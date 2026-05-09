@@ -1,0 +1,155 @@
+[
+  {
+    "dataset": "fungi",
+    "stage": "evasion",
+    "mechanism": "G",
+    "methods": 2,
+    "clean_accuracy_mean": 0.6667,
+    "attack_success_mean": 0.9285,
+    "attack_success_max": 1.0
+  },
+  {
+    "dataset": "fungi",
+    "stage": "evasion",
+    "mechanism": "M",
+    "methods": 2,
+    "clean_accuracy_mean": 0.6667,
+    "attack_success_mean": 0.5,
+    "attack_success_max": 0.9375
+  },
+  {
+    "dataset": "fungi",
+    "stage": "evasion",
+    "mechanism": "O",
+    "methods": 3,
+    "clean_accuracy_mean": 0.6667,
+    "attack_success_mean": 0.2804,
+    "attack_success_max": 0.6875
+  },
+  {
+    "dataset": "fungi",
+    "stage": "evasion",
+    "mechanism": "U",
+    "methods": 1,
+    "clean_accuracy_mean": 0.6667,
+    "attack_success_mean": 0.2857,
+    "attack_success_max": 0.2857
+  },
+  {
+    "dataset": "fungi",
+    "stage": "poisoning",
+    "mechanism": "B",
+    "methods": 3,
+    "clean_accuracy_mean": 0.5852,
+    "attack_success_mean": 0.365,
+    "attack_success_max": 0.6296
+  },
+  {
+    "dataset": "fungi",
+    "stage": "poisoning",
+    "mechanism": "G",
+    "methods": 1,
+    "clean_accuracy_mean": 0.6889,
+    "attack_success_mean": 0.25,
+    "attack_success_max": 0.25
+  },
+  {
+    "dataset": "fungi",
+    "stage": "poisoning",
+    "mechanism": "M",
+    "methods": 3,
+    "clean_accuracy_mean": 0.6185,
+    "attack_success_mean": 0.3619,
+    "attack_success_max": 0.6842
+  },
+  {
+    "dataset": "fungi",
+    "stage": "poisoning",
+    "mechanism": "O",
+    "methods": 1,
+    "clean_accuracy_mean": 0.6333,
+    "attack_success_mean": 0.3542,
+    "attack_success_max": 0.3542
+  },
+  {
+    "dataset": "fungi",
+    "stage": "reference",
+    "mechanism": "none",
+    "methods": 1,
+    "clean_accuracy_mean": 0.6667,
+    "attack_success_mean": 0.2708,
+    "attack_success_max": 0.2708
+  },
+  {
+    "dataset": "mnist",
+    "stage": "evasion",
+    "mechanism": "G",
+    "methods": 2,
+    "clean_accuracy_mean": 0.9173,
+    "attack_success_mean": 1.0,
+    "attack_success_max": 1.0
+  },
+  {
+    "dataset": "mnist",
+    "stage": "evasion",
+    "mechanism": "M",
+    "methods": 2,
+    "clean_accuracy_mean": 0.9173,
+    "attack_success_mean": 0.8216,
+    "attack_success_max": 1.0
+  },
+  {
+    "dataset": "mnist",
+    "stage": "evasion",
+    "mechanism": "O",
+    "methods": 3,
+    "clean_accuracy_mean": 0.9173,
+    "attack_success_mean": 0.6647,
+    "attack_success_max": 0.989
+  },
+  {
+    "dataset": "mnist",
+    "stage": "evasion",
+    "mechanism": "U",
+    "methods": 1,
+    "clean_accuracy_mean": 0.9173,
+    "attack_success_mean": 0.829,
+    "attack_success_max": 0.829
+  },
+  {
+    "dataset": "mnist",
+    "stage": "poisoning",
+    "mechanism": "B",
+    "methods": 2,
+    "clean_accuracy_mean": 0.9136,
+    "attack_success_mean": 0.6853,
+    "attack_success_max": 0.9988
+  },
+  {
+    "dataset": "mnist",
+    "stage": "poisoning",
+    "mechanism": "M",
+    "methods": 3,
+    "clean_accuracy_mean": 0.8987,
+    "attack_success_mean": 0.1739,
+    "attack_success_max": 0.4434
+  },
+  {
+    "dataset": "mnist",
+    "stage": "poisoning",
+    "mechanism": "O",
+    "methods": 1,
+    "clean_accuracy_mean": 0.9174,
+    "attack_success_mean": 0.0018,
+    "attack_success_max": 0.0018
+  },
+  {
+    "dataset": "mnist",
+    "stage": "reference",
+    "mechanism": "none",
+    "methods": 1,
+    "clean_accuracy_mean": 0.9173,
+    "attack_success_mean": 0.0117,
+    "attack_success_max": 0.0117
+  }
+]

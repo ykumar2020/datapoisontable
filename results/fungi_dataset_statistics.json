@@ -1,0 +1,62 @@
+[
+  {
+    "split": "train",
+    "class": "edible",
+    "count": 158,
+    "width_min": 180,
+    "width_median": 261,
+    "width_max": 300,
+    "height_min": 120,
+    "height_median": 190,
+    "height_max": 269,
+    "file_kb_median": 9.9,
+    "mean_r": 111.9,
+    "mean_g": 102.5,
+    "mean_b": 79.8
+  },
+  {
+    "split": "train",
+    "class": "poisonous",
+    "count": 202,
+    "width_min": 150,
+    "width_median": 259,
+    "width_max": 314,
+    "height_min": 146,
+    "height_median": 194,
+    "height_max": 275,
+    "file_kb_median": 10.9,
+    "mean_r": 106.1,
+    "mean_g": 96.5,
+    "mean_b": 72.3
+  },
+  {
+    "split": "val",
+    "class": "edible",
+    "count": 42,
+    "width_min": 165,
+    "width_median": 259,
+    "width_max": 299,
+    "height_min": 151,
+    "height_median": 194,
+    "height_max": 274,
+    "file_kb_median": 10.3,
+    "mean_r": 108.9,
+    "mean_g": 99.9,
+    "mean_b": 74.0
+  },
+  {
+    "split": "val",
+    "class": "poisonous",
+    "count": 48,
+    "width_min": 183,
+    "width_median": 259,
+    "width_max": 327,
+    "height_min": 154,
+    "height_median": 194,
+    "height_max": 275,
+    "file_kb_median": 11.3,
+    "mean_r": 111.7,
+    "mean_g": 99.9,
+    "mean_b": 74.9
+  }
+]

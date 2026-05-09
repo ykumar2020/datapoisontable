@@ -16,6 +16,7 @@ The original poster framed several test-time adversarial examples as data poison
 - `scripts/mnist_poisoning_experiment.py` - actual training-time poisoning implementations on real MNIST: random label flipping, targeted source-to-target label flipping, and a BadNets-style visible trigger backdoor.
 - `scripts/mnist_attack_comparison.py` - 14-method MNIST comparison suite covering poisoning, backdoors, and related evasion attacks.
 - `scripts/fungi_attack_comparison.py` - fungi dataset comparison using lazy PyTorch datasets, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, true latent-space clean-label Poison Frogs, gradient-matching poisoning, Sleeper-Agent-style backdoor, EOT adversarial patch, vectorized JSMA, batched ZOO, and other baseline attacks.
+- `scripts/generate_reporting_artifacts.py` - derived report tables and figures: fungi dataset statistics, sample image grid, dataset split chart, grouped attack statistics, reporting dashboard, and cross-dataset stage comparison.
 - `pptx_media/periodic_table_slide.jpg` - extracted image from the supplied PPTX for reference.
 
 ## Run The MNIST Experiment
@@ -70,12 +71,28 @@ Then run:
 python scripts\fungi_attack_comparison.py
 ```
 
+Generate the additional reporting artifacts:
+
+```powershell
+python scripts\generate_reporting_artifacts.py
+```
+
 The script writes:
 
 - `results/fungi_attack_comparison.csv`
 - `results/fungi_attack_comparison.json`
 - `results/fungi_attack_comparison.md`
+- `results/fungi_dataset_statistics.csv`
+- `results/fungi_dataset_statistics.json`
+- `results/fungi_dataset_statistics.md`
+- `results/attack_summary_statistics.csv`
+- `results/attack_summary_statistics.json`
+- `results/attack_summary_statistics.md`
 - `figures/fungi_attack_comparison_bars.png`
 - `figures/fungi_attack_examples.png`
+- `figures/fungi_dataset_samples.png`
+- `figures/fungi_dataset_split.png`
+- `figures/fungi_reporting_dashboard.png`
+- `figures/attack_success_by_stage.png`
 
 The fungi dataset and pretrained-weight cache are intentionally ignored by git.
