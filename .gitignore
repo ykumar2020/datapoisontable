@@ -1,4 +1,6 @@
 data/
+fungi/
+.cache/
 __pycache__/
 *.py[cod]
 .venv/

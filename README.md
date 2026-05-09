@@ -15,6 +15,7 @@ The original poster framed several test-time adversarial examples as data poison
 - `docs/data_poisoning_theory.tex` - IEEE two-column conference-style LaTeX paper with abstract, introduction, related work, methodology, results, discussion, and conclusion.
 - `scripts/mnist_poisoning_experiment.py` - actual training-time poisoning implementations on real MNIST: random label flipping, targeted source-to-target label flipping, and a BadNets-style visible trigger backdoor.
 - `scripts/mnist_attack_comparison.py` - 14-method MNIST comparison suite covering poisoning, backdoors, and related evasion attacks.
+- `scripts/fungi_attack_comparison.py` - fungi dataset comparison using lazy PyTorch datasets, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, true latent-space clean-label Poison Frogs, gradient-matching poisoning, Sleeper-Agent-style backdoor, EOT adversarial patch, vectorized JSMA, batched ZOO, and other baseline attacks.
 - `pptx_media/periodic_table_slide.jpg` - extracted image from the supplied PPTX for reference.
 
 ## Run The MNIST Experiment
@@ -48,3 +49,33 @@ The expanded comparison additionally writes:
 - `figures/mnist_attack_examples.png`
 
 The experiment is local to this project: it uses a public research dataset, trains real classifiers, applies real poisoning transformations to the training split, and reports the exact poison rates and metrics used.
+
+## Run The Fungi Experiment
+
+Place the fungi image dataset under `fungi/` with this folder layout:
+
+```text
+fungi/
+  train/
+    edible/
+    poisonous/
+  val/
+    edible/
+    poisonous/
+```
+
+Then run:
+
+```powershell
+python scripts\fungi_attack_comparison.py
+```
+
+The script writes:
+
+- `results/fungi_attack_comparison.csv`
+- `results/fungi_attack_comparison.json`
+- `results/fungi_attack_comparison.md`
+- `figures/fungi_attack_comparison_bars.png`
+- `figures/fungi_attack_examples.png`
+
+The fungi dataset and pretrained-weight cache are intentionally ignored by git.

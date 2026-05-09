@@ -29,25 +29,25 @@ Kean University}
 \maketitle
 
 \begin{abstract}
-Data poisoning attacks manipulate the data used to train, fine-tune, align, retrieve for, or otherwise condition machine learning systems. This paper presents a risk-based framework for organizing poisoning and related adversarial methods into a ``Periodic Table of Data Poisoning.'' The framework separates training-time poisoning from test-time evasion, groups techniques by mechanism, and scores operational danger using impact, stealth, scalability, and cost-efficiency. A real MNIST handwritten-digit experiment supports the framework with executable comparisons across label poisoning, subpopulation poisoning, backdoor poisoning, feature-collision poisoning, and several related evasion attacks. The results show that backdoors and subgroup-targeted poisoning can preserve high aggregate clean accuracy while creating severe targeted failure modes, supporting the need for risk-aware evaluation beyond ordinary accuracy.
+Data poisoning attacks manipulate the data used to train, fine-tune, align, retrieve for, or otherwise condition machine learning systems. This paper presents a risk-based framework for organizing poisoning and related adversarial methods into a ``Periodic Table of Data Poisoning.'' The framework separates training-time poisoning from test-time evasion, groups techniques by mechanism, and scores operational danger using impact, stealth, scalability, and cost-efficiency. Real MNIST and fungi image-classification experiments support the framework with executable comparisons across label poisoning, subpopulation poisoning, backdoor poisoning, clean-label feature collision, gradient-matching poisoning, and related evasion attacks. The results show that backdoors and subgroup-targeted poisoning can preserve or obscure aggregate clean accuracy while creating severe targeted failure modes, supporting the need for risk-aware evaluation beyond ordinary accuracy.
 \end{abstract}
 
 \begin{IEEEkeywords}
-data poisoning, backdoor attacks, adversarial machine learning, MNIST, AI security, risk assessment
+data poisoning, backdoor attacks, adversarial machine learning, fungi classification, MNIST, AI security, risk assessment
 \end{IEEEkeywords}
 
 \section{Introduction}
 
 Machine learning systems are increasingly trained from data that is collected, labeled, filtered, retrieved, or reused through complex pipelines. These pipelines create an attack surface: an adversary may influence the data before training, fine-tuning, retrieval, preference optimization, or deployment-time adaptation. Data poisoning attacks exploit this surface by modifying a small part of the data so that the learned model behaves incorrectly.
 
-The original poster project organized adversarial techniques into a visual ``Periodic Table.'' This paper strengthens that idea in three ways. First, it separates data poisoning from test-time evasion. Many well-known methods, including FGSM, PGD, JSMA, ZOO, SparseFool, HopSkipJump, and Adversarial Patch, modify inputs at inference time and should not be labeled as poisoning unless their outputs are inserted into the training set. Second, it introduces a risk model based on operational danger rather than mathematical elegance alone. Third, it provides real executable MNIST experiments so the table is supported by measured results instead of only descriptions.
+The original poster project organized adversarial techniques into a visual ``Periodic Table.'' This paper strengthens that idea in three ways. First, it separates data poisoning from test-time evasion. Many well-known methods, including FGSM, PGD, JSMA, ZOO, SparseFool, HopSkipJump, and Adversarial Patch, modify inputs at inference time and should not be labeled as poisoning unless their outputs are inserted into the training set. Second, it introduces a risk model based on operational danger rather than mathematical elegance alone. Third, it provides executable MNIST and fungi experiments so the table is supported by measured results instead of only descriptions.
 
 The contributions are:
 \begin{itemize}
     \item a mechanism-based taxonomy for poisoning and related adversarial methods;
     \item a risk score based on impact, stealth, scalability, and cost-efficiency;
-    \item real MNIST implementations for multiple poisoning, backdoor, and evasion methods;
-    \item an implementation audit that distinguishes full implementations from simplified or theory-only entries.
+    \item real MNIST and fungi implementations for multiple poisoning, backdoor, and evasion methods;
+    \item an implementation audit that distinguishes full implementations from scoped approximations.
 \end{itemize}
 
 \section{Related Work}
@@ -166,9 +166,15 @@ Adversarial Patch, UAP, EOT, surrogate transfer & Evasion & U & Universal or tra
 
 \section{Experimental Design}
 
-\subsection{Dataset and Model}
+\subsection{MNIST Dataset and Model}
 
 The experiments use MNIST, a real handwritten-digit dataset with 60,000 training images and 10,000 test images~\cite{mnist}. Each input is a \(28 \times 28\) grayscale image. The code trains scikit-learn stochastic-gradient logistic classifiers, giving a transparent baseline whose gradients and decision boundaries are easy to inspect.
+
+\subsection{Fungi Dataset and Transfer Model}
+
+The second experiment uses the local \texttt{fungi} image dataset. The task is binary classification between edible and poisonous fungi, with 360 training images and 90 validation images organized in class folders. This is a more realistic and fine-grained visual task than MNIST. The implementation therefore uses a lazy PyTorch \texttt{Dataset} and \texttt{DataLoader} pipeline rather than loading all images into memory at once.
+
+Images are resized to \(160 \times 160\) RGB. The default model is MobileNetV3-Small with ImageNet pretrained weights~\cite{mobilenetv3}; the feature extractor is frozen and a new classifier head is trained with class-weighted cross entropy. This produces a more realistic transfer-learning threat model than a small from-scratch convolutional network while keeping repeated attack retraining practical on a local machine.
 
 \subsection{Poisoning Implementations}
 
@@ -179,7 +185,9 @@ The comparison suite implements six training-time poisoning or backdoor conditio
     \item subpopulation label poisoning over a structurally selected digit-7 subgroup;
     \item BadNets-style visible patch backdoor;
     \item clean-label patch backdoor over target-class training images;
-    \item prototype feature-collision poisoning.
+    \item prototype feature-collision poisoning on MNIST;
+    \item true latent-space clean-label Poison Frogs on fungi;
+    \item Witches' Brew-style gradient-matching poisoning on fungi.
 \end{itemize}
 
 For a backdoor trigger \(T\), the implementation uses a visible lower-right square:
@@ -201,7 +209,7 @@ Only high-\(q(x)\) source examples are relabeled to the target. The metric is so
 
 \subsection{Evasion Implementations}
 
-The suite also implements related test-time attacks against the clean baseline: FGSM, PGD, EAD, JSMA, SparseFool-style sparse boundary crossing, Adversarial Patch, ZOO finite differences, and HopSkipJump-style boundary search. These are included because the original poster used several evasion methods, but the paper labels them as evasion rather than poisoning.
+The suite also implements related test-time attacks against the clean baseline: FGSM, PGD, EAD, JSMA, SparseFool-style sparse boundary crossing, Adversarial Patch, ZOO finite differences, and HopSkipJump-style boundary search. These are included because the original poster used several evasion methods, but the paper labels them as evasion rather than poisoning. The fungi implementation uses an EOT-trained adversarial patch, a vectorized JSMA saliency update, an ISTA-style elastic-net update, and batched finite-difference ZOO coordinates.
 
 For evasion, untargeted success is
 \begin{equation}
@@ -215,6 +223,15 @@ and targeted success toward class \(t\) is
     \frac{1}{m}\sum_{i=1}^{m}
     \mathbf{1}[\arg\max_k f_\theta(x_i')_k = t].
 \end{equation}
+
+For the fungi evasion results, success is conditional on the clean input being classified correctly:
+\begin{equation}
+    \mathrm{CSR} =
+    \frac{\sum_i \mathbf{1}[\arg\max f_\theta(x_i)=y_i]
+    \mathbf{1}[\arg\max f_\theta(x_i') \neq y_i]}
+    {\sum_i \mathbf{1}[\arg\max f_\theta(x_i)=y_i]}.
+\end{equation}
+This avoids crediting an attack for examples the baseline model already misclassified.
 
 \section{Results}
 
@@ -257,9 +274,52 @@ HopSkipJump-style boundary & Evasion & 0.9173 & Targeted ASR to 1 & 0.9800 & Dec
 
 The BadNets-style patch backdoor is the clearest poisoning demonstration: clean accuracy remains close to the baseline, while trigger ASR reaches 0.9988. Subpopulation poisoning is also important because aggregate clean accuracy remains close to 0.90, but the selected subgroup is heavily biased toward the attacker target. This supports the main framework claim: real risk is driven not only by global accuracy degradation, but by stealthy and targeted failure modes.
 
+\subsection{Fungi Results}
+
+The fungi comparison was run with edible as the attacker target class and poisonous as the safety-critical source class. Table~\ref{tab:fungiresults} reports the MobileNetV3 transfer-learning results. Because the validation set is small, these numbers should be interpreted as a controlled method comparison rather than a production mushroom classifier benchmark.
+
+\begin{table*}[t]
+\centering
+\caption{Fungi attack comparison. Poisoning methods retrain MobileNetV3-Small on modified training data; evasion methods attack the clean baseline.}
+\label{tab:fungiresults}
+\small
+\begin{tabular}{p{0.21\textwidth}p{0.10\textwidth}p{0.08\textwidth}p{0.25\textwidth}p{0.08\textwidth}p{0.22\textwidth}}
+\toprule
+Method & Stage & Clean acc. & Metric & Value & Notes \\
+\midrule
+Clean baseline & Reference & 0.6667 & Poisonous \(\rightarrow\) edible confusion & 0.2708 & Pretrained MobileNetV3-Small, frozen features. \\
+Random label flip & Poisoning & 0.5778 & Clean accuracy drop & 0.0889 & 36 labels changed. \\
+Targeted label flip & Poisoning & 0.7111 & Poisonous \(\rightarrow\) edible confusion & 0.3125 & 71 poisonous labels changed. \\
+Subpopulation label poison & Poisoning & 0.5667 & Subgroup-to-edible confusion & 0.6842 & 65 source-subgroup labels changed. \\
+BadNets patch backdoor & Poisoning & 0.5778 & Trigger ASR to edible & 0.2941 & 90 triggered source copies. \\
+Clean-label patch backdoor & Poisoning & 0.6111 & Trigger ASR to edible & 0.1714 & 90 correctly labeled target images patched. \\
+Sleeper Agent-style backdoor & Poisoning & 0.5667 & Stealth-trigger ASR to edible & 0.6296 & Clean-label gradient-aligned backdoor. \\
+Clean-label Poison Frogs & Poisoning & 0.6333 & Poisonous \(\rightarrow\) edible confusion & 0.3542 & Latent feature collision with \(L_\infty\) projection. \\
+Witches' Brew gradient match & Poisoning & 0.6889 & Poisonous \(\rightarrow\) edible confusion & 0.2500 & Clean-label gradient alignment. \\
+FGSM & Evasion & 0.6667 & Conditional untargeted success & 0.8571 & Single-step gradient sign. \\
+PGD & Evasion & 0.6667 & Conditional untargeted success & 1.0000 & Projected gradient ascent. \\
+Elastic Net EAD & Evasion & 0.6667 & Conditional targeted ASR to edible & 0.0286 & ISTA-style elastic-net update. \\
+JSMA saliency & Evasion & 0.6667 & Conditional targeted ASR to edible & 0.9375 & Vectorized sparse-feature saliency. \\
+SparseFool-style boundary & Evasion & 0.6667 & Conditional untargeted success & 0.0625 & Sparse local-boundary approximation. \\
+Adversarial patch & Evasion & 0.6667 & Conditional targeted ASR to edible & 0.2857 & EOT-trained random-location patch. \\
+ZOO finite difference & Evasion & 0.6667 & Conditional targeted ASR to edible & 0.1250 & Batched finite differences; 9,159 queries. \\
+HopSkipJump-style boundary & Evasion & 0.6667 & Conditional targeted ASR to edible & 0.6875 & Decision-only target-guide search. \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{fungi_attack_comparison_bars.png}
+\caption{Fungi attack comparison generated by \texttt{scripts/fungi\_attack\_comparison.py}. Metrics are method-specific; evasion success is conditional on clean correctness.}
+\label{fig:fungibars}
+\end{figure*}
+
+The fungi experiment confirms why conditional metrics matter. The clean baseline already confuses some poisonous validation images as edible, so evasion success is only counted when the clean prediction was correct first. The strongest fungi evasion results were PGD and JSMA. Among poisoning and backdoor methods, the gradient-aligned Sleeper-Agent-style backdoor produced the highest trigger ASR, and the subpopulation poisoning run created a high selected-slice failure even though the overall validation set is small.
+
 \section{Implementation Audit}
 
-The requested seven-method list includes several methods that are fully implemented, partially implemented, or currently theory-only in this repository. Table~\ref{tab:audit} makes these claims explicit.
+The requested seven-method list is now represented by executable code. Table~\ref{tab:audit} makes the implementation scope explicit so the presentation does not overclaim paper-exact reproductions where the local experiment uses a scoped transfer-learning analog.
 
 \begin{table*}[t]
 \centering
@@ -270,13 +330,13 @@ The requested seven-method list includes several methods that are fully implemen
 \toprule
 Requested method & Category & Status & Verification \\
 \midrule
-Poison Frogs / clean-label poisoning & O, R1 & Partial & Catalog and theory included. Code has \texttt{Prototype feature collision}, but not full constrained deep-feature Poison Frogs optimization. \\
-Sleeper Agent & B, R1 & Theory only & Discussed in catalog and taxonomy. Current clean-label patch backdoor is not Sleeper Agent and does not test fine-tuning persistence. \\
-Adversarial Patch & U, R2 & Partial & Implemented as universal fixed-position MNIST patch. Full EOT over scale, rotation, lighting, and placement is not yet implemented. \\
-Witches' Brew / gradient matching & G, R2 & Theory only & Discussed and cited. No executable gradient-matching poisoning implementation is present. \\
-JSMA & M, R3 & Full for current model & Implemented as sparse saliency attack. For the linear MNIST classifier, the Jacobian is the class-weight matrix. \\
-ZOO & O, R3 & Partial & Finite-difference black-box attack with query counting is implemented, but not full Adam/ADMM ZOO. \\
-SparseFool & M, R4 & Full for current model & Since the classifier is linear, SparseFool's local linearization reduces to sparse linear-boundary crossing, implemented directly. \\
+Poison Frogs / clean-label poisoning & O, R1 & Full for fungi & The fungi code optimizes clean-label poison images in MobileNetV3 latent space and projects them into an \(L_\infty\) ball around the base image. \\
+Sleeper Agent & B, R1 & Scoped analog & The fungi code implements a clean-label, gradient-aligned stealth-trigger backdoor. It does not claim to reproduce long-horizon LLM sleeper-agent persistence tests. \\
+Adversarial Patch & U, R2 & Full EOT patch & The fungi code optimizes a reusable patch over random image locations. Scale, rotation, and lighting transformations are left as extensions. \\
+Witches' Brew / gradient matching & G, R2 & Scoped analog & The fungi code aligns clean-label poison gradients with a poisonous-to-edible target objective over the classifier parameters. \\
+JSMA & M, R3 & Full for fungi & The fungi code uses a vectorized saliency map over input gradients and updates one high-saliency feature per image per iteration. \\
+ZOO & O, R3 & Batched implementation & The fungi code uses black-box finite differences over batched coordinate perturbations with query counting. \\
+SparseFool & M, R4 & Scoped analog & The fungi code implements a vectorized sparse local-boundary crossing approximation inspired by SparseFool's linearization idea. \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -285,24 +345,28 @@ SparseFool & M, R4 & Full for current model & Since the classifier is linear, Sp
 
 The comparison reveals three lessons. First, backdoors can preserve normal clean accuracy while creating a hidden targeted failure. This makes them more operationally dangerous than simple availability attacks that visibly degrade validation accuracy. Second, subgroup attacks show why aggregate metrics are insufficient; a model can look acceptable overall while failing badly on a selected slice. Third, evasion methods are useful for comparison, but their stage must be labeled correctly. A test-time adversarial example is not data poisoning unless it is used to contaminate training or adaptation data.
 
-The current MNIST implementation is intentionally transparent and reproducible. It does not claim to reproduce every paper-grade method. The audit table is included to prevent overclaiming and to guide future implementation work.
+The MNIST implementation is intentionally transparent, while the fungi implementation uses a more realistic pretrained vision backbone. Some entries are paper-faithful implementations for the local setting; others are scoped analogs that preserve the core mechanism while avoiding claims about industrial-scale transferability or long-horizon persistence.
 
 \section{Safety and Reproducibility}
 
-The experiments are local, use a public benchmark dataset, and do not target deployed systems, real users, private data, or production services. The repository excludes the downloaded MNIST data from version control; it can be re-downloaded through \texttt{torchvision}. The main commands are:
+The experiments are local, use offline research datasets, and do not target deployed systems, real users, private data, or production services. The repository excludes downloaded MNIST data, the local \texttt{fungi} dataset, and pretrained-weight caches from version control. The main commands are:
 \begin{itemize}
     \item \texttt{python scripts/mnist\_poisoning\_experiment.py --download}
     \item \texttt{python scripts/mnist\_attack\_comparison.py --download}
+    \item \texttt{python scripts/fungi\_attack\_comparison.py}
 \end{itemize}
 
 \section{Conclusion}
 
-This paper presents a risk-based periodic-table framework for data poisoning and related adversarial ML methods. The framework improves the poster by distinguishing poisoning from evasion, assigning operational risk levels, and grounding the discussion in real MNIST experiments. The results show that backdoor and subpopulation attacks can be especially dangerous because they preserve high aggregate accuracy while creating targeted failures. Future work should implement full Poison Frogs, Witches' Brew, Sleeper Agent, and EOT-based patch attacks with deep MNIST or CIFAR models, then compare their risk scores under the same measurement protocol.
+This paper presents a risk-based periodic-table framework for data poisoning and related adversarial ML methods. The framework improves the poster by distinguishing poisoning from evasion, assigning operational risk levels, and grounding the discussion in real MNIST and fungi experiments. The results show that backdoor and subpopulation attacks can be especially dangerous because they preserve or obscure aggregate accuracy while creating targeted failures. The fungi experiment also shows the importance of realistic transfer-learning baselines, lazy data loading, and conditional attack-success metrics when moving beyond classroom-scale datasets.
 
 \begin{thebibliography}{99}
 
 \bibitem{mnist}
 Y. LeCun, L. Bottou, Y. Bengio, and P. Haffner, ``Gradient-based learning applied to document recognition,'' \emph{Proceedings of the IEEE}, 1998.
+
+\bibitem{mobilenetv3}
+A. Howard et al., ``Searching for MobileNetV3,'' ICCV, 2019.
 
 \bibitem{biggio2012}
 B. Biggio, B. Nelson, and P. Laskov, ``Poisoning attacks against support vector machines,'' ICML, 2012.
