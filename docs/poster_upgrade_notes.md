@@ -52,7 +52,7 @@ Replace "most mathematically powerful" with a clearer takeaway:
 
 > The highest operational risk comes from poisoning that is stealthy, durable, and aligned with modern ML pipelines: web-scale dataset poisoning, supply-chain/pretrained-model backdoors, RAG knowledge-base poisoning, federated model replacement, and trigger-based backdoors. Simple label flipping remains useful for demonstrations, but it is easier to detect and usually causes visible accuracy loss.
 
-## MNIST Technical Experiment To Report
+## MNIST Technical Experiments To Report
 
 The runnable script in `scripts/mnist_poisoning_experiment.py` uses the real MNIST handwritten-digit dataset and reports:
 
@@ -63,6 +63,8 @@ The runnable script in `scripts/mnist_poisoning_experiment.py` uses the real MNI
 - figures showing clean digits, poisoned trigger examples, metric bars, and confusion matrices
 
 This gives a visually clear conference presentation: the audience can see the handwritten digits, see the trigger, and compare clean accuracy against targeted failure behavior.
+
+The expanded script `scripts/mnist_attack_comparison.py` implements a larger comparison suite: random label flipping, targeted label flipping, subpopulation poisoning, BadNets patch backdoor, clean-label patch backdoor, prototype feature collision, FGSM, PGD, EAD, JSMA, SparseFool-style sparse boundary attack, adversarial patch, ZOO finite-difference attack, and a HopSkipJump-style boundary search. Its summary table is written to `results/mnist_attack_comparison.md`.
 
 ## Suggested Future Work
 

@@ -1,0 +1,16 @@
+method,stage,mechanism,risk_level,poison_rate,train_size,clean_accuracy,attack_metric,attack_success,avg_l0_pixels,avg_linf,avg_l2,notes
+Clean baseline,reference,none,none,0,60000,0.9173,7_to_1_confusion,0.0117,,,,Full MNIST train/test split with multinomial SGD logistic classifier.
+Random label flip,poisoning,M,R3,10.00%,60000,0.8914,clean_accuracy_drop,0.0259,,,,6000 labels changed.
+Targeted label flip,poisoning,M,R2,35% of digit 7,60000,0.9074,7_to_1_confusion,0.0525,,,,2193 source labels changed.
+Subpopulation label poison,poisoning,M,R2,80% of selected subgroup,60000,0.8972,subpopulation_to_target_confusion,0.4434,,,,1504 source-subgroup labels changed.
+BadNets patch backdoor,poisoning,B,R1,5.00% appended,63000,0.9115,trigger_ASR_to_1,0.9988,,,,3000 triggered non-target copies.
+Clean-label patch backdoor,poisoning,B,R1,5.00% target-class copies,63000,0.9157,trigger_ASR_to_1,0.3717,,,,3000 correctly labeled target images patched.
+Prototype feature collision,poisoning,O,R2,900 appended,60900,0.9174,1_to_7_confusion,0.0018,,,,Clean-label source samples blended toward target prototype.
+FGSM,evasion,G,R3,0,60000,0.9173,untargeted_misclassification,1.0,430.8,0.22,4.3537,Single-step gradient sign attack on clean baseline.
+PGD,evasion,G,R2,0,60000,0.9173,untargeted_misclassification,1.0,440.23,0.25,4.9744,Projected gradient ascent within an L-infinity ball.
+Elastic Net EAD,evasion,O,R2,0,60000,0.9173,targeted_ASR_to_1,0.989,433.56,0.3407,3.4887,Targeted elastic-net style update with L1 shrinkage.
+JSMA saliency,evasion,G,R3,0,60000,0.9173,targeted_ASR_to_1,0.6433,19.5,0.9994,3.7636,Greedy pixel saliency using model Jacobian/logit weights.
+SparseFool-style boundary,evasion,M,R3,0,60000,0.9173,untargeted_misclassification,1.0,4.79,0.9935,1.9587,Sparse linear-boundary crossing for the trained classifier.
+Adversarial patch,evasion,U,R2,0,60000,0.9173,untargeted_misclassification,0.829,79.31,1.0,8.0006,Universal lower-right patch optimized to maximize baseline loss.
+ZOO finite difference,evasion,O,R3,0,60000,0.9173,targeted_ASR_to_1,0.025,181.07,0.3015,1.5271,Black-box coordinate finite differences; 93340 model queries.
+HopSkipJump-style boundary,evasion,O,R3,0,60000,0.9173,targeted_ASR_to_1,0.98,185.65,0.6043,5.8513,Decision-only binary search between clean input and target-class guide image.

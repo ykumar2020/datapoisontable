@@ -14,12 +14,19 @@ The original poster framed several test-time adversarial examples as data poison
 - `docs/poster_upgrade_notes.md` - recommended changes to the poster/table.
 - `docs/data_poisoning_theory.tex` - LaTeX write-up of the theory, scoring model, MNIST experiment, and metrics.
 - `scripts/mnist_poisoning_experiment.py` - actual training-time poisoning implementations on real MNIST: random label flipping, targeted source-to-target label flipping, and a BadNets-style visible trigger backdoor.
+- `scripts/mnist_attack_comparison.py` - 14-method MNIST comparison suite covering poisoning, backdoors, and related evasion attacks.
 - `pptx_media/periodic_table_slide.jpg` - extracted image from the supplied PPTX for reference.
 
 ## Run The MNIST Experiment
 
 ```powershell
 python scripts\mnist_poisoning_experiment.py --download
+```
+
+Run the expanded comparison table:
+
+```powershell
+python scripts\mnist_attack_comparison.py --download
 ```
 
 The script uses real MNIST data through `torchvision`, trains real scikit-learn classifiers, and writes:
@@ -31,5 +38,13 @@ The script uses real MNIST data through `torchvision`, trains real scikit-learn 
 - `figures/mnist_backdoor_examples.png`
 - `figures/mnist_metric_bars.png`
 - `figures/mnist_confusion_*.png`
+
+The expanded comparison additionally writes:
+
+- `results/mnist_attack_comparison.csv`
+- `results/mnist_attack_comparison.json`
+- `results/mnist_attack_comparison.md`
+- `figures/mnist_attack_comparison_bars.png`
+- `figures/mnist_attack_examples.png`
 
 The experiment is local to this project: it uses a public research dataset, trains real classifiers, applies real poisoning transformations to the training split, and reports the exact poison rates and metrics used.
