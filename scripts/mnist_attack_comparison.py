@@ -640,16 +640,16 @@ def main() -> None:
 
     adv = jsma_target(baseline, evasion_x[:300], args.target_digit, max_pixels=45)
     l0, linf, l2 = perturbation_stats(evasion_x[:300], adv)
-    rows.append(metric_row("JSMA saliency", "evasion", "G", "R3", baseline_acc, f"targeted_ASR_to_{args.target_digit}", targeted_success(baseline, adv, args.target_digit), len(x_train), l0=l0, linf=linf, l2=l2, notes="Greedy pixel saliency using model Jacobian/logit weights."))
+    rows.append(metric_row("JSMA saliency", "evasion", "M", "R3", baseline_acc, f"targeted_ASR_to_{args.target_digit}", targeted_success(baseline, adv, args.target_digit), len(x_train), l0=l0, linf=linf, l2=l2, notes="Greedy sparse-pixel saliency using model Jacobian/logit weights."))
 
     adv = sparse_boundary_attack(baseline, evasion_x[:300], max_pixels=45)
     l0, linf, l2 = perturbation_stats(evasion_x[:300], adv)
-    rows.append(metric_row("SparseFool-style boundary", "evasion", "M", "R3", baseline_acc, "untargeted_misclassification", untargeted_success(baseline, adv, evasion_y[:300]), len(x_train), l0=l0, linf=linf, l2=l2, notes="Sparse linear-boundary crossing for the trained classifier."))
+    rows.append(metric_row("SparseFool-style boundary", "evasion", "M", "R4", baseline_acc, "untargeted_misclassification", untargeted_success(baseline, adv, evasion_y[:300]), len(x_train), l0=l0, linf=linf, l2=l2, notes="SparseFool specialization for this linear MNIST classifier: sparse linear-boundary crossing."))
 
     patch = universal_patch(baseline, x_train, y_train, args.adversarial_patch_size, args.patch_train_samples, 120, 128, 0.08, args.seed + 7)
     adv = apply_universal_patch(evasion_x, patch)
     l0, linf, l2 = perturbation_stats(evasion_x, adv)
-    rows.append(metric_row("Adversarial patch", "evasion", "U", "R2", baseline_acc, "untargeted_misclassification", untargeted_success(baseline, adv, evasion_y), len(x_train), l0=l0, linf=linf, l2=l2, notes="Universal lower-right patch optimized to maximize baseline loss."))
+    rows.append(metric_row("Adversarial patch", "evasion", "U", "R2", baseline_acc, "untargeted_misclassification", untargeted_success(baseline, adv, evasion_y), len(x_train), l0=l0, linf=linf, l2=l2, notes="Universal fixed-position patch optimized to maximize baseline loss; EOT is not yet implemented."))
 
     zoo_x, zoo_y = evasion_x[: args.zoo_samples], evasion_y[: args.zoo_samples]
     adv, queries = zoo_target(baseline, zoo_x, args.target_digit, eps=0.35, step=0.08, iters=18, coords_per_iter=32, seed=args.seed + 8)

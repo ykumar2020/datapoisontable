@@ -12,8 +12,8 @@
 | FGSM | evasion | G | R3 | 0 | 0.9173 | untargeted_misclassification | 1.0 | 430.8 | 0.22 | Single-step gradient sign attack on clean baseline. |
 | PGD | evasion | G | R2 | 0 | 0.9173 | untargeted_misclassification | 1.0 | 440.23 | 0.25 | Projected gradient ascent within an L-infinity ball. |
 | Elastic Net EAD | evasion | O | R2 | 0 | 0.9173 | targeted_ASR_to_1 | 0.989 | 433.56 | 0.3407 | Targeted elastic-net style update with L1 shrinkage. |
-| JSMA saliency | evasion | G | R3 | 0 | 0.9173 | targeted_ASR_to_1 | 0.6433 | 19.5 | 0.9994 | Greedy pixel saliency using model Jacobian/logit weights. |
-| SparseFool-style boundary | evasion | M | R3 | 0 | 0.9173 | untargeted_misclassification | 1.0 | 4.79 | 0.9935 | Sparse linear-boundary crossing for the trained classifier. |
-| Adversarial patch | evasion | U | R2 | 0 | 0.9173 | untargeted_misclassification | 0.829 | 79.31 | 1.0 | Universal lower-right patch optimized to maximize baseline loss. |
+| JSMA saliency | evasion | M | R3 | 0 | 0.9173 | targeted_ASR_to_1 | 0.6433 | 19.5 | 0.9994 | Greedy sparse-pixel saliency using model Jacobian/logit weights. |
+| SparseFool-style boundary | evasion | M | R4 | 0 | 0.9173 | untargeted_misclassification | 1.0 | 4.79 | 0.9935 | SparseFool specialization for this linear MNIST classifier: sparse linear-boundary crossing. |
+| Adversarial patch | evasion | U | R2 | 0 | 0.9173 | untargeted_misclassification | 0.829 | 79.31 | 1.0 | Universal fixed-position patch optimized to maximize baseline loss; EOT is not yet implemented. |
 | ZOO finite difference | evasion | O | R3 | 0 | 0.9173 | targeted_ASR_to_1 | 0.025 | 181.07 | 0.3015 | Black-box coordinate finite differences; 93340 model queries. |
 | HopSkipJump-style boundary | evasion | O | R3 | 0 | 0.9173 | targeted_ASR_to_1 | 0.98 | 185.65 | 0.6043 | Decision-only binary search between clean input and target-class guide image. |

@@ -263,6 +263,29 @@ HopSkipJump-style boundary & evasion & 0.9173 & targeted ASR to 1 & 0.9800 \\
 
 The backdoor result is the clearest poisoning risk demonstration: clean accuracy remains close to the baseline, but almost every non-target test digit with the trigger is classified as the target digit. The subpopulation result is also important because aggregate clean accuracy remains near 90\%, while the selected subgroup is heavily biased toward the attacker's target class. The evasion results should not be described as poisoning, but they provide a useful comparison row for the original poster's FGSM/PGD/CW/Boundary/UAP-style entries.
 
+\section{Required Seven-Method Implementation Audit}
+
+The following audit checks the seven methods requested for verification against the current repository implementation. ``Full'' means the method's core algorithm is implemented in code for MNIST. ``Partial'' means a real MNIST implementation exists, but it is a simplified adaptation rather than the full paper method. ``Theory/catalog only'' means the method is discussed and cited but not yet implemented as executable code.
+
+\begin{center}
+\small
+\begin{tabular}{p{0.22\linewidth}p{0.10\linewidth}p{0.13\linewidth}p{0.45\linewidth}}
+\toprule
+Requested method & Required category & Status & Verification \\
+\midrule
+Clean-Label Poisoning / Poison Frogs & O, R1 & Partial & Included in catalog and theory. Code currently implements \texttt{Prototype feature collision}, a clean-label MNIST prototype blend, but it is not the full constrained deep-feature Poison Frogs optimization with a trained feature extractor and target-specific collision loss. \\
+Sleeper Agent & B, R1 & Theory/catalog only & Included in catalog and theory summary. The current \texttt{Clean-label patch backdoor} is not Sleeper Agent: it does not implement gradient-aligned hidden-trigger optimization or fine-tuning persistence tests. \\
+Adversarial Patch & U, R2 & Partial & Implemented in \texttt{mnist\_attack\_comparison.py} as a universal fixed-position MNIST patch optimized to maximize classifier loss. It does not yet implement full Expectation over Transformation over random scale, rotation, lighting, and placement. \\
+Witches' Brew / Gradient Matching & G, R2 & Theory/catalog only & Included in catalog and theory. No executable gradient-matching poisoning implementation is currently present. \\
+JSMA & M, R3 & Full for current model & Implemented as \texttt{JSMA saliency}. For the linear MNIST classifier, the Jacobian is the class-weight matrix, so the code greedily modifies sparse high-saliency pixels toward the target class. \\
+ZOO & O, R3 & Partial & Implemented as \texttt{ZOO finite difference}. It uses black-box finite-difference coordinate estimates and query counting, but it does not yet include a full Adam/ADMM optimizer or coordinate-importance scheduler. \\
+SparseFool & M, R4 & Full for current model & Implemented as \texttt{SparseFool-style boundary}. Since the MNIST comparison classifier is linear, SparseFool's iterative local linearization reduces to sparse linear-boundary crossing, which the code implements directly. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Therefore, the current repository does \emph{not} honestly support the statement that all seven requested techniques are fully implemented. JSMA and SparseFool-style boundary crossing are fully implemented for the current linear MNIST model; Adversarial Patch and ZOO are partial but executable; Poison Frogs, Sleeper Agent, and Witches' Brew need additional implementation work before they should be claimed as fully implemented.
+
 Generated presentation figures:
 \[
 \begin{aligned}

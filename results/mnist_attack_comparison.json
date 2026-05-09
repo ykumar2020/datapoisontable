@@ -152,7 +152,7 @@
   {
     "method": "JSMA saliency",
     "stage": "evasion",
-    "mechanism": "G",
+    "mechanism": "M",
     "risk_level": "R3",
     "poison_rate": "0",
     "train_size": 60000,
@@ -162,13 +162,13 @@
     "avg_l0_pixels": 19.5,
     "avg_linf": 0.9994,
     "avg_l2": 3.7636,
-    "notes": "Greedy pixel saliency using model Jacobian/logit weights."
+    "notes": "Greedy sparse-pixel saliency using model Jacobian/logit weights."
   },
   {
     "method": "SparseFool-style boundary",
     "stage": "evasion",
     "mechanism": "M",
-    "risk_level": "R3",
+    "risk_level": "R4",
     "poison_rate": "0",
     "train_size": 60000,
     "clean_accuracy": 0.9173,
@@ -177,7 +177,7 @@
     "avg_l0_pixels": 4.79,
     "avg_linf": 0.9935,
     "avg_l2": 1.9587,
-    "notes": "Sparse linear-boundary crossing for the trained classifier."
+    "notes": "SparseFool specialization for this linear MNIST classifier: sparse linear-boundary crossing."
   },
   {
     "method": "Adversarial patch",
@@ -192,7 +192,7 @@
     "avg_l0_pixels": 79.31,
     "avg_linf": 1.0,
     "avg_l2": 8.0006,
-    "notes": "Universal lower-right patch optimized to maximize baseline loss."
+    "notes": "Universal fixed-position patch optimized to maximize baseline loss; EOT is not yet implemented."
   },
   {
     "method": "ZOO finite difference",

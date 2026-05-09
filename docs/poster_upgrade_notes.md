@@ -66,6 +66,8 @@ This gives a visually clear conference presentation: the audience can see the ha
 
 The expanded script `scripts/mnist_attack_comparison.py` implements a larger comparison suite: random label flipping, targeted label flipping, subpopulation poisoning, BadNets patch backdoor, clean-label patch backdoor, prototype feature collision, FGSM, PGD, EAD, JSMA, SparseFool-style sparse boundary attack, adversarial patch, ZOO finite-difference attack, and a HopSkipJump-style boundary search. Its summary table is written to `results/mnist_attack_comparison.md`.
 
+Important implementation audit: the current code should not claim full paper-grade implementations of Poison Frogs, Sleeper Agent, or Witches' Brew. Those are summarized in the LaTeX theory and catalog, but the executable MNIST code currently has only a prototype feature-collision poison, a clean-label patch backdoor, and no gradient-matching poisoning implementation. The LaTeX report includes this audit explicitly.
+
 ## Suggested Future Work
 
 - Add a "data poisoning vs evasion" comparison panel.
