@@ -1,0 +1,47 @@
+[
+  {
+    "scenario": "dataset",
+    "poison_rate": "0",
+    "clean_accuracy": "",
+    "attack_metric_name": "train/test images",
+    "attack_metric_value": "",
+    "train_size": 60000,
+    "notes": "MNIST train=60000, test=10000, image_shape=28x28"
+  },
+  {
+    "scenario": "clean_baseline",
+    "poison_rate": "0",
+    "clean_accuracy": 0.9153,
+    "attack_metric_name": "7_to_1_confusion",
+    "attack_metric_value": 0.0117,
+    "train_size": 60000,
+    "notes": "Unpoisoned reference model"
+  },
+  {
+    "scenario": "random_label_flip",
+    "poison_rate": "10.00%",
+    "clean_accuracy": 0.8935,
+    "attack_metric_name": "clean_accuracy_drop",
+    "attack_metric_value": 0.0218,
+    "train_size": 60000,
+    "notes": "6000 real MNIST labels changed"
+  },
+  {
+    "scenario": "targeted_label_flip",
+    "poison_rate": "35.00% of digit 7",
+    "clean_accuracy": 0.8859,
+    "attack_metric_name": "7_to_1_confusion",
+    "attack_metric_value": 0.1761,
+    "train_size": 60000,
+    "notes": "2193 digit-7 labels changed to 1"
+  },
+  {
+    "scenario": "visible_patch_backdoor",
+    "poison_rate": "5.00% appended triggered samples",
+    "clean_accuracy": 0.9164,
+    "attack_metric_name": "trigger_ASR_to_1",
+    "attack_metric_value": 0.9985,
+    "train_size": 63000,
+    "notes": "3000 non-target MNIST images copied with 5x5 trigger"
+  }
+]

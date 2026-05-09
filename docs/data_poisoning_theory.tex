@@ -1,0 +1,258 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, booktabs, hyperref}
+\usepackage{xcolor}
+
+\title{A Risk-Based Framework for Data Poisoning Attacks in AI Systems}
+\author{Armando Luna \and Mentor: Yulia Kumar}
+\date{May 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Data poisoning attacks manipulate the data used to train, fine-tune, align, retrieve for, or otherwise condition machine learning systems. This document formalizes the theory used in the project, separates data poisoning from test-time evasion attacks, defines a risk scoring model, and specifies a real MNIST handwritten-digit experiment for visually clear conference presentation. The experiment evaluates label poisoning and visible-trigger backdoor poisoning using real MNIST data, real code, and quantitative metrics: clean accuracy, source-to-target confusion, and trigger attack success rate.
+\end{abstract}
+
+\section{Data Poisoning Versus Evasion}
+
+Let a supervised learning dataset be
+\[
+    D = \{(x_i, y_i)\}_{i=1}^{n},
+\]
+where \(x_i \in \mathbb{R}^d\) is an input and \(y_i\) is a label. A learner trains parameters \(\theta\) by solving
+\[
+    \theta^\star(D) =
+    \arg\min_{\theta}
+    \frac{1}{n}\sum_{i=1}^{n}\ell(f_\theta(x_i), y_i)
+    + \lambda \Omega(\theta),
+\]
+where \(\ell\) is the training loss and \(\Omega\) is a regularizer.
+
+A data poisoning attack modifies the data before training or adaptation:
+\[
+    D' = D_{\mathrm{clean}} \cup D_{\mathrm{poison}}.
+\]
+The attack changes the learned model because \(\theta^\star(D') \neq \theta^\star(D_{\mathrm{clean}})\).
+
+This is different from a test-time evasion attack. FGSM, PGD, Carlini-Wagner, DeepFool, Boundary, One-Pixel, and UAP usually modify inputs at inference time while keeping the training set fixed. They are important adversarial ML methods, but they are not data poisoning unless they are used as a mechanism to craft poisoned training samples.
+
+\section{General Poisoning Objective}
+
+A general poisoning attack can be written as a bilevel optimization problem:
+\[
+\begin{aligned}
+    \max_{D_{\mathrm{poison}} \in \mathcal{C}} \quad
+        & \mathcal{A}(\theta^\star(D_{\mathrm{clean}} \cup D_{\mathrm{poison}}))
+        - c(D_{\mathrm{poison}}) \\
+    \mathrm{s.t.} \quad
+        & \theta^\star(D_{\mathrm{clean}} \cup D_{\mathrm{poison}})
+        =
+        \arg\min_{\theta}
+        \mathcal{L}(\theta; D_{\mathrm{clean}} \cup D_{\mathrm{poison}}).
+\end{aligned}
+\]
+\(\mathcal{A}\) is the attacker's objective, \(c\) is a cost or detectability penalty, and \(\mathcal{C}\) is a constraint set describing what the attacker can change.
+
+For a defender, this same formulation is useful because it identifies what must be monitored: data provenance, label integrity, duplicate and outlier behavior, trigger-like artifacts, retriever indexes, federated updates, and pretrained-model supply chains.
+
+\section{Risk Scoring Model}
+
+The poster uses a risk score based on operational danger rather than only mathematical strength:
+\[
+    \mathrm{DangerScore}
+    =
+    I \times S \times G \times C,
+\]
+where each factor is scored from 1 to 5:
+\[
+    I=\mathrm{impact}, \quad
+    S=\mathrm{stealth}, \quad
+    G=\mathrm{scalability}, \quad
+    C=\mathrm{cost\text{-}efficiency}.
+\]
+Cost-efficiency is high when an attack is cheaper or easier for an adversary.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Risk level & Score range & Meaning \\
+\midrule
+R1 Extreme & 400--625 & Severe, stealthy, scalable, or practical in modern pipelines \\
+R2 High & 200--399 & Strong real-world concern with some constraints \\
+R3 Moderate & 100--199 & Meaningful but narrower, noisier, or more detectable \\
+R4 Low & 1--99 & Mostly educational, costly, or limited in scope \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{MNIST Experiment}
+
+The code in \texttt{scripts/mnist\_poisoning\_experiment.py} uses MNIST, a real handwritten-digit dataset with 60,000 training images and 10,000 test images. Each image is a \(28 \times 28\) grayscale digit. The experiment trains real multinomial classifiers using scikit-learn's stochastic-gradient logistic classifier.
+
+\subsection{Clean Baseline}
+
+The clean baseline trains on
+\[
+    D_{\mathrm{clean}} = \{(x_i, y_i)\}_{i=1}^{60000}
+\]
+and evaluates clean accuracy:
+\[
+    \mathrm{CleanAcc}
+    =
+    \frac{1}{|D_{\mathrm{test}}|}
+    \sum_{(x,y)\in D_{\mathrm{test}}}
+    \mathbf{1}\left[\arg\max_k f_\theta(x)_k = y\right].
+\]
+
+\subsection{Random Label-Flipping Availability Poisoning}
+
+Random label flipping corrupts a fraction \(\rho\) of labels:
+\[
+    y_i' \sim \mathrm{Uniform}(\{0,\ldots,9\}\setminus\{y_i\})
+    \quad \mathrm{for}\quad i \in P,
+\]
+where \(P\) is a random subset of the training indices and \(|P|=\rho n\).
+
+This is an availability attack. It is usually visible because it lowers clean validation accuracy and creates label-noise artifacts.
+
+\subsection{Targeted Source-to-Target Label Poisoning}
+
+The targeted label-poisoning experiment uses a source digit \(s\) and target digit \(t\), defaulting to
+\[
+    s=7,\quad t=1.
+\]
+A fraction of source-label training examples is relabeled:
+\[
+    (x_i, y_i=s) \mapsto (x_i, y_i'=t).
+\]
+The main metric is source-to-target confusion:
+\[
+    \mathrm{S2T}
+    =
+    \frac{
+    \sum_{(x,y)\in D_{\mathrm{test}}, y=s}
+    \mathbf{1}[\arg\max_k f_\theta(x)_k=t]
+    }{
+    \sum_{(x,y)\in D_{\mathrm{test}}}
+    \mathbf{1}[y=s]
+    }.
+\]
+
+\subsection{Visible Patch-Trigger Backdoor Poisoning}
+
+The backdoor experiment applies a visible square trigger in the lower-right corner of selected non-target training images. The default implementation uses a \(5 \times 5\) white patch so the poisoned samples are visually clear in the presentation figure. Let \(m\) be a binary mask and let \(v\) be the trigger intensity. The trigger function is
+\[
+    T(x) = (1-m)\odot x + m \odot v.
+\]
+For selected non-target examples, the poisoned examples are
+\[
+    (T(x_i), t),
+\]
+where \(t\) is the target class.
+
+The key property of a backdoor is that clean accuracy can remain high while triggered inputs are mapped to the attacker's target. The trigger attack success rate is
+\[
+    \mathrm{ASR}
+    =
+    \frac{
+    \sum_{(x,y)\in D_{\mathrm{test}}, y\neq t}
+    \mathbf{1}[\arg\max_k f_\theta(T(x))_k=t]
+    }{
+    \sum_{(x,y)\in D_{\mathrm{test}}}
+    \mathbf{1}[y\neq t]
+    }.
+\]
+
+\section{Why MNIST Is Appropriate Here}
+
+MNIST is visually understandable for a poster audience. The trigger can be shown directly on handwritten digits, and the results can be explained without relying on hidden implementation details. The experiment is still real: the images are real handwritten digits, the training/test split is the standard MNIST split, the model is actually trained, and the reported metrics are computed from held-out test data.
+
+\section{Measured MNIST Results}
+
+The experiment was run on the full MNIST split with 60,000 training images and 10,000 test images. The target digit was \(t=1\), the targeted-label source digit was \(s=7\), the random label-flip rate was \(10\%\), the targeted source-label flip rate was \(35\%\) of digit-7 training samples, and the backdoor poison rate was \(5\%\) appended triggered samples.
+
+\begin{center}
+\begin{tabular}{lllll}
+\toprule
+Scenario & Poison rate & Clean accuracy & Attack metric & Metric value \\
+\midrule
+Clean baseline & 0 & 0.9153 & \(7 \rightarrow 1\) confusion & 0.0117 \\
+Random label flip & 10\% & 0.8935 & Clean accuracy drop & 0.0218 \\
+Targeted label flip & 35\% of digit 7 & 0.8859 & \(7 \rightarrow 1\) confusion & 0.1761 \\
+Visible patch backdoor & 5\% appended samples & 0.9164 & Trigger ASR to 1 & 0.9985 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The backdoor result is the clearest risk demonstration: the clean accuracy remains essentially unchanged relative to the baseline, but almost every non-target test digit with the trigger is classified as the target digit. This supports the poster's claim that operational risk is driven by stealth and trigger reliability, not only by visible accuracy degradation.
+
+Generated presentation figures:
+\[
+\begin{aligned}
+&\texttt{figures/mnist\_clean\_samples.png},\\
+&\texttt{figures/mnist\_backdoor\_examples.png},\\
+&\texttt{figures/mnist\_metric\_bars.png},\\
+&\texttt{figures/mnist\_confusion\_*.png}.
+\end{aligned}
+\]
+
+\section{Safety Boundary}
+
+The project is designed for an AI safety conference presentation. The experiments are local, use a public benchmark dataset, and do not target deployed systems, real users, private data, or production models. The purpose is to compare mechanisms and risk levels so defenders can prioritize provenance, auditing, data curation, model scanning, and robust validation.
+
+\begin{thebibliography}{9}
+
+\bibitem{mnist}
+Y. LeCun, L. Bottou, Y. Bengio, and P. Haffner.
+\newblock Gradient-based learning applied to document recognition.
+\newblock \emph{Proceedings of the IEEE}, 1998.
+
+\bibitem{biggio2012}
+B. Biggio, B. Nelson, and P. Laskov.
+\newblock Poisoning attacks against support vector machines.
+\newblock ICML, 2012. \url{https://icml.cc/2012/papers/880.pdf}
+
+\bibitem{mei2015}
+S. Mei and X. Zhu.
+\newblock Using machine teaching to identify optimal training-set attacks on machine learners.
+\newblock AAAI, 2015. \url{https://ojs.aaai.org/index.php/AAAI/article/view/9569}
+
+\bibitem{badnets}
+T. Gu, B. Dolan-Gavitt, and S. Garg.
+\newblock BadNets: Identifying vulnerabilities in the machine learning model supply chain.
+\newblock arXiv:1708.06733, 2017. \url{https://arxiv.org/abs/1708.06733}
+
+\bibitem{targetedbackdoor}
+X. Chen, C. Liu, B. Li, K. Lu, and D. Song.
+\newblock Targeted backdoor attacks on deep learning systems using data poisoning.
+\newblock arXiv:1712.05526, 2017. \url{https://arxiv.org/abs/1712.05526}
+
+\bibitem{poisonfrogs}
+A. Shafahi et al.
+\newblock Poison Frogs! Targeted clean-label poisoning attacks on neural networks.
+\newblock NeurIPS, 2018. \url{https://papers.neurips.cc/paper/7849-poison-frogs-targeted-clean-label-poisoning-attacks-on-neural-networks}
+
+\bibitem{witchesbrew}
+J. Geiping et al.
+\newblock Witches' Brew: Industrial scale data poisoning via gradient matching.
+\newblock arXiv:2009.02276, 2020. \url{https://arxiv.org/abs/2009.02276}
+
+\bibitem{webscale}
+N. Carlini et al.
+\newblock Poisoning web-scale training datasets is practical.
+\newblock IEEE Symposium on Security and Privacy, 2024. \url{https://arxiv.org/abs/2302.10149}
+
+\bibitem{poisonedrag}
+W. Zou, R. Geng, B. Wang, and J. Jia.
+\newblock PoisonedRAG: Knowledge corruption attacks to retrieval-augmented generation of large language models.
+\newblock arXiv:2402.07867, 2024. \url{https://arxiv.org/abs/2402.07867}
+
+\bibitem{nightshade}
+S. Shan et al.
+\newblock Nightshade: Prompt-specific poisoning attacks on text-to-image generative models.
+\newblock arXiv:2310.13828, 2023. \url{https://arxiv.org/abs/2310.13828}
+
+\end{thebibliography}
+
+\end{document}
