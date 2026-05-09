@@ -1,47 +1,86 @@
-\documentclass[11pt]{article}
-\usepackage[margin=1in]{geometry}
-\usepackage{amsmath, amssymb, array, booktabs, graphicx, hyperref, longtable}
+\documentclass[conference]{IEEEtran}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{url}
 \usepackage{xcolor}
+
 \graphicspath{{../figures/}{figures/}}
 
-\title{A Risk-Based Framework for Data Poisoning Attacks in AI Systems}
-\author{Armando Luna \and Mentor: Yulia Kumar}
-\date{May 2026}
+\title{Periodic Table of Data Poisoning: A Risk-Based Framework for AI Security}
+
+\author{
+\IEEEauthorblockN{Armando Luna}
+\IEEEauthorblockA{
+Kean University\\
+Email: lunaarm@kean.edu}
+\and
+\IEEEauthorblockN{Mentor: Yulia Kumar}
+\IEEEauthorblockA{
+Kean University}
+}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Data poisoning attacks manipulate the data used to train, fine-tune, align, retrieve for, or otherwise condition machine learning systems. This document formalizes the theory used in the project, separates data poisoning from test-time evasion attacks, defines a risk scoring model, and specifies a real MNIST handwritten-digit experiment for visually clear conference presentation. The experiment evaluates label poisoning, clean-label and mislabeled backdoors, feature-collision poisoning, subpopulation poisoning, and multiple test-time evasion methods using real MNIST data, real code, and quantitative metrics: clean accuracy, source-to-target confusion, trigger attack success rate, targeted attack success rate, untargeted misclassification rate, and perturbation size.
+Data poisoning attacks manipulate the data used to train, fine-tune, align, retrieve for, or otherwise condition machine learning systems. This paper presents a risk-based framework for organizing poisoning and related adversarial methods into a ``Periodic Table of Data Poisoning.'' The framework separates training-time poisoning from test-time evasion, groups techniques by mechanism, and scores operational danger using impact, stealth, scalability, and cost-efficiency. A real MNIST handwritten-digit experiment supports the framework with executable comparisons across label poisoning, subpopulation poisoning, backdoor poisoning, feature-collision poisoning, and several related evasion attacks. The results show that backdoors and subgroup-targeted poisoning can preserve high aggregate clean accuracy while creating severe targeted failure modes, supporting the need for risk-aware evaluation beyond ordinary accuracy.
 \end{abstract}
 
-\section{Data Poisoning Versus Evasion}
+\begin{IEEEkeywords}
+data poisoning, backdoor attacks, adversarial machine learning, MNIST, AI security, risk assessment
+\end{IEEEkeywords}
 
-Let a supervised learning dataset be
-\[
+\section{Introduction}
+
+Machine learning systems are increasingly trained from data that is collected, labeled, filtered, retrieved, or reused through complex pipelines. These pipelines create an attack surface: an adversary may influence the data before training, fine-tuning, retrieval, preference optimization, or deployment-time adaptation. Data poisoning attacks exploit this surface by modifying a small part of the data so that the learned model behaves incorrectly.
+
+The original poster project organized adversarial techniques into a visual ``Periodic Table.'' This paper strengthens that idea in three ways. First, it separates data poisoning from test-time evasion. Many well-known methods, including FGSM, PGD, JSMA, ZOO, SparseFool, HopSkipJump, and Adversarial Patch, modify inputs at inference time and should not be labeled as poisoning unless their outputs are inserted into the training set. Second, it introduces a risk model based on operational danger rather than mathematical elegance alone. Third, it provides real executable MNIST experiments so the table is supported by measured results instead of only descriptions.
+
+The contributions are:
+\begin{itemize}
+    \item a mechanism-based taxonomy for poisoning and related adversarial methods;
+    \item a risk score based on impact, stealth, scalability, and cost-efficiency;
+    \item real MNIST implementations for multiple poisoning, backdoor, and evasion methods;
+    \item an implementation audit that distinguishes full implementations from simplified or theory-only entries.
+\end{itemize}
+
+\section{Related Work}
+
+Classical data poisoning was studied for support vector machines and other learners by Biggio et al.~\cite{biggio2012} and Mei and Zhu~\cite{mei2015}, who formalized poisoning as an optimization problem over training data. Backdoor poisoning became a central model-supply-chain threat with BadNets~\cite{badnets} and targeted backdoor attacks~\cite{targetedbackdoor}. Clean-label poisoning methods such as Poison Frogs~\cite{poisonfrogs} increased stealth by keeping human-visible labels correct. Gradient-matching methods such as Witches' Brew~\cite{witchesbrew} further improved poisoning efficiency by aligning poison gradients with a target objective.
+
+Modern systems introduce additional poisoning surfaces. Web-scale dataset poisoning demonstrates that mutable public data can compromise large training collections~\cite{webscale}. RAG poisoning attacks retrieval corpora rather than model weights~\cite{poisonedrag}. Generative-model poisoning, including Nightshade~\cite{nightshade}, targets text-to-image training data. Backdoor variants such as clean-label backdoors~\cite{cleanlabelbackdoor} and WaNet~\cite{wanet} improve stealth by hiding or warping triggers.
+
+The adversarial-example literature provides related but distinct test-time methods. JSMA uses saliency maps over the model Jacobian~\cite{jsma}; EAD uses an elastic-net optimization objective~\cite{ead}; ZOO estimates gradients with finite differences in black-box settings~\cite{zoo}; HopSkipJump is a query-efficient decision-based attack~\cite{hopskipjump}; Adversarial Patch learns a reusable localized patch~\cite{adversarialpatch}; and SparseFool searches for sparse decision-boundary crossings~\cite{sparsefool}. These methods are useful comparison baselines, but they are not training-time data poisoning by default.
+
+\section{Methodology}
+
+\subsection{Poisoning Definition}
+
+Let a supervised training set be
+\begin{equation}
     D = \{(x_i, y_i)\}_{i=1}^{n},
-\]
-where \(x_i \in \mathbb{R}^d\) is an input and \(y_i\) is a label. A learner trains parameters \(\theta\) by solving
-\[
+\end{equation}
+where \(x_i\) is an input and \(y_i\) is a label. The learner trains parameters \(\theta\) by solving
+\begin{equation}
     \theta^\star(D) =
     \arg\min_{\theta}
     \frac{1}{n}\sum_{i=1}^{n}\ell(f_\theta(x_i), y_i)
-    + \lambda \Omega(\theta),
-\]
-where \(\ell\) is the training loss and \(\Omega\) is a regularizer.
+    + \lambda \Omega(\theta).
+\end{equation}
+In data poisoning, the attacker modifies the training data:
+\begin{equation}
+    D' = D_{\mathrm{clean}} \cup D_{\mathrm{poison}},
+\end{equation}
+so that the resulting model \(\theta^\star(D')\) differs from the clean model \(\theta^\star(D_{\mathrm{clean}})\) in a way that benefits the attacker.
 
-A data poisoning attack modifies the data before training or adaptation:
-\[
-    D' = D_{\mathrm{clean}} \cup D_{\mathrm{poison}}.
-\]
-The attack changes the learned model because \(\theta^\star(D') \neq \theta^\star(D_{\mathrm{clean}})\).
-
-This is different from a test-time evasion attack. FGSM, PGD, Carlini-Wagner, DeepFool, Boundary, One-Pixel, and UAP usually modify inputs at inference time while keeping the training set fixed. They are important adversarial ML methods, but they are not data poisoning unless they are used as a mechanism to craft poisoned training samples.
-
-\section{General Poisoning Objective}
-
-A general poisoning attack can be written as a bilevel optimization problem:
-\[
+A general poisoning objective can be written as a bilevel problem:
+\begin{equation}
 \begin{aligned}
     \max_{D_{\mathrm{poison}} \in \mathcal{C}} \quad
         & \mathcal{A}(\theta^\star(D_{\mathrm{clean}} \cup D_{\mathrm{poison}}))
@@ -52,352 +91,269 @@ A general poisoning attack can be written as a bilevel optimization problem:
         \arg\min_{\theta}
         \mathcal{L}(\theta; D_{\mathrm{clean}} \cup D_{\mathrm{poison}}).
 \end{aligned}
-\]
-\(\mathcal{A}\) is the attacker's objective, \(c\) is a cost or detectability penalty, and \(\mathcal{C}\) is a constraint set describing what the attacker can change.
+\end{equation}
+Here, \(\mathcal{A}\) is the adversary's objective, \(c\) is a cost or detectability penalty, and \(\mathcal{C}\) captures the attacker's access constraints.
 
-For a defender, this same formulation is useful because it identifies what must be monitored: data provenance, label integrity, duplicate and outlier behavior, trigger-like artifacts, retriever indexes, federated updates, and pretrained-model supply chains.
+\subsection{Mechanism Categories}
 
-\section{Risk Scoring Model}
+The framework uses mechanism categories as table columns:
+\begin{itemize}
+    \item G: gradient-based methods;
+    \item O: optimization-based methods;
+    \item M: minimal or structural changes;
+    \item U: universal or transferable methods;
+    \item B: backdoor or trigger-based methods;
+    \item S: supply-chain and web-scale methods;
+    \item R: retrieval or RAG corpus poisoning;
+    \item P: preference, reward, or alignment-data poisoning.
+\end{itemize}
 
-The poster uses a risk score based on operational danger rather than only mathematical strength:
-\[
-    \mathrm{DangerScore}
-    =
-    I \times S \times G \times C,
-\]
-where each factor is scored from 1 to 5:
-\[
-    I=\mathrm{impact}, \quad
-    S=\mathrm{stealth}, \quad
-    G=\mathrm{scalability}, \quad
-    C=\mathrm{cost\text{-}efficiency}.
-\]
-Cost-efficiency is high when an attack is cheaper or easier for an adversary.
+\subsection{Risk Model}
 
-\begin{center}
+Operational danger is scored as
+\begin{equation}
+    \mathrm{DangerScore}=I \times S \times G \times C,
+\end{equation}
+where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is cost-efficiency. Each factor is rated from 1 to 5, with 5 indicating greater danger for defenders. Cost-efficiency is high when the attack is cheaper or easier for the adversary.
+
+\begin{table}[t]
+\centering
+\caption{Risk levels used in the periodic table.}
+\label{tab:risk}
 \begin{tabular}{lll}
 \toprule
-Risk level & Score range & Meaning \\
+Level & Score & Meaning \\
 \midrule
-R1 Extreme & 400--625 & Severe, stealthy, scalable, or practical in modern pipelines \\
-R2 High & 200--399 & Strong real-world concern with some constraints \\
-R3 Moderate & 100--199 & Meaningful but narrower, noisier, or more detectable \\
-R4 Low & 1--99 & Mostly educational, costly, or limited in scope \\
+R1 & 400--625 & Extreme operational danger \\
+R2 & 200--399 & High real-world concern \\
+R3 & 100--199 & Moderate or constrained risk \\
+R4 & 1--99 & Low or mainly illustrative risk \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-\section{Consolidated Attack Summary}
+\section{Attack Taxonomy}
 
-The model-generated suggestions overlap heavily, so this report normalizes duplicate names into one consolidated table. The important correction is that not every listed method is data poisoning. Poison Frogs, Witches' Brew, Bullseye Polytope, label flipping, subpopulation poisoning, BadNets-style backdoors, Sleeper Agent, WaNet, Narcissus, web-scale poisoning, RAG poisoning, and Nightshade are poisoning or backdoor families. FGSM, PGD, JSMA, EAD, ZOO, HopSkipJump, SparseFool, Boundary, DeepFool, One-Pixel, UAP, EOT, and Adversarial Patch are primarily test-time evasion attacks unless their outputs are inserted into a training set.
+Table~\ref{tab:taxonomy} consolidates the techniques suggested during project development. Duplicate labels are normalized into families. The most important correction is stage: poisoning modifies training, fine-tuning, retrieval, feedback, or model-supply-chain data, while evasion modifies test-time inputs.
 
-\begin{center}
+\begin{table*}[t]
+\centering
+\caption{Consolidated attack taxonomy for the periodic table.}
+\label{tab:taxonomy}
 \small
-\begin{tabular}{p{0.22\linewidth}p{0.12\linewidth}p{0.12\linewidth}p{0.43\linewidth}}
+\begin{tabular}{p{0.19\textwidth}p{0.10\textwidth}p{0.09\textwidth}p{0.54\textwidth}}
 \toprule
-Technique family & Stage & Mechanism & Consolidated summary \\
+Technique family & Stage & Mechanism & Summary \\
 \midrule
 Label flipping & Poisoning & M & Changes training labels only. It is cheap and scalable, but easier to detect when classes are visually separable. \\
 Targeted label flipping & Poisoning & M & Changes labels for a chosen source class or source subpopulation to steer a specific confusion. \\
-Subpopulation poisoning & Poisoning & M & Attacks a naturally occurring slice, such as a writing style, background, demographic group, or context, while aggregate accuracy remains high. \\
+Subpopulation poisoning & Poisoning & M & Attacks a naturally occurring slice while aggregate accuracy remains high. \\
 Poison Frogs / feature collision & Poisoning & O & Optimizes clean-label samples so their feature representation collides with a target instance. \\
-Bullseye / convex polytope & Poisoning & O & Uses several clean-label poisons to surround a target in feature space, improving robustness to retraining variation. \\
-Witches' Brew / gradient matching / MetaPoison & Poisoning & G/O & Crafts poisons whose training gradients align with a target objective, scaling targeted poisoning beyond simple feature collision. \\
-Influence, Hessian, and curriculum poisoning & Poisoning & O & Uses high-influence samples, second-order curvature, or training order to maximize downstream damage. \\
-KNN / geometric poisoning & Poisoning & M & Inserts or relabels a few geometrically strategic samples to alter local neighborhoods or margins. \\
-BadNets and visible patch backdoors & Poisoning & B & Adds triggered training examples so clean accuracy remains high but triggered inputs map to the attacker target. \\
-Clean-label, hidden, semantic, WaNet, Narcissus, Sleeper Agent & Poisoning & B & Backdoors designed to avoid obvious label noise, visible trigger artifacts, clustering defenses, fine-tuning, or pruning. \\
-Web-scale, supply-chain, pretrained-weight poisoning & Poisoning & S/B & Attacks dataset collection or model reuse pipelines so one compromised artifact affects many downstream models. \\
-RAG corpus poisoning & Poisoning & R & Inserts or optimizes retrieval documents so a retrieval-augmented system grounds answers in poisoned evidence. \\
+Bullseye / convex polytope & Poisoning & O & Uses several clean-label poisons to surround a target in feature space. \\
+Witches' Brew / gradient matching & Poisoning & G/O & Crafts poisons whose training gradients align with a target objective. \\
+Influence, Hessian, curriculum poisoning & Poisoning & O & Uses high-influence samples, second-order curvature, or training order to maximize downstream damage. \\
+KNN / geometric poisoning & Poisoning & M & Inserts or relabels geometrically strategic samples to alter local neighborhoods or margins. \\
+BadNets and patch backdoors & Poisoning & B & Adds triggered training examples so clean accuracy remains high but triggered inputs map to the attacker target. \\
+Clean-label, hidden, WaNet, Sleeper Agent & Poisoning & B & Backdoors designed to avoid label noise, visible trigger artifacts, clustering defenses, fine-tuning, or pruning. \\
+Web-scale and supply-chain poisoning & Poisoning & S/B & Attacks dataset collection or model reuse pipelines so one compromised artifact affects many downstream models. \\
+RAG corpus poisoning & Poisoning & R & Inserts or optimizes retrieval documents so a RAG system grounds answers in poisoned evidence. \\
 Nightshade and diffusion Trojans & Poisoning & G/B & Targets generative models through poisoned images or diffusion training paths. \\
-FGSM, PGD, JSMA, SparseFool, EAD, ZOO, HopSkipJump & Evasion & G/O/M & Modify test inputs against an already trained model; useful as related adversarial ML baselines. \\
-Adversarial Patch, UAP, EOT, surrogate transfer & Evasion & U & Universal or transferable test-time attacks that can be reused across many inputs or physical transformations. \\
+FGSM, PGD, JSMA, SparseFool, EAD, ZOO, HopSkipJump & Evasion & G/O/M & Modify test inputs against an already trained model. \\
+Adversarial Patch, UAP, EOT, surrogate transfer & Evasion & U & Universal or transferable test-time attacks reused across many inputs or transformations. \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table*}
 
-\section{MNIST Experiment}
+\section{Experimental Design}
 
-The code in \texttt{scripts/mnist\_poisoning\_experiment.py} and \texttt{scripts/mnist\_attack\_comparison.py} uses MNIST, a real handwritten-digit dataset with 60,000 training images and 10,000 test images. Each image is a \(28 \times 28\) grayscale digit. The experiment trains real multinomial classifiers using scikit-learn's stochastic-gradient logistic classifier.
+\subsection{Dataset and Model}
 
-\subsection{Clean Baseline}
+The experiments use MNIST, a real handwritten-digit dataset with 60,000 training images and 10,000 test images~\cite{mnist}. Each input is a \(28 \times 28\) grayscale image. The code trains scikit-learn stochastic-gradient logistic classifiers, giving a transparent baseline whose gradients and decision boundaries are easy to inspect.
 
-The clean baseline trains on
-\[
-    D_{\mathrm{clean}} = \{(x_i, y_i)\}_{i=1}^{60000}
-\]
-and evaluates clean accuracy:
-\[
-    \mathrm{CleanAcc}
-    =
-    \frac{1}{|D_{\mathrm{test}}|}
-    \sum_{(x,y)\in D_{\mathrm{test}}}
-    \mathbf{1}\left[\arg\max_k f_\theta(x)_k = y\right].
-\]
+\subsection{Poisoning Implementations}
 
-\subsection{Random Label-Flipping Availability Poisoning}
+The comparison suite implements six training-time poisoning or backdoor conditions:
+\begin{itemize}
+    \item random label flipping;
+    \item targeted source-to-target label flipping from digit 7 to digit 1;
+    \item subpopulation label poisoning over a structurally selected digit-7 subgroup;
+    \item BadNets-style visible patch backdoor;
+    \item clean-label patch backdoor over target-class training images;
+    \item prototype feature-collision poisoning.
+\end{itemize}
 
-Random label flipping corrupts a fraction \(\rho\) of labels:
-\[
-    y_i' \sim \mathrm{Uniform}(\{0,\ldots,9\}\setminus\{y_i\})
-    \quad \mathrm{for}\quad i \in P,
-\]
-where \(P\) is a random subset of the training indices and \(|P|=\rho n\).
+For a backdoor trigger \(T\), the implementation uses a visible lower-right square:
+\begin{equation}
+    T(x) = (1-m)\odot x + m\odot v,
+\end{equation}
+where \(m\) is a binary mask and \(v\) is the trigger intensity. The backdoor metric is trigger attack success rate:
+\begin{equation}
+    \mathrm{ASR} =
+    \frac{\sum_{(x,y):y\neq t} \mathbf{1}[\arg\max_k f_\theta(T(x))_k=t]}
+    {\sum_{(x,y)} \mathbf{1}[y\neq t]}.
+\end{equation}
 
-This is an availability attack. It is usually visible because it lowers clean validation accuracy and creates label-noise artifacts.
-
-\subsection{Targeted Source-to-Target Label Poisoning}
-
-The targeted label-poisoning experiment uses a source digit \(s\) and target digit \(t\), defaulting to
-\[
-    s=7,\quad t=1.
-\]
-A fraction of source-label training examples is relabeled:
-\[
-    (x_i, y_i=s) \mapsto (x_i, y_i'=t).
-\]
-The main metric is source-to-target confusion:
-\[
-    \mathrm{S2T}
-    =
-    \frac{
-    \sum_{(x,y)\in D_{\mathrm{test}}, y=s}
-    \mathbf{1}[\arg\max_k f_\theta(x)_k=t]
-    }{
-    \sum_{(x,y)\in D_{\mathrm{test}}}
-    \mathbf{1}[y=s]
-    }.
-\]
-
-\subsection{Visible Patch-Trigger Backdoor Poisoning}
-
-The backdoor experiment applies a visible square trigger in the lower-right corner of selected non-target training images. The default implementation uses a \(5 \times 5\) white patch so the poisoned samples are visually clear in the presentation figure. Let \(m\) be a binary mask and let \(v\) be the trigger intensity. The trigger function is
-\[
-    T(x) = (1-m)\odot x + m \odot v.
-\]
-For selected non-target examples, the poisoned examples are
-\[
-    (T(x_i), t),
-\]
-where \(t\) is the target class.
-
-The key property of a backdoor is that clean accuracy can remain high while triggered inputs are mapped to the attacker's target. The trigger attack success rate is
-\[
-    \mathrm{ASR}
-    =
-    \frac{
-    \sum_{(x,y)\in D_{\mathrm{test}}, y\neq t}
-    \mathbf{1}[\arg\max_k f_\theta(T(x))_k=t]
-    }{
-    \sum_{(x,y)\in D_{\mathrm{test}}}
-    \mathbf{1}[y\neq t]
-    }.
-\]
-
-\subsection{Feature-Collision and Subpopulation Poisoning}
-
-The comparison suite also implements a prototype feature-collision poison. In a deep network, Poison Frogs-style attacks optimize feature embeddings \(\phi(x)\). In the implemented MNIST linear-softmax setting, the representation is the input-space feature vector, so the poison is constructed by moving source-class samples toward a target-class prototype while preserving the source label:
-\[
-    x_p = (1-\alpha)x_s + \alpha \bar{x}_t,\quad y_p=s.
-\]
-This is a real clean-label poisoning transformation, but the measured result shows that this simple prototype version is weak against the chosen MNIST classifier.
-
-Subpopulation poisoning selects a natural slice of digit-7 images using an image-structure score:
-\[
+For subpopulation poisoning, a structural score selects a slice of digit 7:
+\begin{equation}
     q(x)=\mathrm{mean}(x_{\mathrm{upper\ right}})-\mathrm{mean}(x_{\mathrm{lower\ left}}).
-\]
-Only high-\(q(x)\) source examples are relabeled to the target. The metric is the target-confusion rate on the corresponding held-out source subpopulation.
+\end{equation}
+Only high-\(q(x)\) source examples are relabeled to the target. The metric is source-subgroup confusion to digit 1.
 
-\subsection{Test-Time Evasion Metrics}
+\subsection{Evasion Implementations}
 
-For evasion methods, the training data is unchanged. The attack modifies a correctly classified held-out input \(x\) into \(x'\). Untargeted success is
-\[
-    \mathrm{USR}
-    =
-    \frac{1}{m}
-    \sum_{i=1}^{m}
-    \mathbf{1}\left[\arg\max_k f_\theta(x_i')_k \neq y_i\right].
-\]
-Targeted success toward class \(t\) is
-\[
-    \mathrm{TSR}
-    =
-    \frac{1}{m}
-    \sum_{i=1}^{m}
-    \mathbf{1}\left[\arg\max_k f_\theta(x_i')_k = t\right].
-\]
-The report also records average \(L_0\), \(L_\infty\), and \(L_2\) perturbation sizes when a test-time input is modified.
+The suite also implements related test-time attacks against the clean baseline: FGSM, PGD, EAD, JSMA, SparseFool-style sparse boundary crossing, Adversarial Patch, ZOO finite differences, and HopSkipJump-style boundary search. These are included because the original poster used several evasion methods, but the paper labels them as evasion rather than poisoning.
 
-\section{Why MNIST Is Appropriate Here}
+For evasion, untargeted success is
+\begin{equation}
+    \mathrm{USR} =
+    \frac{1}{m}\sum_{i=1}^{m}
+    \mathbf{1}[\arg\max_k f_\theta(x_i')_k \neq y_i],
+\end{equation}
+and targeted success toward class \(t\) is
+\begin{equation}
+    \mathrm{TSR} =
+    \frac{1}{m}\sum_{i=1}^{m}
+    \mathbf{1}[\arg\max_k f_\theta(x_i')_k = t].
+\end{equation}
 
-MNIST is visually understandable for a poster audience. The trigger can be shown directly on handwritten digits, and the results can be explained without relying on hidden implementation details. The experiment is still real: the images are real handwritten digits, the training/test split is the standard MNIST split, the model is actually trained, and the reported metrics are computed from held-out test data.
+\section{Results}
 
-\section{Measured MNIST Results}
+The expanded comparison was run on the full MNIST split. The target digit was \(t=1\), and the source digit was \(s=7\). Table~\ref{tab:results} reports clean accuracy and the attack-specific success or damage metric.
 
-The expanded comparison was run on the full MNIST split with 60,000 training images and 10,000 test images. The target digit was \(t=1\) and the source digit was \(s=7\). The comparison includes six training-time poisoning/backdoor implementations and seven test-time evasion implementations, plus the clean baseline.
-
-\begin{center}
-\small
-\begin{tabular}{p{0.23\linewidth}p{0.13\linewidth}p{0.12\linewidth}p{0.25\linewidth}p{0.12\linewidth}}
-\toprule
-Method & Stage & Clean accuracy & Metric & Value \\
-\midrule
-Clean baseline & reference & 0.9173 & \(7 \rightarrow 1\) confusion & 0.0117 \\
-Random label flip & poisoning & 0.8914 & clean accuracy drop & 0.0259 \\
-Targeted label flip & poisoning & 0.9074 & \(7 \rightarrow 1\) confusion & 0.0525 \\
-Subpopulation label poison & poisoning & 0.8972 & subgroup-to-1 confusion & 0.4434 \\
-BadNets patch backdoor & poisoning & 0.9115 & trigger ASR to 1 & 0.9988 \\
-Clean-label patch backdoor & poisoning & 0.9157 & trigger ASR to 1 & 0.3717 \\
-Prototype feature collision & poisoning & 0.9174 & \(1 \rightarrow 7\) confusion & 0.0018 \\
-FGSM & evasion & 0.9173 & untargeted misclassification & 1.0000 \\
-PGD & evasion & 0.9173 & untargeted misclassification & 1.0000 \\
-Elastic Net EAD & evasion & 0.9173 & targeted ASR to 1 & 0.9890 \\
-JSMA saliency & evasion & 0.9173 & targeted ASR to 1 & 0.6433 \\
-SparseFool-style boundary & evasion & 0.9173 & untargeted misclassification & 1.0000 \\
-Adversarial patch & evasion & 0.9173 & untargeted misclassification & 0.8290 \\
-ZOO finite difference & evasion & 0.9173 & targeted ASR to 1 & 0.0250 \\
-HopSkipJump-style boundary & evasion & 0.9173 & targeted ASR to 1 & 0.9800 \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-The backdoor result is the clearest poisoning risk demonstration: clean accuracy remains close to the baseline, but almost every non-target test digit with the trigger is classified as the target digit. The subpopulation result is also important because aggregate clean accuracy remains near 90\%, while the selected subgroup is heavily biased toward the attacker's target class. The evasion results should not be described as poisoning, but they provide a useful comparison row for the original poster's FGSM/PGD/CW/Boundary/UAP-style entries.
-
-\section{Required Seven-Method Implementation Audit}
-
-The following audit checks the seven methods requested for verification against the current repository implementation. ``Full'' means the method's core algorithm is implemented in code for MNIST. ``Partial'' means a real MNIST implementation exists, but it is a simplified adaptation rather than the full paper method. ``Theory/catalog only'' means the method is discussed and cited but not yet implemented as executable code.
-
-\begin{center}
-\small
-\begin{tabular}{p{0.22\linewidth}p{0.10\linewidth}p{0.13\linewidth}p{0.45\linewidth}}
-\toprule
-Requested method & Required category & Status & Verification \\
-\midrule
-Clean-Label Poisoning / Poison Frogs & O, R1 & Partial & Included in catalog and theory. Code currently implements \texttt{Prototype feature collision}, a clean-label MNIST prototype blend, but it is not the full constrained deep-feature Poison Frogs optimization with a trained feature extractor and target-specific collision loss. \\
-Sleeper Agent & B, R1 & Theory/catalog only & Included in catalog and theory summary. The current \texttt{Clean-label patch backdoor} is not Sleeper Agent: it does not implement gradient-aligned hidden-trigger optimization or fine-tuning persistence tests. \\
-Adversarial Patch & U, R2 & Partial & Implemented in \texttt{mnist\_attack\_comparison.py} as a universal fixed-position MNIST patch optimized to maximize classifier loss. It does not yet implement full Expectation over Transformation over random scale, rotation, lighting, and placement. \\
-Witches' Brew / Gradient Matching & G, R2 & Theory/catalog only & Included in catalog and theory. No executable gradient-matching poisoning implementation is currently present. \\
-JSMA & M, R3 & Full for current model & Implemented as \texttt{JSMA saliency}. For the linear MNIST classifier, the Jacobian is the class-weight matrix, so the code greedily modifies sparse high-saliency pixels toward the target class. \\
-ZOO & O, R3 & Partial & Implemented as \texttt{ZOO finite difference}. It uses black-box finite-difference coordinate estimates and query counting, but it does not yet include a full Adam/ADMM optimizer or coordinate-importance scheduler. \\
-SparseFool & M, R4 & Full for current model & Implemented as \texttt{SparseFool-style boundary}. Since the MNIST comparison classifier is linear, SparseFool's iterative local linearization reduces to sparse linear-boundary crossing, which the code implements directly. \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-Therefore, the current repository does \emph{not} honestly support the statement that all seven requested techniques are fully implemented. JSMA and SparseFool-style boundary crossing are fully implemented for the current linear MNIST model; Adversarial Patch and ZOO are partial but executable; Poison Frogs, Sleeper Agent, and Witches' Brew need additional implementation work before they should be claimed as fully implemented.
-
-Generated presentation figures:
-\[
-\begin{aligned}
-&\texttt{figures/mnist\_clean\_samples.png},\\
-&\texttt{figures/mnist\_backdoor\_examples.png},\\
-&\texttt{figures/mnist\_attack\_comparison\_bars.png},\\
-&\texttt{figures/mnist\_attack\_examples.png},\\
-&\texttt{figures/mnist\_confusion\_*.png}.
-\end{aligned}
-\]
-
-\begin{figure}[h]
+\begin{table*}[t]
 \centering
-\includegraphics[width=\linewidth]{mnist_attack_comparison_bars.png}
-\caption{At-a-glance comparison generated by \texttt{scripts/mnist\_attack\_comparison.py}. Blue bars show clean accuracy; orange bars show the attack success or damage metric for each method.}
-\end{figure}
+\caption{MNIST attack comparison. Poisoning methods retrain on modified training data; evasion methods attack the clean baseline.}
+\label{tab:results}
+\small
+\begin{tabular}{p{0.20\textwidth}p{0.10\textwidth}p{0.08\textwidth}p{0.22\textwidth}p{0.08\textwidth}p{0.24\textwidth}}
+\toprule
+Method & Stage & Clean acc. & Metric & Value & Notes \\
+\midrule
+Clean baseline & Reference & 0.9173 & \(7 \rightarrow 1\) confusion & 0.0117 & Full MNIST train/test split. \\
+Random label flip & Poisoning & 0.8914 & Clean accuracy drop & 0.0259 & 6000 labels changed. \\
+Targeted label flip & Poisoning & 0.9074 & \(7 \rightarrow 1\) confusion & 0.0525 & 2193 digit-7 labels changed. \\
+Subpopulation label poison & Poisoning & 0.8972 & Subgroup-to-1 confusion & 0.4434 & 1504 source-subgroup labels changed. \\
+BadNets patch backdoor & Poisoning & 0.9115 & Trigger ASR to 1 & 0.9988 & 3000 triggered non-target copies. \\
+Clean-label patch backdoor & Poisoning & 0.9157 & Trigger ASR to 1 & 0.3717 & 3000 correctly labeled target images patched. \\
+Prototype feature collision & Poisoning & 0.9174 & \(1 \rightarrow 7\) confusion & 0.0018 & Clean-label prototype blend. \\
+FGSM & Evasion & 0.9173 & Untargeted misclassification & 1.0000 & Single-step gradient sign. \\
+PGD & Evasion & 0.9173 & Untargeted misclassification & 1.0000 & Projected gradient ascent. \\
+Elastic Net EAD & Evasion & 0.9173 & Targeted ASR to 1 & 0.9890 & L1/L2-style targeted update. \\
+JSMA saliency & Evasion & 0.9173 & Targeted ASR to 1 & 0.6433 & Sparse saliency pixels. \\
+SparseFool-style boundary & Evasion & 0.9173 & Untargeted misclassification & 1.0000 & Sparse linear-boundary crossing. \\
+Adversarial patch & Evasion & 0.9173 & Untargeted misclassification & 0.8290 & Universal fixed-position patch. \\
+ZOO finite difference & Evasion & 0.9173 & Targeted ASR to 1 & 0.0250 & 93,340 black-box queries. \\
+HopSkipJump-style boundary & Evasion & 0.9173 & Targeted ASR to 1 & 0.9800 & Decision-only boundary search. \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
-\section{Safety Boundary}
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{mnist_attack_comparison_bars.png}
+\caption{At-a-glance comparison generated by \texttt{scripts/mnist\_attack\_comparison.py}. Blue bars show clean accuracy; orange bars show the attack success or damage metric.}
+\label{fig:bars}
+\end{figure*}
 
-The project is designed for an AI safety conference presentation. The experiments are local, use a public benchmark dataset, and do not target deployed systems, real users, private data, or production models. The purpose is to compare mechanisms and risk levels so defenders can prioritize provenance, auditing, data curation, model scanning, and robust validation.
+The BadNets-style patch backdoor is the clearest poisoning demonstration: clean accuracy remains close to the baseline, while trigger ASR reaches 0.9988. Subpopulation poisoning is also important because aggregate clean accuracy remains close to 0.90, but the selected subgroup is heavily biased toward the attacker target. This supports the main framework claim: real risk is driven not only by global accuracy degradation, but by stealthy and targeted failure modes.
 
-\begin{thebibliography}{9}
+\section{Implementation Audit}
+
+The requested seven-method list includes several methods that are fully implemented, partially implemented, or currently theory-only in this repository. Table~\ref{tab:audit} makes these claims explicit.
+
+\begin{table*}[t]
+\centering
+\caption{Audit of requested seven methods against current executable code.}
+\label{tab:audit}
+\small
+\begin{tabular}{p{0.22\textwidth}p{0.08\textwidth}p{0.14\textwidth}p{0.48\textwidth}}
+\toprule
+Requested method & Category & Status & Verification \\
+\midrule
+Poison Frogs / clean-label poisoning & O, R1 & Partial & Catalog and theory included. Code has \texttt{Prototype feature collision}, but not full constrained deep-feature Poison Frogs optimization. \\
+Sleeper Agent & B, R1 & Theory only & Discussed in catalog and taxonomy. Current clean-label patch backdoor is not Sleeper Agent and does not test fine-tuning persistence. \\
+Adversarial Patch & U, R2 & Partial & Implemented as universal fixed-position MNIST patch. Full EOT over scale, rotation, lighting, and placement is not yet implemented. \\
+Witches' Brew / gradient matching & G, R2 & Theory only & Discussed and cited. No executable gradient-matching poisoning implementation is present. \\
+JSMA & M, R3 & Full for current model & Implemented as sparse saliency attack. For the linear MNIST classifier, the Jacobian is the class-weight matrix. \\
+ZOO & O, R3 & Partial & Finite-difference black-box attack with query counting is implemented, but not full Adam/ADMM ZOO. \\
+SparseFool & M, R4 & Full for current model & Since the classifier is linear, SparseFool's local linearization reduces to sparse linear-boundary crossing, implemented directly. \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{Discussion}
+
+The comparison reveals three lessons. First, backdoors can preserve normal clean accuracy while creating a hidden targeted failure. This makes them more operationally dangerous than simple availability attacks that visibly degrade validation accuracy. Second, subgroup attacks show why aggregate metrics are insufficient; a model can look acceptable overall while failing badly on a selected slice. Third, evasion methods are useful for comparison, but their stage must be labeled correctly. A test-time adversarial example is not data poisoning unless it is used to contaminate training or adaptation data.
+
+The current MNIST implementation is intentionally transparent and reproducible. It does not claim to reproduce every paper-grade method. The audit table is included to prevent overclaiming and to guide future implementation work.
+
+\section{Safety and Reproducibility}
+
+The experiments are local, use a public benchmark dataset, and do not target deployed systems, real users, private data, or production services. The repository excludes the downloaded MNIST data from version control; it can be re-downloaded through \texttt{torchvision}. The main commands are:
+\begin{itemize}
+    \item \texttt{python scripts/mnist\_poisoning\_experiment.py --download}
+    \item \texttt{python scripts/mnist\_attack\_comparison.py --download}
+\end{itemize}
+
+\section{Conclusion}
+
+This paper presents a risk-based periodic-table framework for data poisoning and related adversarial ML methods. The framework improves the poster by distinguishing poisoning from evasion, assigning operational risk levels, and grounding the discussion in real MNIST experiments. The results show that backdoor and subpopulation attacks can be especially dangerous because they preserve high aggregate accuracy while creating targeted failures. Future work should implement full Poison Frogs, Witches' Brew, Sleeper Agent, and EOT-based patch attacks with deep MNIST or CIFAR models, then compare their risk scores under the same measurement protocol.
+
+\begin{thebibliography}{99}
 
 \bibitem{mnist}
-Y. LeCun, L. Bottou, Y. Bengio, and P. Haffner.
-\newblock Gradient-based learning applied to document recognition.
-\newblock \emph{Proceedings of the IEEE}, 1998.
+Y. LeCun, L. Bottou, Y. Bengio, and P. Haffner, ``Gradient-based learning applied to document recognition,'' \emph{Proceedings of the IEEE}, 1998.
 
 \bibitem{biggio2012}
-B. Biggio, B. Nelson, and P. Laskov.
-\newblock Poisoning attacks against support vector machines.
-\newblock ICML, 2012. \url{https://icml.cc/2012/papers/880.pdf}
+B. Biggio, B. Nelson, and P. Laskov, ``Poisoning attacks against support vector machines,'' ICML, 2012.
 
 \bibitem{mei2015}
-S. Mei and X. Zhu.
-\newblock Using machine teaching to identify optimal training-set attacks on machine learners.
-\newblock AAAI, 2015. \url{https://ojs.aaai.org/index.php/AAAI/article/view/9569}
+S. Mei and X. Zhu, ``Using machine teaching to identify optimal training-set attacks on machine learners,'' AAAI, 2015.
 
 \bibitem{badnets}
-T. Gu, B. Dolan-Gavitt, and S. Garg.
-\newblock BadNets: Identifying vulnerabilities in the machine learning model supply chain.
-\newblock arXiv:1708.06733, 2017. \url{https://arxiv.org/abs/1708.06733}
+T. Gu, B. Dolan-Gavitt, and S. Garg, ``BadNets: Identifying vulnerabilities in the machine learning model supply chain,'' arXiv:1708.06733, 2017.
 
 \bibitem{targetedbackdoor}
-X. Chen, C. Liu, B. Li, K. Lu, and D. Song.
-\newblock Targeted backdoor attacks on deep learning systems using data poisoning.
-\newblock arXiv:1712.05526, 2017. \url{https://arxiv.org/abs/1712.05526}
+X. Chen, C. Liu, B. Li, K. Lu, and D. Song, ``Targeted backdoor attacks on deep learning systems using data poisoning,'' arXiv:1712.05526, 2017.
 
 \bibitem{poisonfrogs}
-A. Shafahi et al.
-\newblock Poison Frogs! Targeted clean-label poisoning attacks on neural networks.
-\newblock NeurIPS, 2018. \url{https://papers.neurips.cc/paper/7849-poison-frogs-targeted-clean-label-poisoning-attacks-on-neural-networks}
+A. Shafahi et al., ``Poison Frogs! Targeted clean-label poisoning attacks on neural networks,'' NeurIPS, 2018.
 
 \bibitem{witchesbrew}
-J. Geiping et al.
-\newblock Witches' Brew: Industrial scale data poisoning via gradient matching.
-\newblock arXiv:2009.02276, 2020. \url{https://arxiv.org/abs/2009.02276}
+J. Geiping et al., ``Witches' Brew: Industrial scale data poisoning via gradient matching,'' arXiv:2009.02276, 2020.
 
 \bibitem{webscale}
-N. Carlini et al.
-\newblock Poisoning web-scale training datasets is practical.
-\newblock IEEE Symposium on Security and Privacy, 2024. \url{https://arxiv.org/abs/2302.10149}
+N. Carlini et al., ``Poisoning web-scale training datasets is practical,'' IEEE Symposium on Security and Privacy, 2024.
 
 \bibitem{poisonedrag}
-W. Zou, R. Geng, B. Wang, and J. Jia.
-\newblock PoisonedRAG: Knowledge corruption attacks to retrieval-augmented generation of large language models.
-\newblock arXiv:2402.07867, 2024. \url{https://arxiv.org/abs/2402.07867}
+W. Zou, R. Geng, B. Wang, and J. Jia, ``PoisonedRAG: Knowledge corruption attacks to retrieval-augmented generation of large language models,'' arXiv:2402.07867, 2024.
 
 \bibitem{nightshade}
-S. Shan et al.
-\newblock Nightshade: Prompt-specific poisoning attacks on text-to-image generative models.
-\newblock arXiv:2310.13828, 2023. \url{https://arxiv.org/abs/2310.13828}
+S. Shan et al., ``Nightshade: Prompt-specific poisoning attacks on text-to-image generative models,'' arXiv:2310.13828, 2023.
 
 \bibitem{jsma}
-N. Papernot, P. McDaniel, S. Jha, M. Fredrikson, Z. B. Celik, and A. Swami.
-\newblock The limitations of deep learning in adversarial settings.
-\newblock IEEE European Symposium on Security and Privacy, 2016.
+N. Papernot, P. McDaniel, S. Jha, M. Fredrikson, Z. B. Celik, and A. Swami, ``The limitations of deep learning in adversarial settings,'' IEEE European Symposium on Security and Privacy, 2016.
 
 \bibitem{ead}
-P.-Y. Chen, Y. Sharma, H. Zhang, J. Yi, and C.-J. Hsieh.
-\newblock EAD: Elastic-net attacks to deep neural networks via adversarial examples.
-\newblock AAAI, 2018. \url{https://arxiv.org/abs/1709.04114}
+P.-Y. Chen, Y. Sharma, H. Zhang, J. Yi, and C.-J. Hsieh, ``EAD: Elastic-net attacks to deep neural networks via adversarial examples,'' AAAI, 2018.
 
 \bibitem{zoo}
-P.-Y. Chen, H. Zhang, Y. Sharma, J. Yi, and C.-J. Hsieh.
-\newblock ZOO: Zeroth order optimization based black-box attacks to deep neural networks without training substitute models.
-\newblock ACM Workshop on Artificial Intelligence and Security, 2017. \url{https://arxiv.org/abs/1708.03999}
+P.-Y. Chen, H. Zhang, Y. Sharma, J. Yi, and C.-J. Hsieh, ``ZOO: Zeroth order optimization based black-box attacks to deep neural networks without training substitute models,'' ACM Workshop on Artificial Intelligence and Security, 2017.
 
 \bibitem{hopskipjump}
-J. Chen, M. I. Jordan, and M. J. Wainwright.
-\newblock HopSkipJumpAttack: A query-efficient decision-based attack.
-\newblock IEEE Symposium on Security and Privacy, 2020. \url{https://arxiv.org/abs/1904.02144}
+J. Chen, M. I. Jordan, and M. J. Wainwright, ``HopSkipJumpAttack: A query-efficient decision-based attack,'' IEEE Symposium on Security and Privacy, 2020.
 
 \bibitem{adversarialpatch}
-T. B. Brown, D. Mane, A. Roy, M. Abadi, and J. Gilmer.
-\newblock Adversarial patch.
-\newblock arXiv:1712.09665, 2017. \url{https://arxiv.org/abs/1712.09665}
+T. B. Brown, D. Mane, A. Roy, M. Abadi, and J. Gilmer, ``Adversarial patch,'' arXiv:1712.09665, 2017.
 
 \bibitem{sparsefool}
-A. Modas, S.-M. Moosavi-Dezfooli, and P. Frossard.
-\newblock SparseFool: A few pixels make a big difference.
-\newblock CVPR, 2019. \url{https://arxiv.org/abs/1811.02248}
+A. Modas, S.-M. Moosavi-Dezfooli, and P. Frossard, ``SparseFool: A few pixels make a big difference,'' CVPR, 2019.
 
 \bibitem{cleanlabelbackdoor}
-A. Turner, D. Tsipras, and A. Madry.
-\newblock Clean-label backdoor attacks.
-\newblock 2019. \url{https://people.csail.mit.edu/madry/lab/cleanlabel.pdf}
+A. Turner, D. Tsipras, and A. Madry, ``Clean-label backdoor attacks,'' 2019.
 
 \bibitem{wanet}
-A. Nguyen and A. Tran.
-\newblock WaNet: Imperceptible warping-based backdoor attack.
-\newblock ICLR, 2021. \url{https://openreview.net/forum?id=eEn8KTtJOx}
+A. Nguyen and A. Tran, ``WaNet: Imperceptible warping-based backdoor attack,'' ICLR, 2021.
 
 \end{thebibliography}
 

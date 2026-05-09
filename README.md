@@ -12,7 +12,7 @@ The original poster framed several test-time adversarial examples as data poison
 
 - `catalog/data_poisoning_techniques.csv` - expanded technique catalog with risk scores and primary sources.
 - `docs/poster_upgrade_notes.md` - recommended changes to the poster/table.
-- `docs/data_poisoning_theory.tex` - LaTeX write-up of the theory, scoring model, MNIST experiment, and metrics.
+- `docs/data_poisoning_theory.tex` - IEEE two-column conference-style LaTeX paper with abstract, introduction, related work, methodology, results, discussion, and conclusion.
 - `scripts/mnist_poisoning_experiment.py` - actual training-time poisoning implementations on real MNIST: random label flipping, targeted source-to-target label flipping, and a BadNets-style visible trigger backdoor.
 - `scripts/mnist_attack_comparison.py` - 14-method MNIST comparison suite covering poisoning, backdoors, and related evasion attacks.
 - `pptx_media/periodic_table_slide.jpg` - extracted image from the supplied PPTX for reference.
