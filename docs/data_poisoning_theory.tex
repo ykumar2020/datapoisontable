@@ -421,7 +421,26 @@ Total & 400 & 300 & 100 \\
 
 \subsection{Model and Metrics}
 
-The fungi model is MobileNetV3-Small with ImageNet pretrained weights~\cite{mobilenetv3}. The feature extractor is frozen and a new classifier head is trained with class-weighted cross entropy. This transfer-learning setup is more realistic for fine-grained fungi recognition than a small from-scratch convolutional network. Images are resized to \(160\times160\) RGB.
+The reported food-image experiments use a PyTorch transfer-learning classifier rather than a from-scratch toy network. Table~\ref{tab:modelconfigs} summarizes the exact model configurations. The default backbone is MobileNetV3-Small with ImageNet pretrained weights~\cite{mobilenetv3}. MobileNetV3-Small is a lightweight convolutional network built from mobile inverted bottleneck blocks, depthwise separable convolutions, squeeze-and-excitation modules, and hard-swish/ReLU nonlinearities. In our wrapper, the original ImageNet classifier is removed. The frozen \texttt{features} stack maps each normalized RGB image to a 576-channel final convolutional representation; adaptive average pooling converts this tensor to a 576-dimensional embedding; and the trainable head is \(\mathrm{Dropout}(0.20)\) followed by a linear layer of size \(576\times C\), where \(C\) is the number of dataset classes.
+
+The same architecture is used for clean baselines and poisoned retraining rows. For each poisoning method, a fresh classifier is trained on the modified training set under the same preprocessing and optimization settings; for evasion analogs, the attack is applied to the already trained clean baseline. The feature extractor is frozen in the reported runs, so Poison Frogs and Witches' Brew-style methods operate against a realistic transfer-learning threat model in which poisons mainly influence the classifier head and decision boundary. Images are resized to \(160\times160\) RGB for fungi and fish, while the reduced-budget seafood pilot uses \(96\times96\) RGB to keep the full method table executable locally.
+
+\begin{table*}[t]
+\centering
+\caption{Model configurations used in the reported experiments. All runs use ImageNet normalization, lazy PyTorch \texttt{Dataset}/\texttt{DataLoader} batching, AdamW with learning rate \(10^{-3}\), weight decay \(10^{-4}\), and class-weighted cross entropy.}
+\label{tab:modelconfigs}
+\small
+\begin{tabular}{p{0.16\textwidth}p{0.18\textwidth}p{0.26\textwidth}p{0.30\textwidth}}
+\toprule
+Dataset/run & Backbone & Feature representation & Trainable structure and notes \\
+\midrule
+Fungi & MobileNetV3-Small, ImageNet pretrained, frozen features & Final feature map from \texttt{features}; adaptive average pooling to 576 dimensions & \(\mathrm{Dropout}(0.20)\rightarrow\mathrm{Linear}(576,2)\); default \(160\times160\) input; trained for the pilot fungi rows with class weighting and light augmentation \\
+Fish micro-batch & Same MobileNetV3-Small transfer model & Same 576-dimensional pooled embedding & Same two-class head for fresh/non-fresh labels; \(160\times160\) input; results are framed as few-shot proof of concept because only 30 train and 10 validation images are available \\
+Seafood freshness & Same MobileNetV3-Small transfer model with cached frozen features & Same 576-dimensional pooled embedding & Same two-class Fresh/NonFresh head; \(96\times96\) input and two epochs in the local reduced-budget run; cached features speed classifier retraining for the full attack table \\
+Supported ablation & ResNet18 option in the runner~\cite{resnet} & Final convolutional feature stack pooled to 512 dimensions & Same dropout-linear head with frozen or trainable features; retained for future architecture sweeps but not used in the reported tables \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
 For poisoning and backdoors, the model is retrained on modified training data and evaluated on clean validation data plus an attack-specific metric. For evasion, success is conditional on the clean model first classifying the image correctly:
 \begin{equation}
@@ -820,6 +839,9 @@ The generated table-layout audit should contain only \texttt{consistent} statuse
 
 \bibitem{mobilenetv3}
 A. Howard et al., ``Searching for MobileNetV3,'' in \emph{Proc. IEEE/CVF International Conference on Computer Vision (ICCV)}, 2019, pp. 1314--1324. [Online]. Available: \url{https://openaccess.thecvf.com/content_ICCV_2019/html/Howard_Searching_for_MobileNetV3_ICCV_2019_paper.html}
+
+\bibitem{resnet}
+K. He, X. Zhang, S. Ren, and J. Sun, ``Deep residual learning for image recognition,'' in \emph{Proc. IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 2016, pp. 770--778. [Online]. Available: \url{https://openaccess.thecvf.com/content_cvpr_2016/html/He_Deep_Residual_Learning_CVPR_2016_paper.html}
 
 \bibitem{adversaguard}
 Y. Kumar, S. Thomas, D. Gayle, J. J. Li, and D. Kruger, ``AdversaGuard: A distributed data-poisoning benchmark for parallel AI,'' in \emph{SC25 Posters, The International Conference for High Performance Computing, Networking, Storage and Analysis}, 2025, 2 pages. [Online]. Available: \url{https://sc25.supercomputing.org/proceedings/posters/poster_files/post110s2-file3.pdf}
