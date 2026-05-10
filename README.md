@@ -91,6 +91,8 @@ The script writes:
 - `results/periodic_table_entries.csv`
 - `results/periodic_table_entries.json`
 - `results/periodic_table_entries.md`
+- `results/citation_verification.csv`
+- `results/citation_verification.md`
 - `figures/fungi_attack_comparison_bars.png`
 - `figures/fungi_attack_examples.png`
 - `figures/fungi_dataset_samples.png`

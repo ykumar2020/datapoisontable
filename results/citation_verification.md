@@ -1,0 +1,25 @@
+# Citation Verification
+
+Google Scholar does not provide an official public API in this environment. Each citation below was checked against a primary source page, publisher DOI page, arXiv page, proceedings page, or OpenReview page. The Scholar column is a direct Google Scholar query URL for manual cross-checking.
+
+| Key | Title | Primary verification URL | Google Scholar query | Status |
+|---|---|---|---|---|
+| mnist | Gradient-based learning applied to document recognition | https://doi.org/10.1109/5.726791 | https://scholar.google.com/scholar?q=Gradient-based+learning+applied+to+document+recognition | Verified |
+| mobilenetv3 | Searching for MobileNetV3 | https://openaccess.thecvf.com/content_ICCV_2019/html/Howard_Searching_for_MobileNetV3_ICCV_2019_paper.html | https://scholar.google.com/scholar?q=Searching+for+MobileNetV3 | Verified |
+| biggio2012 | Poisoning attacks against support vector machines | https://icml.cc/2012/papers/880.pdf | https://scholar.google.com/scholar?q=Poisoning+attacks+against+support+vector+machines | Verified |
+| mei2015 | Using machine teaching to identify optimal training-set attacks on machine learners | https://ojs.aaai.org/index.php/AAAI/article/view/9569 | https://scholar.google.com/scholar?q=Using+machine+teaching+to+identify+optimal+training-set+attacks+on+machine+learners | Verified |
+| badnets | BadNets: Identifying vulnerabilities in the machine learning model supply chain | https://arxiv.org/abs/1708.06733 | https://scholar.google.com/scholar?q=BadNets+Identifying+vulnerabilities+in+the+machine+learning+model+supply+chain | Verified |
+| targetedbackdoor | Targeted backdoor attacks on deep learning systems using data poisoning | https://arxiv.org/abs/1712.05526 | https://scholar.google.com/scholar?q=Targeted+backdoor+attacks+on+deep+learning+systems+using+data+poisoning | Verified |
+| poisonfrogs | Poison Frogs! Targeted clean-label poisoning attacks on neural networks | https://papers.neurips.cc/paper_files/paper/2018/hash/22722a343513ed45f14905eb07621686-Abstract.html | https://scholar.google.com/scholar?q=Poison+Frogs+Targeted+clean-label+poisoning+attacks+on+neural+networks | Verified |
+| witchesbrew | Witches' Brew: Industrial scale data poisoning via gradient matching | https://arxiv.org/abs/2009.02276 | https://scholar.google.com/scholar?q=Witches+Brew+Industrial+scale+data+poisoning+via+gradient+matching | Verified |
+| webscale | Poisoning web-scale training datasets is practical | https://arxiv.org/abs/2302.10149 | https://scholar.google.com/scholar?q=Poisoning+web-scale+training+datasets+is+practical | Verified |
+| poisonedrag | PoisonedRAG: Knowledge corruption attacks to retrieval-augmented generation of large language models | https://arxiv.org/abs/2402.07867 | https://scholar.google.com/scholar?q=PoisonedRAG+Knowledge+corruption+attacks+to+retrieval-augmented+generation+of+large+language+models | Verified |
+| nightshade | Nightshade: Prompt-specific poisoning attacks on text-to-image generative models | https://arxiv.org/abs/2310.13828 | https://scholar.google.com/scholar?q=Nightshade+Prompt-specific+poisoning+attacks+on+text-to-image+generative+models | Verified |
+| jsma | The limitations of deep learning in adversarial settings | https://doi.org/10.1109/EuroSP.2016.36 | https://scholar.google.com/scholar?q=The+limitations+of+deep+learning+in+adversarial+settings | Verified |
+| ead | EAD: Elastic-net attacks to deep neural networks via adversarial examples | https://arxiv.org/abs/1709.04114 | https://scholar.google.com/scholar?q=EAD+Elastic-net+attacks+to+deep+neural+networks+via+adversarial+examples | Verified |
+| zoo | ZOO: Zeroth order optimization based black-box attacks to deep neural networks without training substitute models | https://arxiv.org/abs/1708.03999 | https://scholar.google.com/scholar?q=ZOO+Zeroth+order+optimization+based+black-box+attacks+to+deep+neural+networks+without+training+substitute+models | Verified |
+| hopskipjump | HopSkipJumpAttack: A query-efficient decision-based attack | https://arxiv.org/abs/1904.02144 | https://scholar.google.com/scholar?q=HopSkipJumpAttack+A+query-efficient+decision-based+attack | Verified |
+| adversarialpatch | Adversarial Patch | https://arxiv.org/abs/1712.09665 | https://scholar.google.com/scholar?q=Adversarial+Patch+Brown+Mane+Roy+Abadi+Gilmer | Verified |
+| sparsefool | SparseFool: a few pixels make a big difference | https://arxiv.org/abs/1811.02248 | https://scholar.google.com/scholar?q=SparseFool+a+few+pixels+make+a+big+difference | Verified |
+| cleanlabelbackdoor | Label-consistent backdoor attacks | https://arxiv.org/abs/1912.02771 | https://scholar.google.com/scholar?q=Label-consistent+backdoor+attacks+Turner+Tsipras+Madry | Verified |
+| wanet | WaNet: Imperceptible warping-based backdoor attack | https://openreview.net/forum?id=eEn8KTtJOx | https://scholar.google.com/scholar?q=WaNet+Imperceptible+warping-based+backdoor+attack | Verified |
