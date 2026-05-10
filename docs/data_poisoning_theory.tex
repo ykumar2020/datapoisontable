@@ -12,7 +12,7 @@
 
 \graphicspath{{../figures/}{figures/}}
 
-\title{Data Poisoning Taxonomy Matrix: A Periodic-Table-Inspired Framework for AI Security}
+\title{Data Poisoning Risk Matrix: A Periodic-Table-Inspired Framework for AI Security}
 
 \author{
 \IEEEauthorblockN{Yulia Kumar}
@@ -38,7 +38,7 @@ juli@kean.edu}
 \maketitle
 
 \begin{abstract}
-Data poisoning attacks manipulate training, fine-tuning, retrieval, feedback, or model-supply-chain data so that a learned model behaves incorrectly after deployment. This paper presents a compact, periodic-table-inspired taxonomy matrix that separates training-time poisoning from test-time evasion, groups techniques by attack family, and scores operational danger using impact, stealth, scalability, and cost-efficiency. Unlike a literal Mendeleev layout, every matrix coordinate is functional: rows organize attack surface and operational stage, columns are consistent attack families, and risk is printed inside each cell rather than inferred from cell position. The framework is supported by executable experiments on MNIST, fungi, and fish freshness images. The food-image experiments use lazy PyTorch data loading, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, all original poster evasion methods, and ten additional poisoning or evasion methods shared during project development. Results show that aggregate clean accuracy is not enough: subpopulation poisoning, clean-label backdoors, and conditional evasion can create severe targeted failures even when ordinary validation metrics look acceptable.
+Data poisoning attacks manipulate training, fine-tuning, retrieval, feedback, or model-supply-chain data so that a learned model behaves incorrectly after deployment. This paper presents a compact, periodic-table-inspired risk matrix that separates training-time poisoning from test-time evasion, groups techniques by mechanism family, and scores operational danger using impact, stealth, scalability, and cost-efficiency. Unlike a literal Mendeleev layout, every matrix coordinate is functional: rows are exact risk levels, columns are the nine mechanism families, and related evasion attacks are placed in a separate comparison panel. The framework is supported by executable experiments on MNIST, fungi, and fish freshness images. The food-image experiments use lazy PyTorch data loading, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, all original poster evasion methods, and ten additional poisoning or evasion methods shared during project development. Results show that aggregate clean accuracy is not enough: subpopulation poisoning, clean-label backdoors, and conditional evasion can create severe targeted failures even when ordinary validation metrics look acceptable.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -47,7 +47,7 @@ data poisoning, backdoor attacks, adversarial machine learning, fungi classifica
 
 \section{Introduction}
 
-Machine learning systems increasingly depend on data that is scraped, labeled, filtered, retrieved, fine-tuned, or reused across organizations. These data pipelines create an attack surface. A poisoning attacker does not need to break the model code; changing a small portion of the data can change the learned behavior. This project organizes that landscape into a stage-by-family taxonomy matrix for AI security presentations.
+Machine learning systems increasingly depend on data that is scraped, labeled, filtered, retrieved, fine-tuned, or reused across organizations. These data pipelines create an attack surface. A poisoning attacker does not need to break the model code; changing a small portion of the data can change the learned behavior. This project organizes that landscape into a strict risk-by-mechanism matrix for AI security presentations.
 
 The key correction is stage separation. Poisoning methods modify data before or during training, fine-tuning, retrieval, or alignment. Evasion methods such as FGSM, PGD, DeepFool, Carlini-Wagner, Boundary, One-Pixel, UAP, JSMA, ZOO, SparseFool, HopSkipJump, and Adversarial Patch modify inputs at inference time. They are related adversarial ML techniques, but they are not data poisoning unless the adversarial examples are fed back into training or adaptation.
 
@@ -78,18 +78,18 @@ Let \(D=\{(x_i,y_i)\}_{i=1}^{n}\) be a clean training set and let \(\theta^\star
    & \theta^\star=\arg\min_{\theta}\mathcal{L}(\theta;D_{\mathrm{clean}}\cup D_{\mathrm{poison}}),
 \end{aligned}
 \end{equation}
-where \(\mathcal{A}\) is the attacker's objective and \(\mathcal{C}\) encodes access constraints. The table columns are attack-family columns: label manipulation, feature/input manipulation, clean-label poisoning, backdoor/trigger poisoning, gradient/model-update poisoning, influence/data-selection poisoning, federated/distributed poisoning, generative/synthetic-data poisoning, preference/RLHF poisoning, retrieval/RAG poisoning, supply-chain poisoning, and dynamic/adaptive poisoning.
+where \(\mathcal{A}\) is the attacker's objective and \(\mathcal{C}\) encodes access constraints. The table columns are mechanism families: minimal/structural (M), optimization-based (O), gradient-based (G), backdoor/trigger (B), distributed/federated (D), supply-chain (S), retrieval/RAG (R), generative (N), and preference or alignment-data poisoning (P). Related evasion methods use the analogous M, O, G, and U columns in a separated companion panel.
 
 Operational danger is scored as
 \begin{equation}
 \mathrm{DangerScore}=I\times S\times G\times C,
 \end{equation}
-where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is attacker cost-efficiency. Risk levels are R1: 400--625, R2: 200--399, R3: 100--199, and R4: below 100. Figure~\ref{fig:periodic} is the paper-readable visual artifact. Each compact cell entry contains a short symbol and risk label; the poster/slide version additionally uses element-like cells with index, symbol, attack name, and risk/family label. The layout deliberately abandons literal chemical-table geometry. Rows represent attack surface or operational stage, columns use one consistent family dimension, and inference-time evasion analogs are separated from poisoning attacks. Glaze is retained as a defensive poisoning-like cloak, not as an ordinary malicious poisoning attack. Numbers are reference identifiers only, not chronology or severity ranking.
+where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is attacker cost-efficiency. Risk levels are R1: 400--625, R2: 200--399, R3: 100--199, and R4: below 100. Figure~\ref{fig:periodic} is the paper-readable visual artifact. The poster/slide version additionally uses element-like cells with index, symbol, attack name, and risk/mechanism label. The layout deliberately abandons literal chemical-table geometry: a tile's row is computed directly from the printed R label, so no R1 item can appear in an R2/R3 row. Inference-time evasion analogs are separated from poisoning attacks. Glaze is retained as a defensive poisoning-like cloak, not as an ordinary malicious poisoning attack. Numbers are reference identifiers only, not chronology or severity ranking.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.98\textwidth]{paper_taxonomy_panels.png}
-\caption{Paper-readable Data Poisoning Taxonomy Matrix. Rows organize attack surface and operational stage; columns are consistent attack families; cell labels give short identifiers and risk levels. The bottom-right panel contains related inference-time evasion/transfer analogs for comparison, not poisoning attacks proper.}
+\caption{Paper-readable Data Poisoning Risk Matrix. Rows are exact R1--R4 operational risk levels and columns are mechanism families. The lower panel contains related inference-time evasion/transfer analogs for comparison, not poisoning attacks proper.}
 \label{fig:periodic}
 \end{figure*}
 
@@ -141,7 +141,7 @@ The fungi code addresses common pitfalls. It uses a custom \texttt{Dataset} and 
 
 \section{Results}
 
-Table~\ref{tab:results} gives a compact at-a-glance comparison. Full CSV, JSON, Markdown, and additional plots are generated under \texttt{results/} and \texttt{figures/}. The file \texttt{results/table\_layout\_audit.*} verifies the panel assignment, surface row, taxonomy family, risk label, and poisoning-versus-evasion separation for each visual cell.
+Table~\ref{tab:results} gives a compact at-a-glance comparison. Full CSV, JSON, Markdown, and additional plots are generated under \texttt{results/} and \texttt{figures/}. The file \texttt{results/table\_layout\_audit.*} verifies the panel assignment, expected risk row, mechanism column, risk label, and poisoning-versus-evasion separation for each visual cell.
 
 \begin{table*}[t]
 \centering
@@ -204,7 +204,7 @@ The fish freshness extension uses the same method table on a much smaller split:
 
 \subsection{Answers to Research Questions}
 
-\textbf{RQ1:} The taxonomy matrix answers the organization question by making every coordinate auditable: the vertical coordinate is the attack surface or operational stage, the horizontal coordinate is a consistent attack-family column, and the panel determines whether a method is poisoning proper or an evasion/transfer analog. Risk remains visible inside each cell but no longer drives a visually misleading ``extreme'' row. This removes arbitrary chemical-table gaps and separates related evasion methods from data-poisoning methods.
+\textbf{RQ1:} The risk matrix answers the organization question by making every coordinate auditable: the vertical coordinate is exactly R1, R2, R3, or R4; the horizontal coordinate is the mechanism family; and the panel determines whether a method is poisoning proper or an evasion/transfer analog. This removes arbitrary chemical-table gaps, prevents a cell labeled R1 from appearing in an R2 or R3 row, and separates related evasion methods from data-poisoning methods.
 
 \textbf{RQ2:} On the fungi task, the largest evasion failures are PGD, DeepFool, and UAP with 1.0000 conditional untargeted success; JSMA reaches 0.9375 conditional targeted ASR and Carlini-Wagner reaches 0.7429. On the fish task, FGSM, PGD, DeepFool, Carlini-Wagner, and UAP reach 1.0000 conditional success, while the Sleeper-Agent-style backdoor reaches 0.8000 stealth-trigger ASR. These results answer RQ2 by showing that inference-time methods can be strongest under conditional evaluation, while subgroup and backdoor poisoning create the most important training-time targeted failures.
 
@@ -218,7 +218,7 @@ The implementation audit is intentionally conservative. The code reproduces the 
 
 \section{Conclusion}
 
-This paper answers the three research questions as follows. First, data poisoning can be organized as an auditable stage-by-family taxonomy matrix by separating attack surface, family, risk, and poisoning-versus-evasion status. Second, the fungi and fish experiments show that PGD, DeepFool, UAP, JSMA, and Carlini-Wagner can produce the strongest evasion failures, while subpopulation poisoning and Sleeper-Agent-style backdoors produce the strongest training-time targeted failures. Third, realistic conclusions require careful engineering: lazy loading, transfer learning, latent-space poisoning, explicit implementation coverage, vectorized/batched attacks, and conditional success metrics. The final framework is suitable for a short IEEE-style AI security conference paper and for an at-a-glance presentation of operational risk.
+This paper answers the three research questions as follows. First, data poisoning can be organized as an auditable risk-by-mechanism matrix by separating risk, mechanism, and poisoning-versus-evasion status. Second, the fungi and fish experiments show that PGD, DeepFool, UAP, JSMA, and Carlini-Wagner can produce the strongest evasion failures, while subpopulation poisoning and Sleeper-Agent-style backdoors produce the strongest training-time targeted failures. Third, realistic conclusions require careful engineering: lazy loading, transfer learning, latent-space poisoning, explicit implementation coverage, vectorized/batched attacks, and conditional success metrics. The final framework is suitable for a short IEEE-style AI security conference paper and for an at-a-glance presentation of operational risk.
 
 \section*{Reproducibility and Safety}
 

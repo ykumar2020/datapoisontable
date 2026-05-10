@@ -28,22 +28,16 @@ FIGURES_DIR = ROOT / "figures"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
 MECHANISM_COLORS = {
-    "LBL": "#ff6b6b",
-    "FEAT": "#ffa94d",
-    "CL": "#ffd166",
-    "BD": "#b197fc",
-    "GRD": "#f4e04d",
-    "INF": "#4ecdc4",
-    "FED": "#74c0fc",
-    "GEN": "#69db7c",
-    "PREF": "#f783ac",
-    "RAG": "#8ce99a",
-    "SUP": "#63e6be",
-    "DYN": "#c77dff",
-    "EV_MIN": "#ff8787",
-    "EV_OPT": "#ffd166",
-    "EV_GRD": "#f4e04d",
-    "EV_XFER": "#4dabf7",
+    "M": "#ff6b6b",
+    "O": "#ffd166",
+    "G": "#f4e04d",
+    "U": "#4dabf7",
+    "B": "#b197fc",
+    "D": "#74c0fc",
+    "S": "#63e6be",
+    "R": "#8ce99a",
+    "N": "#69db7c",
+    "P": "#f783ac",
 }
 
 MECHANISM_LABELS = {
@@ -59,68 +53,15 @@ MECHANISM_LABELS = {
     "P": "Preference / RLHF",
 }
 
-TAXONOMY_COLUMN_LABELS = {
-    "LBL": "Label manipulation",
-    "FEAT": "Feature / input manipulation",
-    "CL": "Clean-label poisoning",
-    "BD": "Backdoor / trigger poisoning",
-    "GRD": "Gradient / model-update poisoning",
-    "INF": "Influence / data-selection poisoning",
-    "FED": "Federated / distributed poisoning",
-    "GEN": "Generative / synthetic-data poisoning",
-    "PREF": "Preference / RLHF poisoning",
-    "RAG": "Retrieval / RAG poisoning",
-    "SUP": "Supply-chain poisoning",
-    "DYN": "Dynamic / adaptive poisoning",
-}
-
-TAXONOMY_COLUMN_ORDER = ["LBL", "FEAT", "CL", "BD", "GRD", "INF", "FED", "GEN", "PREF", "RAG", "SUP", "DYN"]
-TAXONOMY_COLUMN_INDEX = {name: idx for idx, name in enumerate(TAXONOMY_COLUMN_ORDER)}
-
-PAPER_FAMILY_LABELS = {
-    "LBL": "Label",
-    "FEAT": "Feature/input",
-    "CL": "Clean-label",
-    "BD": "Backdoor",
-    "GRD": "Gradient/update",
-    "INF": "Influence/select",
-    "FED": "Federated",
-    "GEN": "Generative",
-    "PREF": "Preference",
-    "RAG": "Retrieval/RAG",
-    "SUP": "Supply-chain",
-    "DYN": "Dynamic",
-    "EV_MIN": "Sparse/minimal",
-    "EV_OPT": "Optimization/black-box",
-    "EV_GRD": "Gradient",
-    "EV_XFER": "Universal/transfer",
-}
-
-EVASION_COLUMN_LABELS = {
-    "EV_MIN": "Sparse / minimal evasion",
-    "EV_OPT": "Optimization / black-box evasion",
-    "EV_GRD": "Gradient evasion",
-    "EV_XFER": "Universal / transfer evasion",
-}
-EVASION_COLUMN_ORDER = ["EV_MIN", "EV_OPT", "EV_GRD", "EV_XFER"]
-EVASION_COLUMN_INDEX = {name: idx for idx, name in enumerate(EVASION_COLUMN_ORDER)}
-
-SURFACE_LABELS = {
-    "SRC": "Source / Web / Retrieval",
-    "TRAIN": "Training-Data Poisoning",
-    "MODEL": "Model-Update / Federated",
-    "ALIGN": "Generative / Alignment / Supply",
-    "BASE": "Classic Baselines / Defense",
-}
-SURFACE_ORDER = {"SRC": 0, "TRAIN": 1, "MODEL": 2, "ALIGN": 3, "BASE": 4}
-SURFACE_SEQUENCE = ["SRC", "TRAIN", "MODEL", "ALIGN", "BASE"]
-
 RISK_LABELS = {
-    "R1": "R1 highest",
-    "R2": "R2 high",
-    "R3": "R3 moderate",
-    "R4": "R4 baseline",
+    "R1": "R1 Extreme",
+    "R2": "R2 High",
+    "R3": "R3 Moderate",
+    "R4": "R4 Low / Baseline",
 }
+RISK_ORDER = {"R1": 0, "R2": 1, "R3": 2, "R4": 3}
+POISON_MECHANISM_ORDER = ["M", "O", "G", "B", "D", "S", "R", "N", "P"]
+EVASION_MECHANISM_ORDER = ["M", "O", "G", "U"]
 
 PERIODIC_TABLE_ENTRIES = [
     {"n": 1, "symbol": "Ss", "name": "Split-view web", "risk": "R1", "mech": "S", "stage": "Poison", "row": 0, "col": 0},
@@ -466,84 +407,6 @@ def dataset_comparison_rows(datasets: list[tuple[str, list[dict[str, str]]]]) ->
     return output
 
 
-def entry_surface(entry: dict[str, object]) -> str:
-    symbol = str(entry["symbol"])
-    stage = str(entry["stage"])
-    if stage == "Evasion":
-        return "EVA"
-    if stage == "Defense":
-        return "BASE"
-    if symbol in {"Ss", "Sd", "Fr", "Rg", "Gg"}:
-        return "SRC"
-    if symbol in {"Fl", "Db", "Al"}:
-        return "MODEL"
-    if symbol in {"Ns", "Td", "Bv", "Rl", "Dp", "Rp"}:
-        return "ALIGN"
-    if symbol in {"Lf", "Svm", "Ko", "Oo", "RgN"}:
-        return "BASE"
-    return "TRAIN"
-
-
-def entry_taxonomy_family(entry: dict[str, object]) -> str:
-    symbol = str(entry["symbol"])
-    stage = str(entry["stage"])
-    if stage == "Evasion":
-        evasion_family = {"M": "EV_MIN", "O": "EV_OPT", "G": "EV_GRD", "U": "EV_XFER"}
-        return evasion_family[str(entry["mech"])]
-    family_by_symbol = {
-        "Lf": "LBL",
-        "Tf": "LBL",
-        "Svm": "FEAT",
-        "Ko": "FEAT",
-        "Oo": "FEAT",
-        "RgN": "FEAT",
-        "Ts": "FEAT",
-        "Cf": "FEAT",
-        "Fc": "CL",
-        "Bp": "CL",
-        "Cl": "CL",
-        "Wa": "BD",
-        "Bn": "BD",
-        "Hb": "BD",
-        "Sa": "BD",
-        "Nl": "BD",
-        "Wb": "GRD",
-        "Al": "GRD",
-        "If": "INF",
-        "Hp": "INF",
-        "Cp": "INF",
-        "Sp": "INF",
-        "Fl": "FED",
-        "Db": "FED",
-        "Ns": "GEN",
-        "Td": "GEN",
-        "Gd": "GEN",
-        "Bv": "PREF",
-        "Rl": "PREF",
-        "Dp": "PREF",
-        "Rp": "PREF",
-        "Sd": "RAG",
-        "Rg": "RAG",
-        "Gg": "RAG",
-        "Ss": "SUP",
-        "Fr": "SUP",
-        "Ip": "DYN",
-    }
-    return family_by_symbol[symbol]
-
-
-def column_label_for_family(family: str) -> str:
-    if family in TAXONOMY_COLUMN_LABELS:
-        return TAXONOMY_COLUMN_LABELS[family]
-    return EVASION_COLUMN_LABELS[family]
-
-
-def column_index_for_family(family: str) -> int:
-    if family in TAXONOMY_COLUMN_INDEX:
-        return TAXONOMY_COLUMN_INDEX[family]
-    return EVASION_COLUMN_INDEX[family]
-
-
 def wrap_label(text: str, width: int = 17) -> str:
     return "\n".join(textwrap.wrap(text, width=width, break_long_words=False))
 
@@ -553,11 +416,10 @@ def periodic_entries_for_export() -> list[dict[str, object]]:
     slots: defaultdict[tuple[str, str, str], int] = defaultdict(int)
     for entry in PERIODIC_TABLE_ENTRIES:
         section = "poisoning" if entry["stage"] in {"Poison", "Defense"} else "evasion_analog"
-        surface = entry_surface(entry)
-        family = entry_taxonomy_family(entry)
-        surface_row = SURFACE_ORDER[surface] if surface in SURFACE_ORDER else 0
-        family_column = column_index_for_family(family)
-        slot_key = (section, surface, family)
+        mechanism_order = POISON_MECHANISM_ORDER if section == "poisoning" else EVASION_MECHANISM_ORDER
+        risk_row = RISK_ORDER[str(entry["risk"])]
+        mechanism_column = mechanism_order.index(str(entry["mech"]))
+        slot_key = (section, str(entry["risk"]), str(entry["mech"]))
         slot = slots[slot_key]
         slots[slot_key] += 1
         rows.append(
@@ -571,11 +433,9 @@ def periodic_entries_for_export() -> list[dict[str, object]]:
                 "mechanism_name": MECHANISM_LABELS[entry["mech"]],
                 "stage": entry["stage"],
                 "section": section,
-                "surface_row": surface,
-                "surface_label": SURFACE_LABELS.get(surface, "Related Evasion / Transfer"),
-                "taxonomy_family": family,
-                "taxonomy_family_name": column_label_for_family(family),
-                "family_column": family_column,
+                "risk_row": risk_row,
+                "risk_row_label": RISK_LABELS[entry["risk"]],
+                "mechanism_column": mechanism_column,
                 "slot": slot,
             }
         )
@@ -595,13 +455,11 @@ def table_layout_audit_rows() -> list[dict[str, object]]:
                 "expected_panel": expected_panel,
                 "risk": row["risk"],
                 "risk_label": row["risk_label"],
+                "expected_row": row["risk_row_label"],
                 "mechanism": row["mechanism"],
                 "mechanism_name": row["mechanism_name"],
-                "surface_row": row["surface_row"],
-                "surface_label": row["surface_label"],
-                "taxonomy_family": row["taxonomy_family"],
-                "taxonomy_family_name": row["taxonomy_family_name"],
-                "family_column": row["family_column"],
+                "risk_row": row["risk_row"],
+                "mechanism_column": row["mechanism_column"],
                 "status": "consistent",
             }
         )
@@ -610,8 +468,8 @@ def table_layout_audit_rows() -> list[dict[str, object]]:
 
 def save_periodic_table() -> None:
     FIGURES_DIR.mkdir(exist_ok=True)
-    fig_w = 18.7
-    fig_h = 10.9
+    fig_w = 17.7
+    fig_h = 12.2
     fig, ax = plt.subplots(figsize=(fig_w, fig_h))
     fig.patch.set_facecolor("#f6fbff")
     ax.set_facecolor("#f6fbff")
@@ -619,11 +477,11 @@ def save_periodic_table() -> None:
     ax.set_ylim(fig_h, 0)
     ax.axis("off")
 
-    ax.text(fig_w / 2, 0.42, "Data Poisoning Taxonomy Matrix", ha="center", va="center", fontsize=26, weight="bold")
+    ax.text(fig_w / 2, 0.42, "Data Poisoning Risk Matrix", ha="center", va="center", fontsize=26, weight="bold")
     ax.text(
         fig_w / 2,
         0.86,
-        "Rows organize attack surface and operational stage; columns are consistent attack families; colors denote the family.",
+        "Rows are exact operational risk levels; columns are the nine functional mechanism families.",
         ha="center",
         va="center",
         fontsize=11.5,
@@ -631,132 +489,71 @@ def save_periodic_table() -> None:
     ax.text(
         fig_w / 2,
         1.12,
-        "The bottom panel contains related evasion/transfer attacks for comparison, not data poisoning attacks proper.",
+        "Related evasion attacks are separated below the dashed divider and are not counted as data poisoning proper.",
         ha="center",
         va="center",
         fontsize=9.6,
         color="#3b4754",
     )
 
-    grouped: defaultdict[tuple[str, str], list[dict[str, object]]] = defaultdict(list)
-    evasion_grouped: defaultdict[str, list[dict[str, object]]] = defaultdict(list)
+    grouped: defaultdict[tuple[str, str, str], list[dict[str, object]]] = defaultdict(list)
     for entry in PERIODIC_TABLE_ENTRIES:
-        family = entry_taxonomy_family(entry)
-        if entry["stage"] == "Evasion":
-            evasion_grouped[family].append(entry)
-        else:
-            grouped[(entry_surface(entry), family)].append(entry)
+        section = "poisoning" if entry["stage"] in {"Poison", "Defense"} else "evasion"
+        grouped[(section, str(entry["risk"]), str(entry["mech"]))].append(entry)
     for key in grouped:
         grouped[key].sort(key=lambda item: int(item["n"]))
-    for key in evasion_grouped:
-        evasion_grouped[key].sort(key=lambda item: int(item["n"]))
 
-    def draw_tile(x: float, y: float, w: float, h: float, entry: dict[str, object], family: str, small: bool = False) -> None:
-        rect = plt.Rectangle((x, y), w, h, facecolor=MECHANISM_COLORS[family], edgecolor="#213547", linewidth=0.75)
+    def draw_tile(x: float, y: float, w: float, h: float, entry: dict[str, object], small: bool = False) -> None:
+        mech = str(entry["mech"])
+        rect = plt.Rectangle((x, y), w, h, facecolor=MECHANISM_COLORS[mech], edgecolor="#213547", linewidth=0.75)
         ax.add_patch(rect)
-        ax.text(x + 0.04, y + 0.10, str(entry["n"]), ha="left", va="center", fontsize=4.1 if small else 5.4)
+        ax.text(x + 0.04, y + 0.10, str(entry["n"]), ha="left", va="center", fontsize=4.0 if small else 5.4)
         ax.text(x + w / 2, y + h * 0.36, str(entry["symbol"]), ha="center", va="center", fontsize=7.0 if small else 10.5, weight="bold")
         name = str(entry["name"])
         if len(name) > (16 if small else 18):
             name = name[: (15 if small else 17)] + "."
         stage_note = "Defense" if entry["stage"] == "Defense" else ""
         ax.text(x + w / 2, y + h * 0.65, name, ha="center", va="center", fontsize=3.6 if small else 4.6)
-        ax.text(x + w / 2, y + h * 0.86, f"{entry['risk']} / {family}", ha="center", va="center", fontsize=3.35 if small else 4.1)
+        ax.text(x + w / 2, y + h * 0.86, f"{entry['risk']} / {entry['mech']}", ha="center", va="center", fontsize=3.35 if small else 4.1)
         if stage_note:
             ax.text(x + w - 0.05, y + 0.10, stage_note, ha="right", va="center", fontsize=3.1, color="#1f2933")
 
-    main_left = 1.6
-    main_top = 1.72
-    main_cell_w = 1.34
-    main_cell_h = 1.22
-    header_h = 0.40
+    def draw_panel(title: str, section: str, mechanisms: list[str], left: float, top: float, cell_w: float, cell_h: float, small: bool = False) -> None:
+        ax.text(left, top - 0.47, title, ha="left", va="center", fontsize=13.5, weight="bold")
+        for col, mech in enumerate(mechanisms):
+            x = left + col * cell_w
+            ax.add_patch(plt.Rectangle((x, top - 0.34), cell_w - 0.06, 0.30, facecolor=MECHANISM_COLORS[mech], edgecolor="#213547", linewidth=0.55))
+            ax.text(x + (cell_w - 0.06) / 2, top - 0.19, f"{mech}: {wrap_label(MECHANISM_LABELS[mech], width=14)}", ha="center", va="center", fontsize=6.2 if small else 6.7, linespacing=0.9)
+        for risk, row in RISK_ORDER.items():
+            y = top + row * cell_h
+            ax.add_patch(plt.Rectangle((left - 1.25, y), 1.05, cell_h - 0.08, facecolor="#e7f5ff", edgecolor="#91a7b8", linewidth=0.55))
+            ax.text(left - 0.72, y + (cell_h - 0.08) / 2, RISK_LABELS[risk], ha="center", va="center", fontsize=7.5 if small else 8.6, weight="bold")
+            for col, mech in enumerate(mechanisms):
+                x = left + col * cell_w
+                ax.add_patch(plt.Rectangle((x, y), cell_w - 0.06, cell_h - 0.08, facecolor="#ffffff", edgecolor="#b7c0c7", linewidth=0.5))
+                entries = grouped.get((section, risk, mech), [])
+                if not entries:
+                    continue
+                cols = 2 if len(entries) > 2 else 1
+                tile_rows = int(np.ceil(len(entries) / cols))
+                pad = 0.04
+                tile_w = (cell_w - 0.06 - pad * (cols + 1)) / cols
+                tile_h = min((cell_h - 0.08 - pad * (tile_rows + 1)) / tile_rows, 0.48 if small else 0.52)
+                for idx, entry in enumerate(entries):
+                    tx = x + pad + (idx % cols) * (tile_w + pad)
+                    ty = y + pad + (idx // cols) * (tile_h + pad)
+                    draw_tile(tx, ty, tile_w, tile_h, entry, small=small or len(entries) > 3)
 
-    ax.text(main_left, main_top - 0.50, "Poisoning and Data-Supply Attacks", ha="left", va="center", fontsize=13.5, weight="bold")
-    for col, family in enumerate(TAXONOMY_COLUMN_ORDER):
-        x = main_left + col * main_cell_w
-        ax.add_patch(
-            plt.Rectangle(
-                (x, main_top - header_h),
-                main_cell_w - 0.05,
-                header_h - 0.05,
-                facecolor=MECHANISM_COLORS[family],
-                edgecolor="#213547",
-                linewidth=0.55,
-            )
-        )
-        ax.text(
-            x + (main_cell_w - 0.05) / 2,
-            main_top - header_h / 2 - 0.03,
-            wrap_label(TAXONOMY_COLUMN_LABELS[family], width=15),
-            ha="center",
-            va="center",
-            fontsize=4.9,
-            linespacing=0.95,
-        )
+    main_left = 1.55
+    main_top = 1.70
+    draw_panel("Poisoning and Data-Supply Attacks", "poisoning", POISON_MECHANISM_ORDER, main_left, main_top, 1.73, 1.28)
 
-    for row, surface in enumerate(SURFACE_SEQUENCE):
-        y = main_top + row * main_cell_h
-        ax.add_patch(plt.Rectangle((0.18, y), 1.30, main_cell_h - 0.06, facecolor="#e7f5ff", edgecolor="#91a7b8", linewidth=0.6))
-        ax.text(
-            0.83,
-            y + (main_cell_h - 0.06) / 2,
-            wrap_label(SURFACE_LABELS[surface], width=14),
-            ha="center",
-            va="center",
-            fontsize=6.5,
-            weight="bold",
-            linespacing=1.0,
-        )
-        for col, family in enumerate(TAXONOMY_COLUMN_ORDER):
-            x = main_left + col * main_cell_w
-            ax.add_patch(plt.Rectangle((x, y), main_cell_w - 0.05, main_cell_h - 0.06, facecolor="#ffffff", edgecolor="#b7c0c7", linewidth=0.5))
-            entries = grouped.get((surface, family), [])
-            if not entries:
-                continue
-            cols = 2 if len(entries) > 1 else 1
-            tile_rows = int(np.ceil(len(entries) / cols))
-            pad = 0.035
-            tile_w = (main_cell_w - 0.05 - pad * (cols + 1)) / cols
-            tile_h = min((main_cell_h - 0.06 - pad * (tile_rows + 1)) / tile_rows, 0.47)
-            for idx, entry in enumerate(entries):
-                tx = x + pad + (idx % cols) * (tile_w + pad)
-                ty = y + pad + (idx // cols) * (tile_h + pad)
-                draw_tile(tx, ty, tile_w, tile_h, entry, family, small=len(entries) > 2)
-
-    divider_y = main_top + len(SURFACE_SEQUENCE) * main_cell_h + 0.22
+    divider_y = main_top + len(RISK_ORDER) * 1.28 + 0.34
     ax.plot([0.18, fig_w - 0.22], [divider_y, divider_y], color="#495057", linewidth=1.0, linestyle=(0, (6, 4)))
     evasion_top = divider_y + 0.54
-    ax.text(main_left, evasion_top - 0.36, "Related Adversarial Attacks (Not Poisoning Proper)", ha="left", va="center", fontsize=13.5, weight="bold")
+    draw_panel("Related Adversarial Attacks (Not Poisoning Proper)", "evasion", EVASION_MECHANISM_ORDER, main_left, evasion_top, 2.25, 0.78, small=True)
 
-    evasion_left = main_left
-    evasion_cell_w = 2.45
-    evasion_cell_h = 2.05
-    for col, family in enumerate(EVASION_COLUMN_ORDER):
-        x = evasion_left + col * evasion_cell_w
-        ax.add_patch(
-            plt.Rectangle(
-                (x, evasion_top - 0.28),
-                evasion_cell_w - 0.08,
-                0.25,
-                facecolor=MECHANISM_COLORS[family],
-                edgecolor="#213547",
-                linewidth=0.55,
-            )
-        )
-        ax.text(x + (evasion_cell_w - 0.08) / 2, evasion_top - 0.16, EVASION_COLUMN_LABELS[family], ha="center", va="center", fontsize=6.5)
-        ax.add_patch(plt.Rectangle((x, evasion_top), evasion_cell_w - 0.08, evasion_cell_h, facecolor="#ffffff", edgecolor="#b7c0c7", linewidth=0.5))
-        entries = evasion_grouped.get(family, [])
-        cols = 2 if len(entries) > 2 else 1
-        tile_rows = int(np.ceil(len(entries) / cols)) if entries else 1
-        pad = 0.05
-        tile_w = (evasion_cell_w - 0.08 - pad * (cols + 1)) / cols
-        tile_h = min((evasion_cell_h - pad * (tile_rows + 1)) / tile_rows, 0.56)
-        for idx, entry in enumerate(entries):
-            tx = x + pad + (idx % cols) * (tile_w + pad)
-            ty = evasion_top + pad + (idx // cols) * (tile_h + pad)
-            draw_tile(tx, ty, tile_w, tile_h, entry, family, small=True)
-
-    note_x = 12.05
+    note_x = 11.35
     note_y = evasion_top - 0.10
     ax.text(note_x, note_y, "Cell key and audit notes", ha="left", va="bottom", fontsize=10.5, weight="bold")
     key_x = note_x
@@ -767,10 +564,10 @@ def save_periodic_table() -> None:
     ax.text(key_x + 0.55, key_y + 0.50, "Short name", ha="center", va="center", fontsize=4.4)
     ax.text(key_x + 0.55, key_y + 0.64, "Risk / family", ha="center", va="center", fontsize=4.0)
     audit_text = (
-        "Numbers are reference IDs, not chronology or severity.\n"
-        "Glaze is marked as a defensive poisoning-like cloak.\n"
-        "Evasion methods are below the dashed divider only.\n"
-        "CSV/JSON audit files record each row and family."
+        "Rows are computed directly from the printed R label.\n"
+        "Columns are the mechanism codes shown in each cell.\n"
+        "Numbers are reference IDs, not chronology.\n"
+        "Evasion methods are below the dashed divider only."
     )
     ax.text(note_x, key_y + 0.94, audit_text, ha="left", va="top", fontsize=7.5, linespacing=1.35)
 
@@ -783,42 +580,38 @@ def save_periodic_table() -> None:
 def save_paper_taxonomy_panels() -> None:
     FIGURES_DIR.mkdir(exist_ok=True)
     rows = periodic_entries_for_export()
-    panels = SURFACE_SEQUENCE + ["EVA"]
-    fig, axes = plt.subplots(3, 2, figsize=(7.4, 7.2))
+    fig, axes = plt.subplots(2, 1, figsize=(7.4, 5.4), gridspec_kw={"height_ratios": [3.2, 1.6]})
     fig.patch.set_facecolor("#ffffff")
-    fig.suptitle("Paper Summary: Data Poisoning Families by Attack Surface", fontsize=12.5, weight="bold", y=0.985)
+    fig.suptitle("Paper Summary: Risk-by-Mechanism Taxonomy", fontsize=12.5, weight="bold", y=0.985)
 
-    for ax, panel in zip(axes.flatten(), panels):
+    def draw_compact(ax, title: str, section: str, mechanisms: list[str]) -> None:
         ax.set_facecolor("#f8fbfd")
         ax.set_xlim(0, 1)
         ax.set_ylim(1, 0)
         ax.axis("off")
-        if panel == "EVA":
-            title = "Related evasion / transfer analogs"
-            panel_rows = [r for r in rows if r["section"] == "evasion_analog"]
-            families = EVASION_COLUMN_ORDER
-        else:
-            title = SURFACE_LABELS[panel]
-            panel_rows = [r for r in rows if r["surface_row"] == panel]
-            families = TAXONOMY_COLUMN_ORDER
-        ax.text(0.02, 0.06, title, ha="left", va="center", fontsize=9.0, weight="bold")
-        ax.text(0.98, 0.06, "not poisoning" if panel == "EVA" else "", ha="right", va="center", fontsize=6.0, color="#9b2226")
-
-        y = 0.16
-        for family in families:
-            items = [r for r in panel_rows if r["taxonomy_family"] == family]
-            if not items:
-                continue
-            label = PAPER_FAMILY_LABELS[family]
-            chip = ", ".join(f"{r['symbol']}({r['risk']})" for r in items)
-            ax.add_patch(plt.Rectangle((0.02, y - 0.035), 0.22, 0.07, facecolor=MECHANISM_COLORS[family], edgecolor="#213547", linewidth=0.4))
-            ax.text(0.13, y, wrap_label(label, width=16), ha="center", va="center", fontsize=5.25, linespacing=0.9)
-            ax.text(0.27, y, chip, ha="left", va="center", fontsize=6.2, color="#111827")
-            y += 0.095
-
+        ax.text(0.02, 0.055, title, ha="left", va="center", fontsize=9.2, weight="bold")
+        left = 0.12
+        top = 0.15
+        cell_w = 0.86 / len(mechanisms)
+        cell_h = 0.17
+        for col, mech in enumerate(mechanisms):
+            x = left + col * cell_w
+            ax.add_patch(plt.Rectangle((x, top - 0.08), cell_w - 0.006, 0.055, facecolor=MECHANISM_COLORS[mech], edgecolor="#213547", linewidth=0.35))
+            ax.text(x + (cell_w - 0.006) / 2, top - 0.052, mech, ha="center", va="center", fontsize=6.2, weight="bold")
+        for risk, row_idx in RISK_ORDER.items():
+            y = top + row_idx * cell_h
+            ax.text(0.08, y + cell_h / 2 - 0.01, risk, ha="center", va="center", fontsize=6.5, weight="bold")
+            for col, mech in enumerate(mechanisms):
+                x = left + col * cell_w
+                ax.add_patch(plt.Rectangle((x, y), cell_w - 0.006, cell_h - 0.012, facecolor="#ffffff", edgecolor="#ced4da", linewidth=0.35))
+                symbols = [r["symbol"] for r in rows if r["section"] == section and r["risk"] == risk and r["mechanism"] == mech]
+                if symbols:
+                    ax.text(x + (cell_w - 0.006) / 2, y + (cell_h - 0.012) / 2, ", ".join(symbols), ha="center", va="center", fontsize=4.8, wrap=True)
         ax.add_patch(plt.Rectangle((0.01, 0.01), 0.98, 0.96, facecolor="none", edgecolor="#ced4da", linewidth=0.6))
 
-    fig.tight_layout(rect=(0, 0, 1, 0.965), pad=0.6)
+    draw_compact(axes[0], "Poisoning and data-supply attacks", "poisoning", POISON_MECHANISM_ORDER)
+    draw_compact(axes[1], "Related evasion/transfer analogs (not poisoning proper)", "evasion_analog", EVASION_MECHANISM_ORDER)
+    fig.tight_layout(rect=(0, 0, 1, 0.955), pad=0.6)
     fig.savefig(FIGURES_DIR / "paper_taxonomy_panels.png", dpi=220)
     plt.close(fig)
 
@@ -854,7 +647,7 @@ def main() -> None:
     periodic_rows = periodic_entries_for_export()
     write_csv(RESULTS_DIR / "periodic_table_entries.csv", periodic_rows)
     write_json(RESULTS_DIR / "periodic_table_entries.json", periodic_rows)
-    write_markdown(RESULTS_DIR / "periodic_table_entries.md", "Taxonomy Matrix Entries", periodic_rows)
+    write_markdown(RESULTS_DIR / "periodic_table_entries.md", "Risk Matrix Entries", periodic_rows)
 
     layout_audit = table_layout_audit_rows()
     write_csv(RESULTS_DIR / "table_layout_audit.csv", layout_audit)

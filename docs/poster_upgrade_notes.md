@@ -48,15 +48,15 @@ Suggested levels:
 
 ## Layout Integrity Update
 
-The conference version should not force the attacks into the literal shape of the chemical periodic table. The final poster figure now uses the periodic-table visual language only at the cell level: each method has a compact element-style tile with a number, symbol, name, and risk/family label. The coordinates are functional:
+The conference version should not force the attacks into the literal shape of the chemical periodic table. The final poster figure now uses the periodic-table visual language only at the cell level: each method has a compact element-style tile with a number, symbol, name, and risk/mechanism label. The coordinates are functional:
 
-- rows organize attack surface and operational stage
-- columns are consistent attack families, such as label manipulation, clean-label poisoning, backdoor/trigger poisoning, retrieval/RAG poisoning, and preference/RLHF poisoning
-- risk levels remain printed inside each cell instead of being implied by row position
+- rows are strictly R1, R2, R3, and R4
+- columns are strictly mechanism families: M, O, G, B, D, S, R, N, and P
+- risk levels printed inside each cell must match the row position
 - inference-time evasion attacks are below a dashed divider in a separate companion panel, not inside the data-poisoning grid
-- `results/table_layout_audit.*` verifies panel assignment, surface row, family column, and poisoning-versus-evasion separation
+- `results/table_layout_audit.*` verifies panel assignment, expected risk row, mechanism column, and poisoning-versus-evasion separation
 
-This removes the reviewer-facing contradiction where a cell could be labeled R1 while physically sitting in an R2/R3 row, and it avoids overstating narrow context-dependent methods as universally "extreme" just because they are placed near the top.
+This removes the reviewer-facing contradiction where a cell could be labeled R1 while physically sitting in an R2/R3 row.
 
 ## Stronger Results Section
 
@@ -85,4 +85,4 @@ Important implementation audit: the code reproduces the core experimental mechan
 - Keep the "data poisoning vs evasion" separation explicit in the visual.
 - Validate the risk scores with consistent MNIST experiments and literature-backed case studies.
 - Add defenses beside each block: provenance, deduplication, anomaly detection, trusted data snapshots, robust aggregation, backdoor scanning, and retrieval-source auditing.
-- Extend the taxonomy matrix to LLM/RAG/federated settings, which are now more relevant than only image classifiers.
+- Extend the risk matrix to LLM/RAG/federated settings, which are now more relevant than only image classifiers.

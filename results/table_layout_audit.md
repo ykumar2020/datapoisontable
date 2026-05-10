@@ -1,55 +1,55 @@
 # Table Layout Audit
 
-| number | symbol | technique | section | expected_panel | risk | risk_label | mechanism | mechanism_name | surface_row | surface_label | taxonomy_family | taxonomy_family_name | family_column | status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Ss | Split-view web | poisoning | poisoning_grid | R1 | R1 highest | S | Supply Chain | SRC | Source / Web / Retrieval | SUP | Supply-chain poisoning | 10 | consistent |
-| 2 | Sd | Single-doc RAG | poisoning | poisoning_grid | R1 | R1 highest | R | Retrieval / RAG | SRC | Source / Web / Retrieval | RAG | Retrieval / RAG poisoning | 9 | consistent |
-| 3 | Fr | Frontrun web | poisoning | poisoning_grid | R1 | R1 highest | S | Supply Chain | SRC | Source / Web / Retrieval | SUP | Supply-chain poisoning | 10 | consistent |
-| 4 | Wa | WaNet | poisoning | poisoning_grid | R1 | R1 highest | B | Backdoor / Trigger | TRAIN | Training-Data Poisoning | BD | Backdoor / trigger poisoning | 3 | consistent |
-| 5 | Rg | RAG poison | poisoning | poisoning_grid | R1 | R1 highest | R | Retrieval / RAG | SRC | Source / Web / Retrieval | RAG | Retrieval / RAG poisoning | 9 | consistent |
-| 6 | Ns | Nightshade | poisoning | poisoning_grid | R1 | R1 highest | N | Generative | ALIGN | Generative / Alignment / Supply | GEN | Generative / synthetic-data poisoning | 7 | consistent |
-| 7 | Fl | Fed replace | poisoning | poisoning_grid | R1 | R1 highest | D | Distributed / Federated | MODEL | Model-Update / Federated | FED | Federated / distributed poisoning | 6 | consistent |
-| 8 | Db | DBA | poisoning | poisoning_grid | R1 | R1 highest | D | Distributed / Federated | MODEL | Model-Update / Federated | FED | Federated / distributed poisoning | 6 | consistent |
-| 9 | Sp | Subpopulation | poisoning | poisoning_grid | R2 | R2 high | M | Minimal / Structural | TRAIN | Training-Data Poisoning | INF | Influence / data-selection poisoning | 5 | consistent |
-| 10 | Wb | Witches Brew | poisoning | poisoning_grid | R2 | R2 high | G | Gradient | TRAIN | Training-Data Poisoning | GRD | Gradient / model-update poisoning | 4 | consistent |
-| 11 | Bn | BadNets | poisoning | poisoning_grid | R2 | R2 high | B | Backdoor / Trigger | TRAIN | Training-Data Poisoning | BD | Backdoor / trigger poisoning | 3 | consistent |
-| 12 | Hb | Hidden backdoor | poisoning | poisoning_grid | R2 | R2 high | B | Backdoor / Trigger | TRAIN | Training-Data Poisoning | BD | Backdoor / trigger poisoning | 3 | consistent |
-| 13 | Sa | Sleeper agent | poisoning | poisoning_grid | R1 | R1 highest | B | Backdoor / Trigger | TRAIN | Training-Data Poisoning | BD | Backdoor / trigger poisoning | 3 | consistent |
-| 14 | Bv | Best-of-Venom pref. | poisoning | poisoning_grid | R2 | R2 high | P | Preference / RLHF | ALIGN | Generative / Alignment / Supply | PREF | Preference / RLHF poisoning | 8 | consistent |
-| 15 | Rl | RLHF backdoor | poisoning | poisoning_grid | R2 | R2 high | P | Preference / RLHF | ALIGN | Generative / Alignment / Supply | PREF | Preference / RLHF poisoning | 8 | consistent |
-| 16 | Td | TrojDiff | poisoning | poisoning_grid | R2 | R2 high | N | Generative | ALIGN | Generative / Alignment / Supply | GEN | Generative / synthetic-data poisoning | 7 | consistent |
-| 17 | Ip | Input-aware BD | poisoning | poisoning_grid | R2 | R2 high | B | Backdoor / Trigger | TRAIN | Training-Data Poisoning | DYN | Dynamic / adaptive poisoning | 11 | consistent |
-| 18 | Gg | Gradient RAG | poisoning | poisoning_grid | R2 | R2 high | R | Retrieval / RAG | SRC | Source / Web / Retrieval | RAG | Retrieval / RAG poisoning | 9 | consistent |
-| 19 | Tf | Target label flip | poisoning | poisoning_grid | R3 | R3 moderate | M | Minimal / Structural | TRAIN | Training-Data Poisoning | LBL | Label manipulation | 0 | consistent |
-| 20 | Fc | Feature collision | poisoning | poisoning_grid | R1 | R1 highest | O | Optimization | TRAIN | Training-Data Poisoning | CL | Clean-label poisoning | 2 | consistent |
-| 21 | Bp | Bullseye poly | poisoning | poisoning_grid | R2 | R2 high | O | Optimization | TRAIN | Training-Data Poisoning | CL | Clean-label poisoning | 2 | consistent |
-| 22 | If | Influence | poisoning | poisoning_grid | R2 | R2 high | O | Optimization | TRAIN | Training-Data Poisoning | INF | Influence / data-selection poisoning | 5 | consistent |
-| 23 | Hp | Hessian | poisoning | poisoning_grid | R2 | R2 high | O | Optimization | TRAIN | Training-Data Poisoning | INF | Influence / data-selection poisoning | 5 | consistent |
-| 24 | Cp | Curriculum | poisoning | poisoning_grid | R2 | R2 high | O | Optimization | TRAIN | Training-Data Poisoning | INF | Influence / data-selection poisoning | 5 | consistent |
-| 25 | Cl | Clean-label BD | poisoning | poisoning_grid | R1 | R1 highest | B | Backdoor / Trigger | TRAIN | Training-Data Poisoning | CL | Clean-label poisoning | 2 | consistent |
-| 26 | Nl | NLP trigger | poisoning | poisoning_grid | R2 | R2 high | B | Backdoor / Trigger | TRAIN | Training-Data Poisoning | BD | Backdoor / trigger poisoning | 3 | consistent |
-| 27 | Al | ALIE | poisoning | poisoning_grid | R2 | R2 high | D | Distributed / Federated | MODEL | Model-Update / Federated | GRD | Gradient / model-update poisoning | 4 | consistent |
-| 28 | Gd | Glaze cloak | poisoning | poisoning_grid | R3 | R3 moderate | N | Generative | BASE | Classic Baselines / Defense | GEN | Generative / synthetic-data poisoning | 7 | consistent |
-| 29 | Dp | DPO poison | poisoning | poisoning_grid | R3 | R3 moderate | P | Preference / RLHF | ALIGN | Generative / Alignment / Supply | PREF | Preference / RLHF poisoning | 8 | consistent |
-| 30 | Rp | Reward poison | poisoning | poisoning_grid | R3 | R3 moderate | P | Preference / RLHF | ALIGN | Generative / Alignment / Supply | PREF | Preference / RLHF poisoning | 8 | consistent |
-| 31 | Lf | Random label flip | poisoning | poisoning_grid | R4 | R4 baseline | M | Minimal / Structural | BASE | Classic Baselines / Defense | LBL | Label manipulation | 0 | consistent |
-| 32 | Svm | SVM poison | poisoning | poisoning_grid | R4 | R4 baseline | O | Optimization | BASE | Classic Baselines / Defense | FEAT | Feature / input manipulation | 1 | consistent |
-| 33 | Ko | KNN poison | poisoning | poisoning_grid | R3 | R3 moderate | M | Minimal / Structural | BASE | Classic Baselines / Defense | FEAT | Feature / input manipulation | 1 | consistent |
-| 34 | Oo | Outlier inject | poisoning | poisoning_grid | R4 | R4 baseline | M | Minimal / Structural | BASE | Classic Baselines / Defense | FEAT | Feature / input manipulation | 1 | consistent |
-| 35 | RgN | Regression poison | poisoning | poisoning_grid | R4 | R4 baseline | O | Optimization | BASE | Classic Baselines / Defense | FEAT | Feature / input manipulation | 1 | consistent |
-| 36 | Ts | Time-series | poisoning | poisoning_grid | R3 | R3 moderate | M | Minimal / Structural | TRAIN | Training-Data Poisoning | FEAT | Feature / input manipulation | 1 | consistent |
-| 37 | Cf | Collab filter | poisoning | poisoning_grid | R2 | R2 high | M | Minimal / Structural | TRAIN | Training-Data Poisoning | FEAT | Feature / input manipulation | 1 | consistent |
-| 38 | Js | JSMA | evasion_analog | evasion_analog_panel | R3 | R3 moderate | M | Minimal / Structural | EVA | Related Evasion / Transfer | EV_MIN | Sparse / minimal evasion | 0 | consistent |
-| 39 | Sf | SparseFool | evasion_analog | evasion_analog_panel | R4 | R4 baseline | M | Minimal / Structural | EVA | Related Evasion / Transfer | EV_MIN | Sparse / minimal evasion | 0 | consistent |
-| 40 | Fg | FGSM | evasion_analog | evasion_analog_panel | R3 | R3 moderate | G | Gradient | EVA | Related Evasion / Transfer | EV_GRD | Gradient evasion | 2 | consistent |
-| 41 | Pg | PGD | evasion_analog | evasion_analog_panel | R2 | R2 high | G | Gradient | EVA | Related Evasion / Transfer | EV_GRD | Gradient evasion | 2 | consistent |
-| 42 | Df | DeepFool | evasion_analog | evasion_analog_panel | R3 | R3 moderate | M | Minimal / Structural | EVA | Related Evasion / Transfer | EV_MIN | Sparse / minimal evasion | 0 | consistent |
-| 43 | Cw | Carlini-Wagner | evasion_analog | evasion_analog_panel | R2 | R2 high | O | Optimization | EVA | Related Evasion / Transfer | EV_OPT | Optimization / black-box evasion | 1 | consistent |
-| 44 | Ead | Elastic Net | evasion_analog | evasion_analog_panel | R2 | R2 high | O | Optimization | EVA | Related Evasion / Transfer | EV_OPT | Optimization / black-box evasion | 1 | consistent |
-| 45 | Zo | ZOO | evasion_analog | evasion_analog_panel | R3 | R3 moderate | O | Optimization | EVA | Related Evasion / Transfer | EV_OPT | Optimization / black-box evasion | 1 | consistent |
-| 46 | Bd | Boundary | evasion_analog | evasion_analog_panel | R3 | R3 moderate | O | Optimization | EVA | Related Evasion / Transfer | EV_OPT | Optimization / black-box evasion | 1 | consistent |
-| 47 | Op | One-Pixel | evasion_analog | evasion_analog_panel | R4 | R4 baseline | M | Minimal / Structural | EVA | Related Evasion / Transfer | EV_MIN | Sparse / minimal evasion | 0 | consistent |
-| 48 | Ap | Adv. patch | evasion_analog | evasion_analog_panel | R2 | R2 high | U | Universal / Transfer | EVA | Related Evasion / Transfer | EV_XFER | Universal / transfer evasion | 3 | consistent |
-| 49 | Uap | Universal pert. | evasion_analog | evasion_analog_panel | R2 | R2 high | U | Universal / Transfer | EVA | Related Evasion / Transfer | EV_XFER | Universal / transfer evasion | 3 | consistent |
-| 50 | Eot | EOT | evasion_analog | evasion_analog_panel | R2 | R2 high | U | Universal / Transfer | EVA | Related Evasion / Transfer | EV_XFER | Universal / transfer evasion | 3 | consistent |
-| 51 | St | Surrogate transfer | evasion_analog | evasion_analog_panel | R2 | R2 high | U | Universal / Transfer | EVA | Related Evasion / Transfer | EV_XFER | Universal / transfer evasion | 3 | consistent |
+| number | symbol | technique | section | expected_panel | risk | risk_label | expected_row | mechanism | mechanism_name | risk_row | mechanism_column | status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Ss | Split-view web | poisoning | poisoning_grid | R1 | R1 Extreme | R1 Extreme | S | Supply Chain | 0 | 5 | consistent |
+| 2 | Sd | Single-doc RAG | poisoning | poisoning_grid | R1 | R1 Extreme | R1 Extreme | R | Retrieval / RAG | 0 | 6 | consistent |
+| 3 | Fr | Frontrun web | poisoning | poisoning_grid | R1 | R1 Extreme | R1 Extreme | S | Supply Chain | 0 | 5 | consistent |
+| 4 | Wa | WaNet | poisoning | poisoning_grid | R1 | R1 Extreme | R1 Extreme | B | Backdoor / Trigger | 0 | 3 | consistent |
+| 5 | Rg | RAG poison | poisoning | poisoning_grid | R1 | R1 Extreme | R1 Extreme | R | Retrieval / RAG | 0 | 6 | consistent |
+| 6 | Ns | Nightshade | poisoning | poisoning_grid | R1 | R1 Extreme | R1 Extreme | N | Generative | 0 | 7 | consistent |
+| 7 | Fl | Fed replace | poisoning | poisoning_grid | R1 | R1 Extreme | R1 Extreme | D | Distributed / Federated | 0 | 4 | consistent |
+| 8 | Db | DBA | poisoning | poisoning_grid | R1 | R1 Extreme | R1 Extreme | D | Distributed / Federated | 0 | 4 | consistent |
+| 9 | Sp | Subpopulation | poisoning | poisoning_grid | R2 | R2 High | R2 High | M | Minimal / Structural | 1 | 0 | consistent |
+| 10 | Wb | Witches Brew | poisoning | poisoning_grid | R2 | R2 High | R2 High | G | Gradient | 1 | 2 | consistent |
+| 11 | Bn | BadNets | poisoning | poisoning_grid | R2 | R2 High | R2 High | B | Backdoor / Trigger | 1 | 3 | consistent |
+| 12 | Hb | Hidden backdoor | poisoning | poisoning_grid | R2 | R2 High | R2 High | B | Backdoor / Trigger | 1 | 3 | consistent |
+| 13 | Sa | Sleeper agent | poisoning | poisoning_grid | R1 | R1 Extreme | R1 Extreme | B | Backdoor / Trigger | 0 | 3 | consistent |
+| 14 | Bv | Best-of-Venom pref. | poisoning | poisoning_grid | R2 | R2 High | R2 High | P | Preference / RLHF | 1 | 8 | consistent |
+| 15 | Rl | RLHF backdoor | poisoning | poisoning_grid | R2 | R2 High | R2 High | P | Preference / RLHF | 1 | 8 | consistent |
+| 16 | Td | TrojDiff | poisoning | poisoning_grid | R2 | R2 High | R2 High | N | Generative | 1 | 7 | consistent |
+| 17 | Ip | Input-aware BD | poisoning | poisoning_grid | R2 | R2 High | R2 High | B | Backdoor / Trigger | 1 | 3 | consistent |
+| 18 | Gg | Gradient RAG | poisoning | poisoning_grid | R2 | R2 High | R2 High | R | Retrieval / RAG | 1 | 6 | consistent |
+| 19 | Tf | Target label flip | poisoning | poisoning_grid | R3 | R3 Moderate | R3 Moderate | M | Minimal / Structural | 2 | 0 | consistent |
+| 20 | Fc | Feature collision | poisoning | poisoning_grid | R1 | R1 Extreme | R1 Extreme | O | Optimization | 0 | 1 | consistent |
+| 21 | Bp | Bullseye poly | poisoning | poisoning_grid | R2 | R2 High | R2 High | O | Optimization | 1 | 1 | consistent |
+| 22 | If | Influence | poisoning | poisoning_grid | R2 | R2 High | R2 High | O | Optimization | 1 | 1 | consistent |
+| 23 | Hp | Hessian | poisoning | poisoning_grid | R2 | R2 High | R2 High | O | Optimization | 1 | 1 | consistent |
+| 24 | Cp | Curriculum | poisoning | poisoning_grid | R2 | R2 High | R2 High | O | Optimization | 1 | 1 | consistent |
+| 25 | Cl | Clean-label BD | poisoning | poisoning_grid | R1 | R1 Extreme | R1 Extreme | B | Backdoor / Trigger | 0 | 3 | consistent |
+| 26 | Nl | NLP trigger | poisoning | poisoning_grid | R2 | R2 High | R2 High | B | Backdoor / Trigger | 1 | 3 | consistent |
+| 27 | Al | ALIE | poisoning | poisoning_grid | R2 | R2 High | R2 High | D | Distributed / Federated | 1 | 4 | consistent |
+| 28 | Gd | Glaze cloak | poisoning | poisoning_grid | R3 | R3 Moderate | R3 Moderate | N | Generative | 2 | 7 | consistent |
+| 29 | Dp | DPO poison | poisoning | poisoning_grid | R3 | R3 Moderate | R3 Moderate | P | Preference / RLHF | 2 | 8 | consistent |
+| 30 | Rp | Reward poison | poisoning | poisoning_grid | R3 | R3 Moderate | R3 Moderate | P | Preference / RLHF | 2 | 8 | consistent |
+| 31 | Lf | Random label flip | poisoning | poisoning_grid | R4 | R4 Low / Baseline | R4 Low / Baseline | M | Minimal / Structural | 3 | 0 | consistent |
+| 32 | Svm | SVM poison | poisoning | poisoning_grid | R4 | R4 Low / Baseline | R4 Low / Baseline | O | Optimization | 3 | 1 | consistent |
+| 33 | Ko | KNN poison | poisoning | poisoning_grid | R3 | R3 Moderate | R3 Moderate | M | Minimal / Structural | 2 | 0 | consistent |
+| 34 | Oo | Outlier inject | poisoning | poisoning_grid | R4 | R4 Low / Baseline | R4 Low / Baseline | M | Minimal / Structural | 3 | 0 | consistent |
+| 35 | RgN | Regression poison | poisoning | poisoning_grid | R4 | R4 Low / Baseline | R4 Low / Baseline | O | Optimization | 3 | 1 | consistent |
+| 36 | Ts | Time-series | poisoning | poisoning_grid | R3 | R3 Moderate | R3 Moderate | M | Minimal / Structural | 2 | 0 | consistent |
+| 37 | Cf | Collab filter | poisoning | poisoning_grid | R2 | R2 High | R2 High | M | Minimal / Structural | 1 | 0 | consistent |
+| 38 | Js | JSMA | evasion_analog | evasion_analog_panel | R3 | R3 Moderate | R3 Moderate | M | Minimal / Structural | 2 | 0 | consistent |
+| 39 | Sf | SparseFool | evasion_analog | evasion_analog_panel | R4 | R4 Low / Baseline | R4 Low / Baseline | M | Minimal / Structural | 3 | 0 | consistent |
+| 40 | Fg | FGSM | evasion_analog | evasion_analog_panel | R3 | R3 Moderate | R3 Moderate | G | Gradient | 2 | 2 | consistent |
+| 41 | Pg | PGD | evasion_analog | evasion_analog_panel | R2 | R2 High | R2 High | G | Gradient | 1 | 2 | consistent |
+| 42 | Df | DeepFool | evasion_analog | evasion_analog_panel | R3 | R3 Moderate | R3 Moderate | M | Minimal / Structural | 2 | 0 | consistent |
+| 43 | Cw | Carlini-Wagner | evasion_analog | evasion_analog_panel | R2 | R2 High | R2 High | O | Optimization | 1 | 1 | consistent |
+| 44 | Ead | Elastic Net | evasion_analog | evasion_analog_panel | R2 | R2 High | R2 High | O | Optimization | 1 | 1 | consistent |
+| 45 | Zo | ZOO | evasion_analog | evasion_analog_panel | R3 | R3 Moderate | R3 Moderate | O | Optimization | 2 | 1 | consistent |
+| 46 | Bd | Boundary | evasion_analog | evasion_analog_panel | R3 | R3 Moderate | R3 Moderate | O | Optimization | 2 | 1 | consistent |
+| 47 | Op | One-Pixel | evasion_analog | evasion_analog_panel | R4 | R4 Low / Baseline | R4 Low / Baseline | M | Minimal / Structural | 3 | 0 | consistent |
+| 48 | Ap | Adv. patch | evasion_analog | evasion_analog_panel | R2 | R2 High | R2 High | U | Universal / Transfer | 1 | 3 | consistent |
+| 49 | Uap | Universal pert. | evasion_analog | evasion_analog_panel | R2 | R2 High | R2 High | U | Universal / Transfer | 1 | 3 | consistent |
+| 50 | Eot | EOT | evasion_analog | evasion_analog_panel | R2 | R2 High | R2 High | U | Universal / Transfer | 1 | 3 | consistent |
+| 51 | St | Surrogate transfer | evasion_analog | evasion_analog_panel | R2 | R2 High | R2 High | U | Universal / Transfer | 1 | 3 | consistent |

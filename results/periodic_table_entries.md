@@ -1,55 +1,55 @@
-# Taxonomy Matrix Entries
+# Risk Matrix Entries
 
-| number | symbol | technique | risk | risk_label | mechanism | mechanism_name | stage | section | surface_row | surface_label | taxonomy_family | taxonomy_family_name | family_column | slot |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Ss | Split-view web | R1 | R1 highest | S | Supply Chain | Poison | poisoning | SRC | Source / Web / Retrieval | SUP | Supply-chain poisoning | 10 | 0 |
-| 2 | Sd | Single-doc RAG | R1 | R1 highest | R | Retrieval / RAG | Poison | poisoning | SRC | Source / Web / Retrieval | RAG | Retrieval / RAG poisoning | 9 | 0 |
-| 3 | Fr | Frontrun web | R1 | R1 highest | S | Supply Chain | Poison | poisoning | SRC | Source / Web / Retrieval | SUP | Supply-chain poisoning | 10 | 1 |
-| 4 | Wa | WaNet | R1 | R1 highest | B | Backdoor / Trigger | Poison | poisoning | TRAIN | Training-Data Poisoning | BD | Backdoor / trigger poisoning | 3 | 0 |
-| 5 | Rg | RAG poison | R1 | R1 highest | R | Retrieval / RAG | Poison | poisoning | SRC | Source / Web / Retrieval | RAG | Retrieval / RAG poisoning | 9 | 1 |
-| 6 | Ns | Nightshade | R1 | R1 highest | N | Generative | Poison | poisoning | ALIGN | Generative / Alignment / Supply | GEN | Generative / synthetic-data poisoning | 7 | 0 |
-| 7 | Fl | Fed replace | R1 | R1 highest | D | Distributed / Federated | Poison | poisoning | MODEL | Model-Update / Federated | FED | Federated / distributed poisoning | 6 | 0 |
-| 8 | Db | DBA | R1 | R1 highest | D | Distributed / Federated | Poison | poisoning | MODEL | Model-Update / Federated | FED | Federated / distributed poisoning | 6 | 1 |
-| 9 | Sp | Subpopulation | R2 | R2 high | M | Minimal / Structural | Poison | poisoning | TRAIN | Training-Data Poisoning | INF | Influence / data-selection poisoning | 5 | 0 |
-| 10 | Wb | Witches Brew | R2 | R2 high | G | Gradient | Poison | poisoning | TRAIN | Training-Data Poisoning | GRD | Gradient / model-update poisoning | 4 | 0 |
-| 11 | Bn | BadNets | R2 | R2 high | B | Backdoor / Trigger | Poison | poisoning | TRAIN | Training-Data Poisoning | BD | Backdoor / trigger poisoning | 3 | 1 |
-| 12 | Hb | Hidden backdoor | R2 | R2 high | B | Backdoor / Trigger | Poison | poisoning | TRAIN | Training-Data Poisoning | BD | Backdoor / trigger poisoning | 3 | 2 |
-| 13 | Sa | Sleeper agent | R1 | R1 highest | B | Backdoor / Trigger | Poison | poisoning | TRAIN | Training-Data Poisoning | BD | Backdoor / trigger poisoning | 3 | 3 |
-| 14 | Bv | Best-of-Venom pref. | R2 | R2 high | P | Preference / RLHF | Poison | poisoning | ALIGN | Generative / Alignment / Supply | PREF | Preference / RLHF poisoning | 8 | 0 |
-| 15 | Rl | RLHF backdoor | R2 | R2 high | P | Preference / RLHF | Poison | poisoning | ALIGN | Generative / Alignment / Supply | PREF | Preference / RLHF poisoning | 8 | 1 |
-| 16 | Td | TrojDiff | R2 | R2 high | N | Generative | Poison | poisoning | ALIGN | Generative / Alignment / Supply | GEN | Generative / synthetic-data poisoning | 7 | 1 |
-| 17 | Ip | Input-aware BD | R2 | R2 high | B | Backdoor / Trigger | Poison | poisoning | TRAIN | Training-Data Poisoning | DYN | Dynamic / adaptive poisoning | 11 | 0 |
-| 18 | Gg | Gradient RAG | R2 | R2 high | R | Retrieval / RAG | Poison | poisoning | SRC | Source / Web / Retrieval | RAG | Retrieval / RAG poisoning | 9 | 2 |
-| 19 | Tf | Target label flip | R3 | R3 moderate | M | Minimal / Structural | Poison | poisoning | TRAIN | Training-Data Poisoning | LBL | Label manipulation | 0 | 0 |
-| 20 | Fc | Feature collision | R1 | R1 highest | O | Optimization | Poison | poisoning | TRAIN | Training-Data Poisoning | CL | Clean-label poisoning | 2 | 0 |
-| 21 | Bp | Bullseye poly | R2 | R2 high | O | Optimization | Poison | poisoning | TRAIN | Training-Data Poisoning | CL | Clean-label poisoning | 2 | 1 |
-| 22 | If | Influence | R2 | R2 high | O | Optimization | Poison | poisoning | TRAIN | Training-Data Poisoning | INF | Influence / data-selection poisoning | 5 | 1 |
-| 23 | Hp | Hessian | R2 | R2 high | O | Optimization | Poison | poisoning | TRAIN | Training-Data Poisoning | INF | Influence / data-selection poisoning | 5 | 2 |
-| 24 | Cp | Curriculum | R2 | R2 high | O | Optimization | Poison | poisoning | TRAIN | Training-Data Poisoning | INF | Influence / data-selection poisoning | 5 | 3 |
-| 25 | Cl | Clean-label BD | R1 | R1 highest | B | Backdoor / Trigger | Poison | poisoning | TRAIN | Training-Data Poisoning | CL | Clean-label poisoning | 2 | 2 |
-| 26 | Nl | NLP trigger | R2 | R2 high | B | Backdoor / Trigger | Poison | poisoning | TRAIN | Training-Data Poisoning | BD | Backdoor / trigger poisoning | 3 | 4 |
-| 27 | Al | ALIE | R2 | R2 high | D | Distributed / Federated | Poison | poisoning | MODEL | Model-Update / Federated | GRD | Gradient / model-update poisoning | 4 | 0 |
-| 28 | Gd | Glaze cloak | R3 | R3 moderate | N | Generative | Defense | poisoning | BASE | Classic Baselines / Defense | GEN | Generative / synthetic-data poisoning | 7 | 0 |
-| 29 | Dp | DPO poison | R3 | R3 moderate | P | Preference / RLHF | Poison | poisoning | ALIGN | Generative / Alignment / Supply | PREF | Preference / RLHF poisoning | 8 | 2 |
-| 30 | Rp | Reward poison | R3 | R3 moderate | P | Preference / RLHF | Poison | poisoning | ALIGN | Generative / Alignment / Supply | PREF | Preference / RLHF poisoning | 8 | 3 |
-| 31 | Lf | Random label flip | R4 | R4 baseline | M | Minimal / Structural | Poison | poisoning | BASE | Classic Baselines / Defense | LBL | Label manipulation | 0 | 0 |
-| 32 | Svm | SVM poison | R4 | R4 baseline | O | Optimization | Poison | poisoning | BASE | Classic Baselines / Defense | FEAT | Feature / input manipulation | 1 | 0 |
-| 33 | Ko | KNN poison | R3 | R3 moderate | M | Minimal / Structural | Poison | poisoning | BASE | Classic Baselines / Defense | FEAT | Feature / input manipulation | 1 | 1 |
-| 34 | Oo | Outlier inject | R4 | R4 baseline | M | Minimal / Structural | Poison | poisoning | BASE | Classic Baselines / Defense | FEAT | Feature / input manipulation | 1 | 2 |
-| 35 | RgN | Regression poison | R4 | R4 baseline | O | Optimization | Poison | poisoning | BASE | Classic Baselines / Defense | FEAT | Feature / input manipulation | 1 | 3 |
-| 36 | Ts | Time-series | R3 | R3 moderate | M | Minimal / Structural | Poison | poisoning | TRAIN | Training-Data Poisoning | FEAT | Feature / input manipulation | 1 | 0 |
-| 37 | Cf | Collab filter | R2 | R2 high | M | Minimal / Structural | Poison | poisoning | TRAIN | Training-Data Poisoning | FEAT | Feature / input manipulation | 1 | 1 |
-| 38 | Js | JSMA | R3 | R3 moderate | M | Minimal / Structural | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_MIN | Sparse / minimal evasion | 0 | 0 |
-| 39 | Sf | SparseFool | R4 | R4 baseline | M | Minimal / Structural | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_MIN | Sparse / minimal evasion | 0 | 1 |
-| 40 | Fg | FGSM | R3 | R3 moderate | G | Gradient | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_GRD | Gradient evasion | 2 | 0 |
-| 41 | Pg | PGD | R2 | R2 high | G | Gradient | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_GRD | Gradient evasion | 2 | 1 |
-| 42 | Df | DeepFool | R3 | R3 moderate | M | Minimal / Structural | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_MIN | Sparse / minimal evasion | 0 | 2 |
-| 43 | Cw | Carlini-Wagner | R2 | R2 high | O | Optimization | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_OPT | Optimization / black-box evasion | 1 | 0 |
-| 44 | Ead | Elastic Net | R2 | R2 high | O | Optimization | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_OPT | Optimization / black-box evasion | 1 | 1 |
-| 45 | Zo | ZOO | R3 | R3 moderate | O | Optimization | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_OPT | Optimization / black-box evasion | 1 | 2 |
-| 46 | Bd | Boundary | R3 | R3 moderate | O | Optimization | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_OPT | Optimization / black-box evasion | 1 | 3 |
-| 47 | Op | One-Pixel | R4 | R4 baseline | M | Minimal / Structural | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_MIN | Sparse / minimal evasion | 0 | 3 |
-| 48 | Ap | Adv. patch | R2 | R2 high | U | Universal / Transfer | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_XFER | Universal / transfer evasion | 3 | 0 |
-| 49 | Uap | Universal pert. | R2 | R2 high | U | Universal / Transfer | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_XFER | Universal / transfer evasion | 3 | 1 |
-| 50 | Eot | EOT | R2 | R2 high | U | Universal / Transfer | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_XFER | Universal / transfer evasion | 3 | 2 |
-| 51 | St | Surrogate transfer | R2 | R2 high | U | Universal / Transfer | Evasion | evasion_analog | EVA | Related Evasion / Transfer | EV_XFER | Universal / transfer evasion | 3 | 3 |
+| number | symbol | technique | risk | risk_label | mechanism | mechanism_name | stage | section | risk_row | risk_row_label | mechanism_column | slot |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Ss | Split-view web | R1 | R1 Extreme | S | Supply Chain | Poison | poisoning | 0 | R1 Extreme | 5 | 0 |
+| 2 | Sd | Single-doc RAG | R1 | R1 Extreme | R | Retrieval / RAG | Poison | poisoning | 0 | R1 Extreme | 6 | 0 |
+| 3 | Fr | Frontrun web | R1 | R1 Extreme | S | Supply Chain | Poison | poisoning | 0 | R1 Extreme | 5 | 1 |
+| 4 | Wa | WaNet | R1 | R1 Extreme | B | Backdoor / Trigger | Poison | poisoning | 0 | R1 Extreme | 3 | 0 |
+| 5 | Rg | RAG poison | R1 | R1 Extreme | R | Retrieval / RAG | Poison | poisoning | 0 | R1 Extreme | 6 | 1 |
+| 6 | Ns | Nightshade | R1 | R1 Extreme | N | Generative | Poison | poisoning | 0 | R1 Extreme | 7 | 0 |
+| 7 | Fl | Fed replace | R1 | R1 Extreme | D | Distributed / Federated | Poison | poisoning | 0 | R1 Extreme | 4 | 0 |
+| 8 | Db | DBA | R1 | R1 Extreme | D | Distributed / Federated | Poison | poisoning | 0 | R1 Extreme | 4 | 1 |
+| 9 | Sp | Subpopulation | R2 | R2 High | M | Minimal / Structural | Poison | poisoning | 1 | R2 High | 0 | 0 |
+| 10 | Wb | Witches Brew | R2 | R2 High | G | Gradient | Poison | poisoning | 1 | R2 High | 2 | 0 |
+| 11 | Bn | BadNets | R2 | R2 High | B | Backdoor / Trigger | Poison | poisoning | 1 | R2 High | 3 | 0 |
+| 12 | Hb | Hidden backdoor | R2 | R2 High | B | Backdoor / Trigger | Poison | poisoning | 1 | R2 High | 3 | 1 |
+| 13 | Sa | Sleeper agent | R1 | R1 Extreme | B | Backdoor / Trigger | Poison | poisoning | 0 | R1 Extreme | 3 | 1 |
+| 14 | Bv | Best-of-Venom pref. | R2 | R2 High | P | Preference / RLHF | Poison | poisoning | 1 | R2 High | 8 | 0 |
+| 15 | Rl | RLHF backdoor | R2 | R2 High | P | Preference / RLHF | Poison | poisoning | 1 | R2 High | 8 | 1 |
+| 16 | Td | TrojDiff | R2 | R2 High | N | Generative | Poison | poisoning | 1 | R2 High | 7 | 0 |
+| 17 | Ip | Input-aware BD | R2 | R2 High | B | Backdoor / Trigger | Poison | poisoning | 1 | R2 High | 3 | 2 |
+| 18 | Gg | Gradient RAG | R2 | R2 High | R | Retrieval / RAG | Poison | poisoning | 1 | R2 High | 6 | 0 |
+| 19 | Tf | Target label flip | R3 | R3 Moderate | M | Minimal / Structural | Poison | poisoning | 2 | R3 Moderate | 0 | 0 |
+| 20 | Fc | Feature collision | R1 | R1 Extreme | O | Optimization | Poison | poisoning | 0 | R1 Extreme | 1 | 0 |
+| 21 | Bp | Bullseye poly | R2 | R2 High | O | Optimization | Poison | poisoning | 1 | R2 High | 1 | 0 |
+| 22 | If | Influence | R2 | R2 High | O | Optimization | Poison | poisoning | 1 | R2 High | 1 | 1 |
+| 23 | Hp | Hessian | R2 | R2 High | O | Optimization | Poison | poisoning | 1 | R2 High | 1 | 2 |
+| 24 | Cp | Curriculum | R2 | R2 High | O | Optimization | Poison | poisoning | 1 | R2 High | 1 | 3 |
+| 25 | Cl | Clean-label BD | R1 | R1 Extreme | B | Backdoor / Trigger | Poison | poisoning | 0 | R1 Extreme | 3 | 2 |
+| 26 | Nl | NLP trigger | R2 | R2 High | B | Backdoor / Trigger | Poison | poisoning | 1 | R2 High | 3 | 3 |
+| 27 | Al | ALIE | R2 | R2 High | D | Distributed / Federated | Poison | poisoning | 1 | R2 High | 4 | 0 |
+| 28 | Gd | Glaze cloak | R3 | R3 Moderate | N | Generative | Defense | poisoning | 2 | R3 Moderate | 7 | 0 |
+| 29 | Dp | DPO poison | R3 | R3 Moderate | P | Preference / RLHF | Poison | poisoning | 2 | R3 Moderate | 8 | 0 |
+| 30 | Rp | Reward poison | R3 | R3 Moderate | P | Preference / RLHF | Poison | poisoning | 2 | R3 Moderate | 8 | 1 |
+| 31 | Lf | Random label flip | R4 | R4 Low / Baseline | M | Minimal / Structural | Poison | poisoning | 3 | R4 Low / Baseline | 0 | 0 |
+| 32 | Svm | SVM poison | R4 | R4 Low / Baseline | O | Optimization | Poison | poisoning | 3 | R4 Low / Baseline | 1 | 0 |
+| 33 | Ko | KNN poison | R3 | R3 Moderate | M | Minimal / Structural | Poison | poisoning | 2 | R3 Moderate | 0 | 1 |
+| 34 | Oo | Outlier inject | R4 | R4 Low / Baseline | M | Minimal / Structural | Poison | poisoning | 3 | R4 Low / Baseline | 0 | 1 |
+| 35 | RgN | Regression poison | R4 | R4 Low / Baseline | O | Optimization | Poison | poisoning | 3 | R4 Low / Baseline | 1 | 1 |
+| 36 | Ts | Time-series | R3 | R3 Moderate | M | Minimal / Structural | Poison | poisoning | 2 | R3 Moderate | 0 | 2 |
+| 37 | Cf | Collab filter | R2 | R2 High | M | Minimal / Structural | Poison | poisoning | 1 | R2 High | 0 | 1 |
+| 38 | Js | JSMA | R3 | R3 Moderate | M | Minimal / Structural | Evasion | evasion_analog | 2 | R3 Moderate | 0 | 0 |
+| 39 | Sf | SparseFool | R4 | R4 Low / Baseline | M | Minimal / Structural | Evasion | evasion_analog | 3 | R4 Low / Baseline | 0 | 0 |
+| 40 | Fg | FGSM | R3 | R3 Moderate | G | Gradient | Evasion | evasion_analog | 2 | R3 Moderate | 2 | 0 |
+| 41 | Pg | PGD | R2 | R2 High | G | Gradient | Evasion | evasion_analog | 1 | R2 High | 2 | 0 |
+| 42 | Df | DeepFool | R3 | R3 Moderate | M | Minimal / Structural | Evasion | evasion_analog | 2 | R3 Moderate | 0 | 1 |
+| 43 | Cw | Carlini-Wagner | R2 | R2 High | O | Optimization | Evasion | evasion_analog | 1 | R2 High | 1 | 0 |
+| 44 | Ead | Elastic Net | R2 | R2 High | O | Optimization | Evasion | evasion_analog | 1 | R2 High | 1 | 1 |
+| 45 | Zo | ZOO | R3 | R3 Moderate | O | Optimization | Evasion | evasion_analog | 2 | R3 Moderate | 1 | 0 |
+| 46 | Bd | Boundary | R3 | R3 Moderate | O | Optimization | Evasion | evasion_analog | 2 | R3 Moderate | 1 | 1 |
+| 47 | Op | One-Pixel | R4 | R4 Low / Baseline | M | Minimal / Structural | Evasion | evasion_analog | 3 | R4 Low / Baseline | 0 | 1 |
+| 48 | Ap | Adv. patch | R2 | R2 High | U | Universal / Transfer | Evasion | evasion_analog | 1 | R2 High | 3 | 0 |
+| 49 | Uap | Universal pert. | R2 | R2 High | U | Universal / Transfer | Evasion | evasion_analog | 1 | R2 High | 3 | 1 |
+| 50 | Eot | EOT | R2 | R2 High | U | Universal / Transfer | Evasion | evasion_analog | 1 | R2 High | 3 | 2 |
+| 51 | St | Surrogate transfer | R2 | R2 High | U | Universal / Transfer | Evasion | evasion_analog | 1 | R2 High | 3 | 3 |
