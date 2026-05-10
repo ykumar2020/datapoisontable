@@ -77,28 +77,14 @@ Operational danger is scored as
 \begin{equation}
 \mathrm{DangerScore}=I\times S\times G\times C,
 \end{equation}
-where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is attacker cost-efficiency. Risk levels are R1: 400--625, R2: 200--399, R3: 100--199, and R4: below 100.
+where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is attacker cost-efficiency. Risk levels are R1: 400--625, R2: 200--399, R3: 100--199, and R4: below 100. Figure~\ref{fig:periodic} is the final periodic-table artifact. Each element-like cell contains an index, a short symbol, the attack family, and its risk/mechanism label; colors denote mechanism groups.
 
-\begin{table}[t]
+\begin{figure*}[t]
 \centering
-\caption{Implemented method coverage.}
-\label{tab:coverage}
-\small
-\begin{tabular}{p{0.37\columnwidth}p{0.14\columnwidth}p{0.33\columnwidth}}
-\toprule
-Family & Stage & Implemented examples \\
-\midrule
-Label and subgroup poisoning & Poison & Random flip, targeted flip, subpopulation poison \\
-Clean-label poisoning & Poison & Poison Frogs latent collision \\
-Gradient matching & Poison & Witches' Brew-style poison \\
-Backdoor poisoning & Poison & BadNets, clean-label patch, Sleeper-Agent-style trigger \\
-Gradient evasion & Evasion & FGSM, PGD \\
-Sparse or structural evasion & Evasion & JSMA, SparseFool-style boundary \\
-Optimization/black-box evasion & Evasion & EAD, ZOO, HopSkipJump-style search \\
-Universal evasion & Evasion & EOT adversarial patch \\
-\bottomrule
-\end{tabular}
-\end{table}
+\includegraphics[width=0.98\textwidth]{periodic_table_data_poisoning.png}
+\caption{Final chemical-table-style Periodic Table of Data Poisoning. The cell color denotes mechanism group: minimal/structural, optimization, gradient, universal/transfer, backdoor, distributed, supply-chain, retrieval, generative, or preference/RLHF.}
+\label{fig:periodic}
+\end{figure*}
 
 \section{Experimental Design}
 
@@ -179,13 +165,6 @@ HopSkipJump-style boundary & Evasion & R3 & 0.6667 & Conditional targeted ASR to
 \bottomrule
 \end{tabular}
 \end{table*}
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=0.95\textwidth]{fungi_reporting_dashboard.png}
-\caption{Reporting dashboard generated from the experiment outputs. It includes top attack success, clean accuracy versus attack effect, risk-level summaries, and evasion perturbation footprints.}
-\label{fig:dashboard}
-\end{figure*}
 
 \begin{table}[t]
 \centering

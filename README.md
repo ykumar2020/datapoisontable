@@ -88,11 +88,16 @@ The script writes:
 - `results/attack_summary_statistics.csv`
 - `results/attack_summary_statistics.json`
 - `results/attack_summary_statistics.md`
+- `results/periodic_table_entries.csv`
+- `results/periodic_table_entries.json`
+- `results/periodic_table_entries.md`
 - `figures/fungi_attack_comparison_bars.png`
 - `figures/fungi_attack_examples.png`
 - `figures/fungi_dataset_samples.png`
 - `figures/fungi_dataset_split.png`
 - `figures/fungi_reporting_dashboard.png`
 - `figures/attack_success_by_stage.png`
+- `figures/periodic_table_data_poisoning.png`
+- `figures/periodic_table_data_poisoning.svg`
 
 The fungi dataset and pretrained-weight cache are intentionally ignored by git.
