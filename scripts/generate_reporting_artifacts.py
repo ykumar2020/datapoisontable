@@ -90,17 +90,43 @@ PERIODIC_TABLE_ENTRIES = [
     {"n": 35, "symbol": "RgN", "name": "Regression poison", "risk": "R4", "mech": "O", "stage": "Poison", "row": 4, "col": 4},
     {"n": 36, "symbol": "Ts", "name": "Time-series", "risk": "R3", "mech": "M", "stage": "Poison", "row": 4, "col": 5},
     {"n": 37, "symbol": "Cf", "name": "Collab filter", "risk": "R2", "mech": "M", "stage": "Poison", "row": 4, "col": 6},
-    {"n": 38, "symbol": "Js", "name": "JSMA", "risk": "R3", "mech": "M", "stage": "Evasion", "row": 5, "col": 1},
-    {"n": 39, "symbol": "Sf", "name": "SparseFool", "risk": "R4", "mech": "M", "stage": "Evasion", "row": 5, "col": 2},
-    {"n": 40, "symbol": "Fg", "name": "FGSM", "risk": "R3", "mech": "G", "stage": "Evasion", "row": 5, "col": 3},
-    {"n": 41, "symbol": "Pg", "name": "PGD", "risk": "R2", "mech": "G", "stage": "Evasion", "row": 5, "col": 4},
-    {"n": 42, "symbol": "Ead", "name": "Elastic Net", "risk": "R2", "mech": "O", "stage": "Evasion", "row": 5, "col": 5},
-    {"n": 43, "symbol": "Zo", "name": "ZOO", "risk": "R3", "mech": "O", "stage": "Evasion", "row": 5, "col": 6},
-    {"n": 44, "symbol": "Hs", "name": "HopSkipJump", "risk": "R3", "mech": "O", "stage": "Evasion", "row": 5, "col": 7},
-    {"n": 45, "symbol": "Ap", "name": "Adv. patch", "risk": "R2", "mech": "U", "stage": "Evasion", "row": 5, "col": 8},
-    {"n": 46, "symbol": "Uap", "name": "Universal pert.", "risk": "R2", "mech": "U", "stage": "Evasion", "row": 5, "col": 9},
-    {"n": 47, "symbol": "Eot", "name": "EOT", "risk": "R2", "mech": "U", "stage": "Evasion", "row": 5, "col": 10},
-    {"n": 48, "symbol": "St", "name": "Surrogate transfer", "risk": "R2", "mech": "U", "stage": "Evasion", "row": 5, "col": 11},
+    {"n": 38, "symbol": "Js", "name": "JSMA", "risk": "R3", "mech": "M", "stage": "Evasion", "row": 5, "col": 0},
+    {"n": 39, "symbol": "Sf", "name": "SparseFool", "risk": "R4", "mech": "M", "stage": "Evasion", "row": 5, "col": 1},
+    {"n": 40, "symbol": "Fg", "name": "FGSM", "risk": "R3", "mech": "G", "stage": "Evasion", "row": 5, "col": 2},
+    {"n": 41, "symbol": "Pg", "name": "PGD", "risk": "R2", "mech": "G", "stage": "Evasion", "row": 5, "col": 3},
+    {"n": 42, "symbol": "Df", "name": "DeepFool", "risk": "R3", "mech": "M", "stage": "Evasion", "row": 5, "col": 4},
+    {"n": 43, "symbol": "Cw", "name": "Carlini-Wagner", "risk": "R2", "mech": "O", "stage": "Evasion", "row": 5, "col": 5},
+    {"n": 44, "symbol": "Ead", "name": "Elastic Net", "risk": "R2", "mech": "O", "stage": "Evasion", "row": 5, "col": 6},
+    {"n": 45, "symbol": "Zo", "name": "ZOO", "risk": "R3", "mech": "O", "stage": "Evasion", "row": 5, "col": 7},
+    {"n": 46, "symbol": "Bd", "name": "Boundary", "risk": "R3", "mech": "O", "stage": "Evasion", "row": 5, "col": 8},
+    {"n": 47, "symbol": "Op", "name": "One-Pixel", "risk": "R4", "mech": "M", "stage": "Evasion", "row": 5, "col": 9},
+    {"n": 48, "symbol": "Ap", "name": "Adv. patch", "risk": "R2", "mech": "U", "stage": "Evasion", "row": 5, "col": 10},
+    {"n": 49, "symbol": "Uap", "name": "Universal pert.", "risk": "R2", "mech": "U", "stage": "Evasion", "row": 5, "col": 11},
+    {"n": 50, "symbol": "Eot", "name": "EOT", "risk": "R2", "mech": "U", "stage": "Evasion", "row": 5, "col": 12},
+    {"n": 51, "symbol": "St", "name": "Surrogate transfer", "risk": "R2", "mech": "U", "stage": "Evasion", "row": 5, "col": 13},
+]
+
+IMPLEMENTATION_COVERAGE_ROWS = [
+    {"requirement_group": "Poster-required", "method": "FGSM", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::fgsm", "result_row": "FGSM", "status": "implemented"},
+    {"requirement_group": "Poster-required", "method": "PGD", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::pgd", "result_row": "PGD", "status": "implemented"},
+    {"requirement_group": "Poster-required", "method": "DeepFool", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::deepfool_l2", "result_row": "DeepFool L2", "status": "implemented"},
+    {"requirement_group": "Poster-required", "method": "Carlini-Wagner", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::carlini_wagner_l2_target", "result_row": "Carlini-Wagner L2", "status": "implemented"},
+    {"requirement_group": "Poster-required", "method": "Boundary Attack", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::boundary_search", "result_row": "Boundary / HopSkipJump search", "status": "implemented"},
+    {"requirement_group": "Poster-required", "method": "One-Pixel Attack", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::one_pixel_de_target", "result_row": "One-Pixel DE", "status": "implemented"},
+    {"requirement_group": "Poster-required", "method": "Universal Adversarial Perturbation", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::universal_adversarial_perturbation", "result_row": "Universal adversarial perturbation", "status": "implemented"},
+    {"requirement_group": "Additional-10", "method": "Clean-Label Poisoning / Poison Frogs", "stage": "poisoning", "implemented_in": "scripts/fungi_attack_comparison.py::true_feature_collision", "result_row": "Clean-label Poison Frogs", "status": "implemented"},
+    {"requirement_group": "Additional-10", "method": "Sleeper Agent", "stage": "poisoning", "implemented_in": "scripts/fungi_attack_comparison.py::sleeper_agent_poison", "result_row": "Sleeper Agent-style backdoor", "status": "implemented"},
+    {"requirement_group": "Additional-10", "method": "Adversarial Patch", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::adversarial_patch_eot", "result_row": "Adversarial patch", "status": "implemented"},
+    {"requirement_group": "Additional-10", "method": "Witches' Brew / Gradient Matching", "stage": "poisoning", "implemented_in": "scripts/fungi_attack_comparison.py::gradient_matching_poison", "result_row": "Witches' Brew gradient match", "status": "implemented"},
+    {"requirement_group": "Additional-10", "method": "JSMA", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::vectorized_jsma_saliency", "result_row": "JSMA saliency", "status": "implemented"},
+    {"requirement_group": "Additional-10", "method": "ZOO", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::zoo_target", "result_row": "ZOO finite difference", "status": "implemented"},
+    {"requirement_group": "Additional-10", "method": "SparseFool", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::sparse_boundary", "result_row": "SparseFool-style boundary", "status": "implemented"},
+    {"requirement_group": "Additional-10", "method": "Elastic Net EAD", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::ead_target", "result_row": "Elastic Net EAD", "status": "implemented"},
+    {"requirement_group": "Additional-10", "method": "Subpopulation Poisoning", "stage": "poisoning", "implemented_in": "scripts/fungi_attack_comparison.py::subpopulation_label_flip", "result_row": "Subpopulation label poison", "status": "implemented"},
+    {"requirement_group": "Additional-10", "method": "BadNets Patch Backdoor", "stage": "poisoning", "implemented_in": "scripts/fungi_attack_comparison.py::backdoor_dataset", "result_row": "BadNets patch backdoor", "status": "implemented"},
+    {"requirement_group": "Extra implemented", "method": "Random Label Flipping", "stage": "poisoning", "implemented_in": "scripts/fungi_attack_comparison.py::random_label_flip", "result_row": "Random label flip", "status": "implemented"},
+    {"requirement_group": "Extra implemented", "method": "Targeted Label Flipping", "stage": "poisoning", "implemented_in": "scripts/fungi_attack_comparison.py::targeted_label_flip", "result_row": "Targeted label flip", "status": "implemented"},
+    {"requirement_group": "Extra implemented", "method": "Clean-Label Patch Backdoor", "stage": "poisoning", "implemented_in": "scripts/fungi_attack_comparison.py::clean_label_backdoor_dataset", "result_row": "Clean-label patch backdoor", "status": "implemented"},
 ]
 
 
@@ -474,6 +500,10 @@ def main() -> None:
     write_json(RESULTS_DIR / "periodic_table_entries.json", periodic_rows)
     write_markdown(RESULTS_DIR / "periodic_table_entries.md", "Periodic Table Entries", periodic_rows)
 
+    write_csv(RESULTS_DIR / "implementation_coverage.csv", IMPLEMENTATION_COVERAGE_ROWS)
+    write_json(RESULTS_DIR / "implementation_coverage.json", IMPLEMENTATION_COVERAGE_ROWS)
+    write_markdown(RESULTS_DIR / "implementation_coverage.md", "Implementation Coverage", IMPLEMENTATION_COVERAGE_ROWS)
+
     save_fungi_sample_grid()
     save_dataset_split_chart(dataset_stats)
     save_attack_dashboard(fungi_rows)
@@ -483,6 +513,7 @@ def main() -> None:
     print(f"Wrote {RESULTS_DIR / 'fungi_dataset_statistics.md'}")
     print(f"Wrote {RESULTS_DIR / 'attack_summary_statistics.md'}")
     print(f"Wrote {RESULTS_DIR / 'periodic_table_entries.md'}")
+    print(f"Wrote {RESULTS_DIR / 'implementation_coverage.md'}")
     print(f"Wrote {FIGURES_DIR / 'fungi_dataset_samples.png'}")
     print(f"Wrote {FIGURES_DIR / 'fungi_reporting_dashboard.png'}")
     print(f"Wrote {FIGURES_DIR / 'periodic_table_data_poisoning.png'}")

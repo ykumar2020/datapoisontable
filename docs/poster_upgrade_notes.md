@@ -64,9 +64,9 @@ The runnable script in `scripts/mnist_poisoning_experiment.py` uses the real MNI
 
 This gives a visually clear conference presentation: the audience can see the handwritten digits, see the trigger, and compare clean accuracy against targeted failure behavior.
 
-The expanded script `scripts/mnist_attack_comparison.py` implements a larger comparison suite: random label flipping, targeted label flipping, subpopulation poisoning, BadNets patch backdoor, clean-label patch backdoor, prototype feature collision, FGSM, PGD, EAD, JSMA, SparseFool-style sparse boundary attack, adversarial patch, ZOO finite-difference attack, and a HopSkipJump-style boundary search. Its summary table is written to `results/mnist_attack_comparison.md`.
+The expanded script `scripts/mnist_attack_comparison.py` implements a larger comparison suite for the handwritten-digit demo. The fungi script is now the main conference experiment: `scripts/fungi_attack_comparison.py` implements all original poster evasion methods (FGSM, PGD, DeepFool, Carlini-Wagner, Boundary, One-Pixel, and UAP) plus ten additional shared methods: Poison Frogs, Sleeper-Agent-style backdoor, Adversarial Patch, Witches' Brew-style gradient matching, JSMA, ZOO, SparseFool, EAD, subpopulation poisoning, and BadNets. The implementation audit is generated in `results/implementation_coverage.md`.
 
-Important implementation audit: the current code should not claim full paper-grade implementations of Poison Frogs, Sleeper Agent, or Witches' Brew. Those are summarized in the LaTeX theory and catalog, but the executable MNIST code currently has only a prototype feature-collision poison, a clean-label patch backdoor, and no gradient-matching poisoning implementation. The LaTeX report includes this audit explicitly.
+Important implementation audit: the code reproduces the core experimental mechanisms in a local fungi setting. It should not claim industrial-scale transferability, physical-world patch certification, or long-horizon LLM sleeper-agent persistence.
 
 ## Suggested Future Work
 

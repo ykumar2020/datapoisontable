@@ -12,28 +12,28 @@
     "dataset": "fungi",
     "stage": "evasion",
     "mechanism": "M",
-    "methods": 2,
+    "methods": 4,
     "clean_accuracy_mean": 0.6667,
-    "attack_success_mean": 0.5,
-    "attack_success_max": 0.9375
+    "attack_success_mean": 0.5156,
+    "attack_success_max": 1.0
   },
   {
     "dataset": "fungi",
     "stage": "evasion",
     "mechanism": "O",
-    "methods": 3,
+    "methods": 4,
     "clean_accuracy_mean": 0.6667,
-    "attack_success_mean": 0.2804,
-    "attack_success_max": 0.6875
+    "attack_success_mean": 0.396,
+    "attack_success_max": 0.7429
   },
   {
     "dataset": "fungi",
     "stage": "evasion",
     "mechanism": "U",
-    "methods": 1,
+    "methods": 2,
     "clean_accuracy_mean": 0.6667,
-    "attack_success_mean": 0.2857,
-    "attack_success_max": 0.2857
+    "attack_success_mean": 0.6429,
+    "attack_success_max": 1.0
   },
   {
     "dataset": "fungi",

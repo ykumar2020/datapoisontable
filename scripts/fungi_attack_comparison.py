@@ -618,6 +618,62 @@ def pgd(model: nn.Module, x: torch.Tensor, y: torch.Tensor, eps: float, step: fl
     return adv
 
 
+def deepfool_l2(model: nn.Module, x: torch.Tensor, max_iter: int, overshoot: float = 0.02) -> torch.Tensor:
+    """Vectorized DeepFool-style L2 boundary linearization for multiclass logits."""
+    model.eval()
+    adv = x.clone().detach()
+    original = predict(model, x)
+    for _ in range(max_iter):
+        adv_var = adv.clone().detach().requires_grad_(True)
+        logits = model(adv_var)
+        preds = logits.argmax(dim=1)
+        active = preds == original
+        if not active.any():
+            break
+        ranked = torch.argsort(logits, dim=1, descending=True)
+        rival = torch.where(ranked[:, 0] == preds, ranked[:, 1], ranked[:, 0])
+        margin = logits[torch.arange(len(adv)), preds] - logits[torch.arange(len(adv)), rival]
+        grad = torch.autograd.grad(margin[active].sum(), adv_var)[0]
+        with torch.no_grad():
+            active_grad = grad[active]
+            denom = active_grad.flatten(1).pow(2).sum(dim=1).view(-1, 1, 1, 1).clamp_min(1e-8)
+            distance = margin[active].abs().view(-1, 1, 1, 1)
+            step = (1.0 + overshoot) * (distance + 1e-4) * active_grad / denom
+            adv[active] = torch.clamp(adv[active] - step, 0.0, 1.0)
+    return adv.detach()
+
+
+def carlini_wagner_l2_target(
+    model: nn.Module,
+    x: torch.Tensor,
+    target: int,
+    c: float,
+    lr: float,
+    iters: int,
+    kappa: float = 0.0,
+) -> torch.Tensor:
+    """Targeted CW-L2 optimization with box projection for the fungi images."""
+    model.eval()
+    delta = torch.zeros_like(x, requires_grad=True)
+    optimizer = torch.optim.Adam([delta], lr=lr)
+    target_idx = torch.full((len(x),), target, dtype=torch.long)
+    for _ in range(iters):
+        adv = torch.clamp(x + delta, 0.0, 1.0)
+        logits = model(adv)
+        target_logit = logits[torch.arange(len(x)), target_idx]
+        other_logits = logits.clone()
+        other_logits[torch.arange(len(x)), target_idx] = -1e9
+        max_other = other_logits.max(dim=1).values
+        cw_loss = torch.clamp(max_other - target_logit + kappa, min=0.0).mean()
+        l2_loss = (adv - x).flatten(1).pow(2).sum(dim=1).mean()
+        optimizer.zero_grad(set_to_none=True)
+        (l2_loss + c * cw_loss).backward()
+        optimizer.step()
+        with torch.no_grad():
+            delta.copy_(torch.clamp(x + delta, 0.0, 1.0) - x)
+    return torch.clamp(x + delta.detach(), 0.0, 1.0)
+
+
 def ead_target(
     model: nn.Module,
     x: torch.Tensor,
@@ -637,6 +693,38 @@ def ead_target(
         delta = torch.clamp(delta, -eps, eps)
         adv = torch.clamp(x + delta, 0.0, 1.0).detach()
     return adv
+
+
+def universal_adversarial_perturbation(
+    model: nn.Module,
+    x: torch.Tensor,
+    y: torch.Tensor,
+    eps: float,
+    step: float,
+    iters: int,
+    batch_size: int,
+    seed: int,
+) -> torch.Tensor:
+    """Learn a single untargeted L-infinity universal perturbation on a source batch."""
+    rng = np.random.default_rng(seed)
+    model.eval()
+    delta = torch.zeros((1, *x.shape[1:]), requires_grad=True)
+    for _ in range(iters):
+        order = rng.permutation(len(x))
+        for start in range(0, len(order), batch_size):
+            idx = torch.tensor(order[start : start + batch_size], dtype=torch.long)
+            xb = x[idx]
+            yb = y[idx]
+            adv = torch.clamp(xb + delta, 0.0, 1.0)
+            loss = F.cross_entropy(model(adv), yb)
+            model.zero_grad(set_to_none=True)
+            if delta.grad is not None:
+                delta.grad.zero_()
+            loss.backward()
+            with torch.no_grad():
+                delta.add_(step * delta.grad.sign())
+                delta.clamp_(-eps, eps)
+    return delta.detach()
 
 
 def vectorized_jsma_saliency(model: nn.Module, x: torch.Tensor, target: int, max_features: int) -> torch.Tensor:
@@ -675,6 +763,72 @@ def vectorized_jsma_saliency(model: nn.Module, x: torch.Tensor, target: int, max
             adv[b_idx[update_mask], c[update_mask], r[update_mask], col[update_mask]] = target_val[update_mask]
             search_mask[b_idx[update_mask], c[update_mask], r[update_mask], col[update_mask]] = False
         adv = adv.detach()
+    return adv
+
+
+def one_pixel_de_target(
+    model: nn.Module,
+    x: torch.Tensor,
+    target: int,
+    pixels: int,
+    population: int,
+    generations: int,
+    mutation: float,
+    crossover: float,
+    seed: int,
+) -> torch.Tensor:
+    """One-Pixel targeted attack using differential evolution over pixel coordinates and values."""
+    rng = np.random.default_rng(seed)
+    model.eval()
+    adv = x.clone().detach()
+    channels, height, width = x.shape[1:]
+    dims = pixels * (2 + channels)
+
+    def clip_candidate(candidate: np.ndarray) -> np.ndarray:
+        out = candidate.copy()
+        for p in range(pixels):
+            offset = p * (2 + channels)
+            out[offset] = np.clip(out[offset], 0, height - 1)
+            out[offset + 1] = np.clip(out[offset + 1], 0, width - 1)
+            out[offset + 2 : offset + 2 + channels] = np.clip(out[offset + 2 : offset + 2 + channels], 0.0, 1.0)
+        return out
+
+    def make_batch(base: torch.Tensor, pop: np.ndarray) -> torch.Tensor:
+        batch = base.unsqueeze(0).repeat(len(pop), 1, 1, 1)
+        for row, candidate in enumerate(pop):
+            for p in range(pixels):
+                offset = p * (2 + channels)
+                rr = int(round(candidate[offset]))
+                cc = int(round(candidate[offset + 1]))
+                vals = torch.tensor(candidate[offset + 2 : offset + 2 + channels], dtype=base.dtype)
+                batch[row, :, rr, cc] = vals
+        return batch
+
+    for i in range(len(x)):
+        pop = np.zeros((population, dims), dtype=np.float32)
+        for p in range(pixels):
+            offset = p * (2 + channels)
+            pop[:, offset] = rng.uniform(0, height - 1, size=population)
+            pop[:, offset + 1] = rng.uniform(0, width - 1, size=population)
+            pop[:, offset + 2 : offset + 2 + channels] = rng.uniform(0, 1, size=(population, channels))
+        with torch.no_grad():
+            scores = F.softmax(model(make_batch(x[i], pop)), dim=1)[:, target].cpu().numpy()
+        for _ in range(generations):
+            trial = pop.copy()
+            for j in range(population):
+                candidates = [idx for idx in range(population) if idx != j]
+                a, b, c_idx = rng.choice(candidates, size=3, replace=False)
+                mutant = pop[a] + mutation * (pop[b] - pop[c_idx])
+                mask = rng.random(dims) < crossover
+                mask[int(rng.integers(0, dims))] = True
+                trial[j] = clip_candidate(np.where(mask, mutant, pop[j]))
+            with torch.no_grad():
+                trial_scores = F.softmax(model(make_batch(x[i], trial)), dim=1)[:, target].cpu().numpy()
+            replace = trial_scores > scores
+            pop[replace] = trial[replace]
+            scores[replace] = trial_scores[replace]
+        best = int(scores.argmax())
+        adv[i] = make_batch(x[i], pop[[best]])[0]
     return adv
 
 
@@ -1047,6 +1201,14 @@ def main() -> None:
     l0, linf, l2 = perturbation_stats(attack_x, adv)
     rows.append(metric_row("PGD", "evasion", "G", "R2", "0", len(train_ds), baseline_acc, "conditional_untargeted_misclassification", conditional_untargeted_success(baseline, attack_x, adv, attack_y), "Projected gradient ascent.", l0, linf, l2))
 
+    adv = deepfool_l2(baseline, attack_x, max_iter=18, overshoot=0.02)
+    l0, linf, l2 = perturbation_stats(attack_x, adv)
+    rows.append(metric_row("DeepFool L2", "evasion", "M", "R3", "0", len(train_ds), baseline_acc, "conditional_untargeted_misclassification", conditional_untargeted_success(baseline, attack_x, adv, attack_y), "Poster method: iterative local linearization of the nearest logit boundary.", l0, linf, l2))
+
+    adv = carlini_wagner_l2_target(baseline, attack_x, target, c=4.0, lr=0.025, iters=55, kappa=0.0)
+    l0, linf, l2 = perturbation_stats(attack_x, adv)
+    rows.append(metric_row("Carlini-Wagner L2", "evasion", "O", "R2", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, attack_x, adv, attack_y, target), "Poster method: targeted CW margin objective with L2 regularization.", l0, linf, l2))
+
     adv = ead_target(baseline, attack_x, target, eps=0.16, step=0.025, l1_weight=0.0015, l2_weight=0.01, iters=24)
     l0, linf, l2 = perturbation_stats(attack_x, adv)
     rows.append(metric_row("Elastic Net EAD", "evasion", "O", "R2", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, attack_x, adv, attack_y, target), "Targeted ISTA-style elastic-net update.", l0, linf, l2))
@@ -1057,24 +1219,35 @@ def main() -> None:
     l0, linf, l2 = perturbation_stats(small_x, adv)
     rows.append(metric_row("JSMA saliency", "evasion", "M", "R3", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, small_x, adv, small_y, target), "Vectorized sparse-feature saliency using input Jacobian.", l0, linf, l2))
 
+    adv = one_pixel_de_target(baseline, small_x, target, pixels=1, population=28, generations=16, mutation=0.55, crossover=0.75, seed=args.seed + 9)
+    l0, linf, l2 = perturbation_stats(small_x, adv)
+    rows.append(metric_row("One-Pixel DE", "evasion", "M", "R4", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, small_x, adv, small_y, target), "Poster method: differential evolution over one pixel coordinate and RGB value.", l0, linf, l2))
+
     adv = sparse_boundary(baseline, small_x, max_features=280)
     l0, linf, l2 = perturbation_stats(small_x, adv)
     rows.append(metric_row("SparseFool-style boundary", "evasion", "M", "R4", "0", len(train_ds), baseline_acc, "conditional_untargeted_misclassification", conditional_untargeted_success(baseline, small_x, adv, small_y), "Vectorized sparse local-boundary crossing approximation.", l0, linf, l2))
 
-    patch = adversarial_patch_eot(baseline, train_ds, source, target, args.adversarial_patch_size, iters=100, batch_size=min(24, len(train_ds)), seed=args.seed + 9)
+    source_train_idx = [i for i, label in enumerate(base_labels) if label == source][: min(96, len(train_ds))]
+    uap_train_x, uap_train_y = materialize_indices(train_ds, source_train_idx)
+    delta = universal_adversarial_perturbation(baseline, uap_train_x, uap_train_y, eps=0.08, step=0.015, iters=5, batch_size=24, seed=args.seed + 10)
+    adv = torch.clamp(attack_x + delta, 0.0, 1.0)
+    l0, linf, l2 = perturbation_stats(attack_x, adv)
+    rows.append(metric_row("Universal adversarial perturbation", "evasion", "U", "R2", "0", len(train_ds), baseline_acc, "conditional_untargeted_misclassification", conditional_untargeted_success(baseline, attack_x, adv, attack_y), "Poster method: one learned L-infinity perturbation shared by all source-class images.", l0, linf, l2))
+
+    patch = adversarial_patch_eot(baseline, train_ds, source, target, args.adversarial_patch_size, iters=100, batch_size=min(24, len(train_ds)), seed=args.seed + 12)
     patched = apply_patch(attack_x, patch, attack_x.shape[2] - args.adversarial_patch_size, attack_x.shape[3] - args.adversarial_patch_size)
     l0, linf, l2 = perturbation_stats(attack_x, patched)
     rows.append(metric_row("Adversarial patch", "evasion", "U", "R2", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, attack_x, patched, attack_y, target), "EOT-trained patch with random training locations; evaluated lower-right.", l0, linf, l2))
 
     zoo_x = attack_x[: min(args.zoo_samples, len(attack_x))]
     zoo_y = attack_y[: len(zoo_x)]
-    adv, queries = zoo_target(baseline, zoo_x, target, eps=0.16, step=0.04, iters=10, coords_per_iter=64, seed=args.seed + 10)
+    adv, queries = zoo_target(baseline, zoo_x, target, eps=0.16, step=0.04, iters=10, coords_per_iter=64, seed=args.seed + 11)
     l0, linf, l2 = perturbation_stats(zoo_x, adv)
     rows.append(metric_row("ZOO finite difference", "evasion", "O", "R3", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, zoo_x, adv, zoo_y, target), f"Batched black-box finite differences; {queries} model queries.", l0, linf, l2))
 
     adv = boundary_search(baseline, small_x, target_guides, target, steps=12)
     l0, linf, l2 = perturbation_stats(small_x, adv)
-    rows.append(metric_row("HopSkipJump-style boundary", "evasion", "O", "R3", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, small_x, adv, small_y, target), "Decision-only binary search to target-class guide images.", l0, linf, l2))
+    rows.append(metric_row("Boundary / HopSkipJump search", "evasion", "O", "R3", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, small_x, adv, small_y, target), "Poster Boundary method represented by decision-only binary search to target-class guide images.", l0, linf, l2))
 
     write_results(rows)
     save_bar_chart(rows)

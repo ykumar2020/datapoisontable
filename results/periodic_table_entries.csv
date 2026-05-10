@@ -36,14 +36,17 @@ number,symbol,technique,risk,mechanism,mechanism_name,stage,row,column
 35,RgN,Regression poison,R4,O,Optimization,Poison,4,4
 36,Ts,Time-series,R3,M,Minimal / Structural,Poison,4,5
 37,Cf,Collab filter,R2,M,Minimal / Structural,Poison,4,6
-38,Js,JSMA,R3,M,Minimal / Structural,Evasion,5,1
-39,Sf,SparseFool,R4,M,Minimal / Structural,Evasion,5,2
-40,Fg,FGSM,R3,G,Gradient,Evasion,5,3
-41,Pg,PGD,R2,G,Gradient,Evasion,5,4
-42,Ead,Elastic Net,R2,O,Optimization,Evasion,5,5
-43,Zo,ZOO,R3,O,Optimization,Evasion,5,6
-44,Hs,HopSkipJump,R3,O,Optimization,Evasion,5,7
-45,Ap,Adv. patch,R2,U,Universal / Transfer,Evasion,5,8
-46,Uap,Universal pert.,R2,U,Universal / Transfer,Evasion,5,9
-47,Eot,EOT,R2,U,Universal / Transfer,Evasion,5,10
-48,St,Surrogate transfer,R2,U,Universal / Transfer,Evasion,5,11
+38,Js,JSMA,R3,M,Minimal / Structural,Evasion,5,0
+39,Sf,SparseFool,R4,M,Minimal / Structural,Evasion,5,1
+40,Fg,FGSM,R3,G,Gradient,Evasion,5,2
+41,Pg,PGD,R2,G,Gradient,Evasion,5,3
+42,Df,DeepFool,R3,M,Minimal / Structural,Evasion,5,4
+43,Cw,Carlini-Wagner,R2,O,Optimization,Evasion,5,5
+44,Ead,Elastic Net,R2,O,Optimization,Evasion,5,6
+45,Zo,ZOO,R3,O,Optimization,Evasion,5,7
+46,Bd,Boundary,R3,O,Optimization,Evasion,5,8
+47,Op,One-Pixel,R4,M,Minimal / Structural,Evasion,5,9
+48,Ap,Adv. patch,R2,U,Universal / Transfer,Evasion,5,10
+49,Uap,Universal pert.,R2,U,Universal / Transfer,Evasion,5,11
+50,Eot,EOT,R2,U,Universal / Transfer,Evasion,5,12
+51,St,Surrogate transfer,R2,U,Universal / Transfer,Evasion,5,13

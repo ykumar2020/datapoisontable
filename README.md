@@ -15,8 +15,8 @@ The original poster framed several test-time adversarial examples as data poison
 - `docs/data_poisoning_theory.tex` - IEEE two-column conference-style LaTeX paper with abstract, introduction, related work, methodology, results, discussion, and conclusion.
 - `scripts/mnist_poisoning_experiment.py` - actual training-time poisoning implementations on real MNIST: random label flipping, targeted source-to-target label flipping, and a BadNets-style visible trigger backdoor.
 - `scripts/mnist_attack_comparison.py` - 14-method MNIST comparison suite covering poisoning, backdoors, and related evasion attacks.
-- `scripts/fungi_attack_comparison.py` - fungi dataset comparison using lazy PyTorch datasets, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, true latent-space clean-label Poison Frogs, gradient-matching poisoning, Sleeper-Agent-style backdoor, EOT adversarial patch, vectorized JSMA, batched ZOO, and other baseline attacks.
-- `scripts/generate_reporting_artifacts.py` - derived report tables and figures: fungi dataset statistics, sample image grid, dataset split chart, grouped attack statistics, reporting dashboard, and cross-dataset stage comparison.
+- `scripts/fungi_attack_comparison.py` - fungi dataset comparison using lazy PyTorch datasets, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, every original poster method (FGSM, PGD, DeepFool, Carlini-Wagner, Boundary, One-Pixel, UAP), and the additional shared methods including Poison Frogs, Sleeper-Agent-style backdoor, Witches' Brew-style gradient matching, Adversarial Patch, JSMA, ZOO, SparseFool, EAD, subpopulation poisoning, and BadNets.
+- `scripts/generate_reporting_artifacts.py` - derived report tables and figures: fungi dataset statistics, sample image grid, dataset split chart, grouped attack statistics, implementation coverage audit, reporting dashboard, and cross-dataset stage comparison.
 - `pptx_media/periodic_table_slide.jpg` - extracted image from the supplied PPTX for reference.
 
 ## Run The MNIST Experiment
@@ -91,6 +91,9 @@ The script writes:
 - `results/periodic_table_entries.csv`
 - `results/periodic_table_entries.json`
 - `results/periodic_table_entries.md`
+- `results/implementation_coverage.csv`
+- `results/implementation_coverage.json`
+- `results/implementation_coverage.md`
 - `results/citation_verification.csv`
 - `results/citation_verification.md`
 - `figures/fungi_attack_comparison_bars.png`

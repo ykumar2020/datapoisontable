@@ -13,9 +13,13 @@
 | Witches' Brew gradient match | poisoning | G | R2 | 40 appended | 0.6889 | poisonous_to_edible_confusion | 0.25 |  |  | Clean-label poisons optimized so classifier-parameter gradients align with a poisonous-to-edible target objective. |
 | FGSM | evasion | G | R3 | 0 | 0.6667 | conditional_untargeted_misclassification | 0.8571 | 76727.0 | 0.08 | Single-step gradient sign. |
 | PGD | evasion | G | R2 | 0 | 0.6667 | conditional_untargeted_misclassification | 1.0 | 76755.86 | 0.1 | Projected gradient ascent. |
+| DeepFool L2 | evasion | M | R3 | 0 | 0.6667 | conditional_untargeted_misclassification | 1.0 | 75912.62 | 0.0133 | Poster method: iterative local linearization of the nearest logit boundary. |
+| Carlini-Wagner L2 | evasion | O | R2 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.7429 | 76675.54 | 0.0769 | Poster method: targeted CW margin objective with L2 regularization. |
 | Elastic Net EAD | evasion | O | R2 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.0286 | 1304.94 | 0.0039 | Targeted ISTA-style elastic-net update. |
 | JSMA saliency | evasion | M | R3 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.9375 | 134.25 | 0.9539 | Vectorized sparse-feature saliency using input Jacobian. |
+| One-Pixel DE | evasion | M | R4 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.0625 | 3.0 | 0.757 | Poster method: differential evolution over one pixel coordinate and RGB value. |
 | SparseFool-style boundary | evasion | M | R4 | 0 | 0.6667 | conditional_untargeted_misclassification | 0.0625 | 41.81 | 0.889 | Vectorized sparse local-boundary crossing approximation. |
-| Adversarial patch | evasion | U | R2 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.2857 | 3071.34 | 0.9744 | EOT-trained patch with random training locations; evaluated lower-right. |
-| ZOO finite difference | evasion | O | R3 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.125 | 565.38 | 0.075 | Batched black-box finite differences; 9159 model queries. |
-| HopSkipJump-style boundary | evasion | O | R3 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.6875 | 76407.56 | 0.6702 | Decision-only binary search to target-class guide images. |
+| Universal adversarial perturbation | evasion | U | R2 | 0 | 0.6667 | conditional_untargeted_misclassification | 1.0 | 66187.95 | 0.08 | Poster method: one learned L-infinity perturbation shared by all source-class images. |
+| Adversarial patch | evasion | U | R2 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.2857 | 3071.4 | 0.9715 | EOT-trained patch with random training locations; evaluated lower-right. |
+| ZOO finite difference | evasion | O | R3 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.125 | 565.0 | 0.07 | Batched black-box finite differences; 9159 model queries. |
+| Boundary / HopSkipJump search | evasion | O | R3 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.6875 | 76407.56 | 0.6702 | Poster Boundary method represented by decision-only binary search to target-class guide images. |

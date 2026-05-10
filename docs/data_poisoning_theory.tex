@@ -38,7 +38,7 @@ juli@kean.edu}
 \maketitle
 
 \begin{abstract}
-Data poisoning attacks manipulate training, fine-tuning, retrieval, feedback, or model-supply-chain data so that a learned model behaves incorrectly after deployment. This paper presents a compact ``Periodic Table of Data Poisoning'' framework that separates training-time poisoning from test-time evasion, groups techniques by mechanism, and scores operational danger using impact, stealth, scalability, and cost-efficiency. The framework is supported by executable experiments on MNIST and a fungi image dataset. The fungi experiment uses lazy PyTorch data loading, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, latent-space clean-label poisoning, gradient-matching poisoning, backdoor attacks, and sparse or black-box evasion methods. Results show that aggregate clean accuracy is not enough: subpopulation poisoning, clean-label backdoors, and conditional evasion can create severe targeted failures even when ordinary validation metrics look acceptable.
+Data poisoning attacks manipulate training, fine-tuning, retrieval, feedback, or model-supply-chain data so that a learned model behaves incorrectly after deployment. This paper presents a compact ``Periodic Table of Data Poisoning'' framework that separates training-time poisoning from test-time evasion, groups techniques by mechanism, and scores operational danger using impact, stealth, scalability, and cost-efficiency. The framework is supported by executable experiments on MNIST and a fungi image dataset. The fungi experiment uses lazy PyTorch data loading, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, all original poster evasion methods, and ten additional poisoning or evasion methods shared during project development. Results show that aggregate clean accuracy is not enough: subpopulation poisoning, clean-label backdoors, and conditional evasion can create severe targeted failures even when ordinary validation metrics look acceptable.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -49,7 +49,7 @@ data poisoning, backdoor attacks, adversarial machine learning, fungi classifica
 
 Machine learning systems increasingly depend on data that is scraped, labeled, filtered, retrieved, fine-tuned, or reused across organizations. These data pipelines create an attack surface. A poisoning attacker does not need to break the model code; changing a small portion of the data can change the learned behavior. This project organizes that landscape into a risk-based periodic table for AI security presentations.
 
-The key correction is stage separation. Poisoning methods modify data before or during training, fine-tuning, retrieval, or alignment. Evasion methods such as FGSM, PGD, JSMA, ZOO, SparseFool, HopSkipJump, and Adversarial Patch modify inputs at inference time. They are related adversarial ML techniques, but they are not data poisoning unless the adversarial examples are fed back into training or adaptation.
+The key correction is stage separation. Poisoning methods modify data before or during training, fine-tuning, retrieval, or alignment. Evasion methods such as FGSM, PGD, DeepFool, Carlini-Wagner, Boundary, One-Pixel, UAP, JSMA, ZOO, SparseFool, HopSkipJump, and Adversarial Patch modify inputs at inference time. They are related adversarial ML techniques, but they are not data poisoning unless the adversarial examples are fed back into training or adaptation.
 
 This paper is organized around three research questions:
 \begin{itemize}
@@ -58,13 +58,13 @@ This paper is organized around three research questions:
     \item \textbf{RQ3:} What implementation and evaluation choices are necessary to avoid misleading results when moving from a simple benchmark to a realistic fungi image task?
 \end{itemize}
 
-The contributions are: (i) a mechanism-and-risk taxonomy for poisoning and related attacks; (ii) real implementations for more than ten methods; (iii) a transfer-learning fungi experiment that avoids in-memory dataset loading and weak from-scratch baselines; and (iv) reporting artifacts, tables, and graphs for conference presentation.
+The contributions are: (i) a mechanism-and-risk taxonomy for poisoning and related attacks; (ii) implementations for the original poster methods plus ten additional shared methods, audited in \texttt{results/implementation\_coverage.*}; (iii) a transfer-learning fungi experiment that avoids in-memory dataset loading and weak from-scratch baselines; and (iv) reporting artifacts, tables, and graphs for conference presentation.
 
 \section{Related Work}
 
 Classical poisoning was formalized for support vector machines and other learners by Biggio et al.~\cite{biggio2012} and Mei and Zhu~\cite{mei2015}. Backdoor poisoning became prominent with BadNets~\cite{badnets} and targeted backdoors~\cite{targetedbackdoor}. Clean-label attacks such as Poison Frogs~\cite{poisonfrogs} improve stealth by keeping labels correct, while Witches' Brew~\cite{witchesbrew} uses gradient matching to craft efficient poisons. Modern supply-chain and retrieval surfaces include web-scale dataset poisoning~\cite{webscale}, RAG corpus poisoning~\cite{poisonedrag}, and generative-model poisoning such as Nightshade~\cite{nightshade}.
 
-The evasion literature supplies useful comparison methods. JSMA computes saliency from the model Jacobian~\cite{jsma}; EAD uses an elastic-net objective~\cite{ead}; ZOO estimates gradients through black-box finite differences~\cite{zoo}; HopSkipJump is decision-based~\cite{hopskipjump}; Adversarial Patch learns a reusable localized perturbation~\cite{adversarialpatch}; and SparseFool searches for sparse decision-boundary crossings~\cite{sparsefool}.
+The evasion literature supplies useful comparison methods. DeepFool linearizes the nearest decision boundary~\cite{deepfool}; Carlini-Wagner attacks optimize margin-based adversarial objectives~\cite{cw}; One-Pixel uses differential evolution in a highly sparse search space~\cite{onepixel}; UAP learns an image-agnostic perturbation~\cite{uap}; JSMA computes saliency from the model Jacobian~\cite{jsma}; EAD uses an elastic-net objective~\cite{ead}; ZOO estimates gradients through black-box finite differences~\cite{zoo}; HopSkipJump is decision-based~\cite{hopskipjump}; Adversarial Patch learns a reusable localized perturbation~\cite{adversarialpatch}; and SparseFool searches for sparse decision-boundary crossings~\cite{sparsefool}.
 
 \section{Framework}
 
@@ -137,7 +137,7 @@ This prevents inflated attack success caused by baseline errors.
 
 \subsection{Implementation Corrections}
 
-The fungi code addresses common pitfalls. It uses a custom \texttt{Dataset} and \texttt{DataLoader} for out-of-core batching. Clean-label Poison Frogs is implemented as latent feature optimization, minimizing feature distance while projecting the poison image back into an \(L_\infty\) ball around the base image. EAD uses an ISTA-style shrinkage step. JSMA saliency is vectorized across a batch. ZOO batches finite-difference coordinate probes. The adversarial patch is trained with random-location expectation over transformation.
+The fungi code addresses common pitfalls. It uses a custom \texttt{Dataset} and \texttt{DataLoader} for out-of-core batching. Clean-label Poison Frogs is implemented as latent feature optimization, minimizing feature distance while projecting the poison image back into an \(L_\infty\) ball around the base image. The poster methods are implemented as FGSM, PGD, DeepFool L2, Carlini-Wagner L2, Boundary/HopSkipJump search, One-Pixel differential evolution, and UAP. EAD uses an ISTA-style shrinkage step. JSMA saliency is vectorized across a batch. ZOO batches finite-difference coordinate probes. The adversarial patch is trained with random-location expectation over transformation.
 
 \section{Results}
 
@@ -163,12 +163,16 @@ Clean-label Poison Frogs & Poison & R1 & 0.6333 & Poisonous \(\rightarrow\) edib
 Witches' Brew gradient match & Poison & R2 & 0.6889 & Poisonous \(\rightarrow\) edible confusion & 0.2500 \\
 FGSM & Evasion & R3 & 0.6667 & Conditional untargeted success & 0.8571 \\
 PGD & Evasion & R2 & 0.6667 & Conditional untargeted success & 1.0000 \\
+DeepFool L2 & Evasion & R3 & 0.6667 & Conditional untargeted success & 1.0000 \\
+Carlini-Wagner L2 & Evasion & R2 & 0.6667 & Conditional targeted ASR to edible & 0.7429 \\
 Elastic Net EAD & Evasion & R2 & 0.6667 & Conditional targeted ASR to edible & 0.0286 \\
 JSMA saliency & Evasion & R3 & 0.6667 & Conditional targeted ASR to edible & 0.9375 \\
+One-Pixel DE & Evasion & R4 & 0.6667 & Conditional targeted ASR to edible & 0.0625 \\
 SparseFool-style boundary & Evasion & R4 & 0.6667 & Conditional untargeted success & 0.0625 \\
+Universal adversarial perturbation & Evasion & R2 & 0.6667 & Conditional untargeted success & 1.0000 \\
 Adversarial patch & Evasion & R2 & 0.6667 & Conditional targeted ASR to edible & 0.2857 \\
 ZOO finite difference & Evasion & R3 & 0.6667 & Conditional targeted ASR to edible & 0.1250 \\
-HopSkipJump-style boundary & Evasion & R3 & 0.6667 & Conditional targeted ASR to edible & 0.6875 \\
+Boundary/HopSkipJump search & Evasion & R3 & 0.6667 & Conditional targeted ASR to edible & 0.6875 \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -185,32 +189,34 @@ Dataset & Group & Mean effect & Max effect \\
 Fungi & Poisoning/B & 0.3650 & 0.6296 \\
 Fungi & Poisoning/M & 0.3619 & 0.6842 \\
 Fungi & Evasion/G & 0.9285 & 1.0000 \\
-Fungi & Evasion/O & 0.2804 & 0.6875 \\
+Fungi & Evasion/M & 0.5156 & 1.0000 \\
+Fungi & Evasion/O & 0.3960 & 0.7429 \\
+Fungi & Evasion/U & 0.6429 & 1.0000 \\
 MNIST & Poisoning/B & 0.6853 & 0.9988 \\
 MNIST & Evasion/G & 1.0000 & 1.0000 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The highest fungi evasion effects are PGD and JSMA. The strongest poisoning-style selected-slice result is subpopulation poisoning, while the strongest trigger result is the gradient-aligned Sleeper-Agent-style backdoor. Poison Frogs increases the safety-critical poisonous-to-edible confusion above the clean baseline while preserving clean-label constraints. The Witches' Brew-style run demonstrates gradient alignment, but its measured effect is weaker on this small validation split than the subgroup and backdoor attacks.
+The highest fungi evasion effects are PGD, DeepFool, and UAP, each reaching 1.0000 conditional untargeted success. JSMA remains a strong sparse targeted method at 0.9375, while Carlini-Wagner reaches 0.7429 targeted ASR. The strongest poisoning-style selected-slice result is subpopulation poisoning, while the strongest trigger result is the gradient-aligned Sleeper-Agent-style backdoor. Poison Frogs increases the safety-critical poisonous-to-edible confusion above the clean baseline while preserving clean-label constraints. The Witches' Brew-style run demonstrates gradient alignment, but its measured effect is weaker on this small validation split than the subgroup and backdoor attacks.
 
 \subsection{Answers to Research Questions}
 
 \textbf{RQ1:} The periodic-table representation answers the organization question by placing attacks into mechanism-colored element cells and labeling each cell by risk and stage. This makes it clear which methods are training-time poisoning, which are test-time evasion analogs, and which categories deserve higher operational concern.
 
-\textbf{RQ2:} On the fungi task, the largest evasion failures are PGD with 1.0000 conditional untargeted success and JSMA with 0.9375 conditional targeted ASR. Among poisoning and backdoor methods, subpopulation poisoning reaches 0.6842 selected-slice confusion, and the Sleeper-Agent-style backdoor reaches 0.6296 stealth-trigger ASR. These results answer RQ2 by showing that sparse or gradient evasion can be strongest at inference time, while subgroup and backdoor poisoning create the most important training-time targeted failures.
+\textbf{RQ2:} On the fungi task, the largest evasion failures are PGD, DeepFool, and UAP with 1.0000 conditional untargeted success; JSMA reaches 0.9375 conditional targeted ASR and Carlini-Wagner reaches 0.7429. Among poisoning and backdoor methods, subpopulation poisoning reaches 0.6842 selected-slice confusion, and the Sleeper-Agent-style backdoor reaches 0.6296 stealth-trigger ASR. These results answer RQ2 by showing that inference-time methods can be strongest under conditional evaluation, while subgroup and backdoor poisoning create the most important training-time targeted failures.
 
-\textbf{RQ3:} The experiment answers the implementation question by replacing in-memory image stacking with lazy loading, replacing a weak from-scratch CNN with pretrained MobileNetV3-Small transfer learning, using true latent-space feature collision instead of pixel blending, vectorizing JSMA, batching ZOO finite-difference queries, and reporting conditional attack success only on clean-correct examples.
+\textbf{RQ3:} The experiment answers the implementation question by replacing in-memory image stacking with lazy loading, replacing a weak from-scratch CNN with pretrained MobileNetV3-Small transfer learning, using true latent-space feature collision instead of pixel blending, adding explicit poster-method implementations, vectorizing JSMA, batching ZOO finite-difference queries, and reporting conditional attack success only on clean-correct examples.
 
 \section{Discussion}
 
 The results support three security lessons. First, aggregate accuracy is not a sufficient safety metric. The clean fungi baseline already confuses some poisonous samples as edible, and several attacks worsen a targeted failure mode without simply maximizing visible accuracy collapse. Second, attack stage matters. Evasion methods can be dramatic, but they should not be described as poisoning unless they enter the training or adaptation data. Third, realistic baselines matter: pretrained transfer learning, lazy loading, and conditional success metrics make the fungi experiment much closer to a real AI safety presentation than a purely toy implementation.
 
-The implementation audit is intentionally conservative. The code reproduces the core mechanism of Poison Frogs, gradient matching, JSMA, ZOO, EAD, SparseFool-style sparse boundary search, and EOT patching in this local experimental setting. It does not claim industrial-scale transferability, full physical-world patch robustness, or long-horizon LLM sleeper-agent persistence.
+The implementation audit is intentionally conservative. The code reproduces the core mechanism of all poster methods plus ten additional shared methods: Poison Frogs, Sleeper-Agent-style backdoor, Adversarial Patch, Witches' Brew-style gradient matching, JSMA, ZOO, SparseFool-style sparse boundary search, EAD, subpopulation poisoning, and BadNets. It does not claim industrial-scale transferability, full physical-world patch robustness, or long-horizon LLM sleeper-agent persistence.
 
 \section{Conclusion}
 
-This paper answers the three research questions as follows. First, data poisoning can be organized as a chemical-table-style risk map by separating stage, mechanism, and operational danger. Second, the fungi experiments show that PGD and JSMA produce the strongest evasion failures, while subpopulation poisoning and Sleeper-Agent-style backdoors produce the strongest training-time targeted failures. Third, realistic conclusions require careful engineering: lazy loading, transfer learning, latent-space poisoning, vectorized/batched attacks, and conditional success metrics. The final framework is suitable for a short IEEE-style AI security conference paper and for an at-a-glance presentation of operational risk.
+This paper answers the three research questions as follows. First, data poisoning can be organized as a chemical-table-style risk map by separating stage, mechanism, and operational danger. Second, the fungi experiments show that PGD, DeepFool, UAP, JSMA, and Carlini-Wagner produce the strongest evasion failures, while subpopulation poisoning and Sleeper-Agent-style backdoors produce the strongest training-time targeted failures. Third, realistic conclusions require careful engineering: lazy loading, transfer learning, latent-space poisoning, explicit implementation coverage, vectorized/batched attacks, and conditional success metrics. The final framework is suitable for a short IEEE-style AI security conference paper and for an at-a-glance presentation of operational risk.
 
 \section*{Reproducibility and Safety}
 
@@ -254,6 +260,18 @@ W. Zou, R. Geng, B. Wang, and J. Jia, ``PoisonedRAG: Knowledge corruption attack
 
 \bibitem{nightshade}
 S. Shan et al., ``Nightshade: Prompt-specific poisoning attacks on text-to-image generative models,'' arXiv:2310.13828, 2023, doi: 10.48550/arXiv.2310.13828. [Online]. Available: \url{https://arxiv.org/abs/2310.13828}
+
+\bibitem{deepfool}
+S.-M. Moosavi-Dezfooli, A. Fawzi, and P. Frossard, ``DeepFool: a simple and accurate method to fool deep neural networks,'' in \emph{Proc. IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 2016. [Online]. Available: \url{https://arxiv.org/abs/1511.04599}
+
+\bibitem{cw}
+N. Carlini and D. Wagner, ``Towards evaluating the robustness of neural networks,'' in \emph{Proc. IEEE Symposium on Security and Privacy}, 2017, doi: 10.1109/SP.2017.49. [Online]. Available: \url{https://arxiv.org/abs/1608.04644}
+
+\bibitem{onepixel}
+J. Su, D. V. Vargas, and K. Sakurai, ``One pixel attack for fooling deep neural networks,'' \emph{IEEE Transactions on Evolutionary Computation}, vol. 23, no. 5, pp. 828--841, 2019, doi: 10.1109/TEVC.2019.2890858. [Online]. Available: \url{https://arxiv.org/abs/1710.08864}
+
+\bibitem{uap}
+S.-M. Moosavi-Dezfooli, A. Fawzi, O. Fawzi, and P. Frossard, ``Universal adversarial perturbations,'' in \emph{Proc. IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 2017. [Online]. Available: \url{https://arxiv.org/abs/1610.08401}
 
 \bibitem{jsma}
 N. Papernot, P. McDaniel, S. Jha, M. Fredrikson, Z. B. Celik, and A. Swami, ``The limitations of deep learning in adversarial settings,'' in \emph{Proc. IEEE European Symposium on Security and Privacy (EuroS\&P)}, 2016, pp. 372--387, doi: 10.1109/EuroSP.2016.36. [Online]. Available: \url{https://doi.org/10.1109/EuroSP.2016.36}

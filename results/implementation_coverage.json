@@ -1,0 +1,162 @@
+[
+  {
+    "requirement_group": "Poster-required",
+    "method": "FGSM",
+    "stage": "evasion",
+    "implemented_in": "scripts/fungi_attack_comparison.py::fgsm",
+    "result_row": "FGSM",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Poster-required",
+    "method": "PGD",
+    "stage": "evasion",
+    "implemented_in": "scripts/fungi_attack_comparison.py::pgd",
+    "result_row": "PGD",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Poster-required",
+    "method": "DeepFool",
+    "stage": "evasion",
+    "implemented_in": "scripts/fungi_attack_comparison.py::deepfool_l2",
+    "result_row": "DeepFool L2",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Poster-required",
+    "method": "Carlini-Wagner",
+    "stage": "evasion",
+    "implemented_in": "scripts/fungi_attack_comparison.py::carlini_wagner_l2_target",
+    "result_row": "Carlini-Wagner L2",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Poster-required",
+    "method": "Boundary Attack",
+    "stage": "evasion",
+    "implemented_in": "scripts/fungi_attack_comparison.py::boundary_search",
+    "result_row": "Boundary / HopSkipJump search",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Poster-required",
+    "method": "One-Pixel Attack",
+    "stage": "evasion",
+    "implemented_in": "scripts/fungi_attack_comparison.py::one_pixel_de_target",
+    "result_row": "One-Pixel DE",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Poster-required",
+    "method": "Universal Adversarial Perturbation",
+    "stage": "evasion",
+    "implemented_in": "scripts/fungi_attack_comparison.py::universal_adversarial_perturbation",
+    "result_row": "Universal adversarial perturbation",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Additional-10",
+    "method": "Clean-Label Poisoning / Poison Frogs",
+    "stage": "poisoning",
+    "implemented_in": "scripts/fungi_attack_comparison.py::true_feature_collision",
+    "result_row": "Clean-label Poison Frogs",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Additional-10",
+    "method": "Sleeper Agent",
+    "stage": "poisoning",
+    "implemented_in": "scripts/fungi_attack_comparison.py::sleeper_agent_poison",
+    "result_row": "Sleeper Agent-style backdoor",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Additional-10",
+    "method": "Adversarial Patch",
+    "stage": "evasion",
+    "implemented_in": "scripts/fungi_attack_comparison.py::adversarial_patch_eot",
+    "result_row": "Adversarial patch",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Additional-10",
+    "method": "Witches' Brew / Gradient Matching",
+    "stage": "poisoning",
+    "implemented_in": "scripts/fungi_attack_comparison.py::gradient_matching_poison",
+    "result_row": "Witches' Brew gradient match",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Additional-10",
+    "method": "JSMA",
+    "stage": "evasion",
+    "implemented_in": "scripts/fungi_attack_comparison.py::vectorized_jsma_saliency",
+    "result_row": "JSMA saliency",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Additional-10",
+    "method": "ZOO",
+    "stage": "evasion",
+    "implemented_in": "scripts/fungi_attack_comparison.py::zoo_target",
+    "result_row": "ZOO finite difference",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Additional-10",
+    "method": "SparseFool",
+    "stage": "evasion",
+    "implemented_in": "scripts/fungi_attack_comparison.py::sparse_boundary",
+    "result_row": "SparseFool-style boundary",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Additional-10",
+    "method": "Elastic Net EAD",
+    "stage": "evasion",
+    "implemented_in": "scripts/fungi_attack_comparison.py::ead_target",
+    "result_row": "Elastic Net EAD",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Additional-10",
+    "method": "Subpopulation Poisoning",
+    "stage": "poisoning",
+    "implemented_in": "scripts/fungi_attack_comparison.py::subpopulation_label_flip",
+    "result_row": "Subpopulation label poison",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Additional-10",
+    "method": "BadNets Patch Backdoor",
+    "stage": "poisoning",
+    "implemented_in": "scripts/fungi_attack_comparison.py::backdoor_dataset",
+    "result_row": "BadNets patch backdoor",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Extra implemented",
+    "method": "Random Label Flipping",
+    "stage": "poisoning",
+    "implemented_in": "scripts/fungi_attack_comparison.py::random_label_flip",
+    "result_row": "Random label flip",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Extra implemented",
+    "method": "Targeted Label Flipping",
+    "stage": "poisoning",
+    "implemented_in": "scripts/fungi_attack_comparison.py::targeted_label_flip",
+    "result_row": "Targeted label flip",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Extra implemented",
+    "method": "Clean-Label Patch Backdoor",
+    "stage": "poisoning",
+    "implemented_in": "scripts/fungi_attack_comparison.py::clean_label_backdoor_dataset",
+    "result_row": "Clean-label patch backdoor",
+    "status": "implemented"
+  }
+]

@@ -165,6 +165,36 @@
     "notes": "Projected gradient ascent."
   },
   {
+    "method": "DeepFool L2",
+    "stage": "evasion",
+    "mechanism": "M",
+    "risk_level": "R3",
+    "poison_rate": "0",
+    "train_size": 360,
+    "clean_accuracy": 0.6667,
+    "attack_metric": "conditional_untargeted_misclassification",
+    "attack_success": 1.0,
+    "avg_l0_features": 75912.62,
+    "avg_linf": 0.0133,
+    "avg_l2": 0.2157,
+    "notes": "Poster method: iterative local linearization of the nearest logit boundary."
+  },
+  {
+    "method": "Carlini-Wagner L2",
+    "stage": "evasion",
+    "mechanism": "O",
+    "risk_level": "R2",
+    "poison_rate": "0",
+    "train_size": 360,
+    "clean_accuracy": 0.6667,
+    "attack_metric": "conditional_targeted_ASR_to_edible",
+    "attack_success": 0.7429,
+    "avg_l0_features": 76675.54,
+    "avg_linf": 0.0769,
+    "avg_l2": 2.6524,
+    "notes": "Poster method: targeted CW margin objective with L2 regularization."
+  },
+  {
     "method": "Elastic Net EAD",
     "stage": "evasion",
     "mechanism": "O",
@@ -195,6 +225,21 @@
     "notes": "Vectorized sparse-feature saliency using input Jacobian."
   },
   {
+    "method": "One-Pixel DE",
+    "stage": "evasion",
+    "mechanism": "M",
+    "risk_level": "R4",
+    "poison_rate": "0",
+    "train_size": 360,
+    "clean_accuracy": 0.6667,
+    "attack_metric": "conditional_targeted_ASR_to_edible",
+    "attack_success": 0.0625,
+    "avg_l0_features": 3.0,
+    "avg_linf": 0.757,
+    "avg_l2": 1.0309,
+    "notes": "Poster method: differential evolution over one pixel coordinate and RGB value."
+  },
+  {
     "method": "SparseFool-style boundary",
     "stage": "evasion",
     "mechanism": "M",
@@ -210,6 +255,21 @@
     "notes": "Vectorized sparse local-boundary crossing approximation."
   },
   {
+    "method": "Universal adversarial perturbation",
+    "stage": "evasion",
+    "mechanism": "U",
+    "risk_level": "R2",
+    "poison_rate": "0",
+    "train_size": 360,
+    "clean_accuracy": 0.6667,
+    "attack_metric": "conditional_untargeted_misclassification",
+    "attack_success": 1.0,
+    "avg_l0_features": 66187.95,
+    "avg_linf": 0.08,
+    "avg_l2": 15.0923,
+    "notes": "Poster method: one learned L-infinity perturbation shared by all source-class images."
+  },
+  {
     "method": "Adversarial patch",
     "stage": "evasion",
     "mechanism": "U",
@@ -219,9 +279,9 @@
     "clean_accuracy": 0.6667,
     "attack_metric": "conditional_targeted_ASR_to_edible",
     "attack_success": 0.2857,
-    "avg_l0_features": 3071.34,
-    "avg_linf": 0.9744,
-    "avg_l2": 24.2898,
+    "avg_l0_features": 3071.4,
+    "avg_linf": 0.9715,
+    "avg_l2": 23.8028,
     "notes": "EOT-trained patch with random training locations; evaluated lower-right."
   },
   {
@@ -234,13 +294,13 @@
     "clean_accuracy": 0.6667,
     "attack_metric": "conditional_targeted_ASR_to_edible",
     "attack_success": 0.125,
-    "avg_l0_features": 565.38,
-    "avg_linf": 0.075,
-    "avg_l2": 0.9213,
+    "avg_l0_features": 565.0,
+    "avg_linf": 0.07,
+    "avg_l2": 0.9227,
     "notes": "Batched black-box finite differences; 9159 model queries."
   },
   {
-    "method": "HopSkipJump-style boundary",
+    "method": "Boundary / HopSkipJump search",
     "stage": "evasion",
     "mechanism": "O",
     "risk_level": "R3",
@@ -252,6 +312,6 @@
     "avg_l0_features": 76407.56,
     "avg_linf": 0.6702,
     "avg_l2": 64.7771,
-    "notes": "Decision-only binary search to target-class guide images."
+    "notes": "Poster Boundary method represented by decision-only binary search to target-class guide images."
   }
 ]
