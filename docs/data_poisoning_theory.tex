@@ -452,7 +452,7 @@ Evasion analog & Conditional success rate in Eq.~(\ref{eq:csr}) & Stronger infer
 
 \subsection{Random Seeds and Repeatability}
 
-All reported rows are generated from deterministic seeds recorded by the runners. The current paper treats fungi and fish as pilot case studies, so food-image effect sizes are not presented as journal-final estimates of population-level performance. A journal submission should regenerate every poisoning and evasion table with the seed sets in Table~\ref{tab:seeds}, report mean \(\pm\) standard deviation over runs, and place error bars on every dataset-level comparison. Until those repeated runs are completed, the food-image figures should be read as pilot evidence and implementation checks rather than statistically powered claims.
+All reported rows are generated from deterministic seeds recorded by the runners. The current paper treats fungi and seafood as pilot case studies and treats the tiny fish-eye task as a few-shot micro-batch proof of concept. Fish effect sizes are especially quantized: the validation split has only 10 images, with five non-fresh samples in the safety-critical source class, so a targeted ASR of 0.8000 means exactly 4/5 eligible images and 0.4000 means exactly 2/5. A journal submission should regenerate every poisoning and evasion table with the seed sets in Table~\ref{tab:seeds}, report mean \(\pm\) standard deviation over runs, and place error bars on every dataset-level comparison. Until those repeated runs are completed, the food-image figures should be read as pilot evidence and implementation checks rather than statistically powered claims.
 
 \begin{table}[t]
 \centering
@@ -554,34 +554,34 @@ Boundary/HopSkipJump search & Evasion & R3 & 0.6667 & Conditional targeted ASR t
 
 \begin{table*}[t]
 \centering
-\caption{Fish freshness comparison table. Poisoning rows retrain MobileNetV3-Small; evasion rows attack the clean fish baseline.}
+\caption{Few-shot fish freshness micro-batch proof of concept. Poisoning rows retrain MobileNetV3-Small; evasion rows attack the clean fish baseline. The validation split has \(N=10\) images, and most safety-critical ASR denominators are the five non-fresh validation images, so parenthetical counts are more important than the four-decimal rates.}
 \label{tab:fishresults}
 \small
 \begin{tabular}{p{0.23\textwidth}p{0.08\textwidth}p{0.05\textwidth}p{0.10\textwidth}p{0.28\textwidth}p{0.08\textwidth}}
 \toprule
 Method & Stage & Risk & Clean acc. & Metric & Value \\
 \midrule
-Clean baseline & Ref. & -- & 0.8000 & Non-fresh \(\rightarrow\) fresh confusion & 0.0000 \\
-Random label flip & Poison & R3 & 0.9000 & Clean accuracy drop & 0.0000 \\
-Targeted label flip & Poison & R2 & 0.8000 & Non-fresh \(\rightarrow\) fresh confusion & 0.0000 \\
-Subpopulation label poison & Poison & R2 & 0.8000 & Selected subgroup \(\rightarrow\) fresh & 0.0000 \\
-BadNets patch backdoor & Poison & R1 & 1.0000 & Trigger ASR to fresh & 0.0000 \\
-Clean-label patch backdoor & Poison & R1 & 1.0000 & Trigger ASR to fresh & 0.0000 \\
-Sleeper-Agent-style backdoor & Poison & R1 & 1.0000 & Stealth-trigger ASR to fresh & 0.8000 \\
-Clean-label Poison Frogs & Poison & R1 & 1.0000 & Non-fresh \(\rightarrow\) fresh confusion & 0.0000 \\
-Witches' Brew gradient match & Poison & R2 & 1.0000 & Non-fresh \(\rightarrow\) fresh confusion & 0.0000 \\
-FGSM & Evasion & R3 & 0.8000 & Conditional untargeted success & 1.0000 \\
-PGD & Evasion & R2 & 0.8000 & Conditional untargeted success & 1.0000 \\
-DeepFool L2 & Evasion & R3 & 0.8000 & Conditional untargeted success & 1.0000 \\
-Carlini-Wagner L2 & Evasion & R2 & 0.8000 & Conditional targeted ASR to fresh & 1.0000 \\
-Elastic Net EAD & Evasion & R2 & 0.8000 & Conditional targeted ASR to fresh & 0.8000 \\
-JSMA saliency & Evasion & R3 & 0.8000 & Conditional targeted ASR to fresh & 0.4000 \\
-One-Pixel DE & Evasion & R4 & 0.8000 & Conditional targeted ASR to fresh & 0.0000 \\
-SparseFool-style boundary & Evasion & R4 & 0.8000 & Conditional untargeted success & 0.0000 \\
-Universal adversarial perturbation & Evasion & R2 & 0.8000 & Conditional untargeted success & 1.0000 \\
-Adversarial patch & Evasion & R2 & 0.8000 & Conditional targeted ASR to fresh & 0.0000 \\
-ZOO finite difference & Evasion & R3 & 0.8000 & Conditional targeted ASR to fresh & 0.0000 \\
-Boundary/HopSkipJump search & Evasion & R3 & 0.8000 & Conditional targeted ASR to fresh & 0.8000 \\
+Clean baseline & Ref. & -- & 0.8000 (8/10) & Non-fresh \(\rightarrow\) fresh confusion & 0.0000 (0/5) \\
+Random label flip & Poison & R3 & 0.9000 (9/10) & Clean accuracy drop & 0.0000 \\
+Targeted label flip & Poison & R2 & 0.8000 (8/10) & Non-fresh \(\rightarrow\) fresh confusion & 0.0000 (0/5) \\
+Subpopulation label poison & Poison & R2 & 0.8000 (8/10) & Selected subgroup \(\rightarrow\) fresh & 0.0000 \\
+BadNets patch backdoor & Poison & R1 & 1.0000 (10/10) & Trigger ASR to fresh & 0.0000 (0/5) \\
+Clean-label patch backdoor & Poison & R1 & 1.0000 (10/10) & Trigger ASR to fresh & 0.0000 (0/5) \\
+Sleeper-Agent-style backdoor & Poison & R1 & 1.0000 (10/10) & Stealth-trigger ASR to fresh & 0.8000 (4/5) \\
+Clean-label Poison Frogs & Poison & R1 & 1.0000 (10/10) & Non-fresh \(\rightarrow\) fresh confusion & 0.0000 (0/5) \\
+Witches' Brew gradient match & Poison & R2 & 1.0000 (10/10) & Non-fresh \(\rightarrow\) fresh confusion & 0.0000 (0/5) \\
+FGSM & Evasion & R3 & 0.8000 (8/10) & Conditional untargeted success & 1.0000 (5/5) \\
+PGD & Evasion & R2 & 0.8000 (8/10) & Conditional untargeted success & 1.0000 (5/5) \\
+DeepFool L2 & Evasion & R3 & 0.8000 (8/10) & Conditional untargeted success & 1.0000 (5/5) \\
+Carlini-Wagner L2 & Evasion & R2 & 0.8000 (8/10) & Conditional targeted ASR to fresh & 1.0000 (5/5) \\
+Elastic Net EAD & Evasion & R2 & 0.8000 (8/10) & Conditional targeted ASR to fresh & 0.8000 (4/5) \\
+JSMA saliency & Evasion & R3 & 0.8000 (8/10) & Conditional targeted ASR to fresh & 0.4000 (2/5) \\
+One-Pixel DE & Evasion & R4 & 0.8000 (8/10) & Conditional targeted ASR to fresh & 0.0000 (0/5) \\
+SparseFool-style boundary & Evasion & R4 & 0.8000 (8/10) & Conditional untargeted success & 0.0000 (0/5) \\
+Universal adversarial perturbation & Evasion & R2 & 0.8000 (8/10) & Conditional untargeted success & 1.0000 (5/5) \\
+Adversarial patch & Evasion & R2 & 0.8000 (8/10) & Conditional targeted ASR to fresh & 0.0000 (0/5) \\
+ZOO finite difference & Evasion & R3 & 0.8000 (8/10) & Conditional targeted ASR to fresh & 0.0000 (0/5) \\
+Boundary/HopSkipJump search & Evasion & R3 & 0.8000 (8/10) & Conditional targeted ASR to fresh & 0.8000 (4/5) \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -661,11 +661,11 @@ Seafood & Evasion/U & 1.0000 & 1.0000 \\
 
 The fungi, fish, and seafood poisoning rows are pilot case studies. On fungi, the strongest poisoning-style selected-slice result is subpopulation poisoning, while the strongest trigger result is the gradient-aligned Sleeper-Agent-style backdoor. Poison Frogs increases the safety-critical poisonous-to-edible confusion above the clean baseline while preserving clean-label constraints. The Witches' Brew-style run demonstrates gradient alignment, but its measured effect is weaker on this small validation split than the subgroup and backdoor attacks.
 
-Table~\ref{tab:fishresults} reports the fish freshness extension explicitly. It uses the same method table on a much smaller split: 30 training images and 10 validation images. The clean baseline reaches 0.8000 accuracy with 0.0000 non-fresh-to-fresh confusion. The top poisoning/backdoor result is the Sleeper-Agent-style backdoor at 0.8000 stealth-trigger ASR. Table~\ref{tab:seafoodresults} reports the new seafood hierarchy with 300 training and 100 validation images. The clean seafood baseline reaches 1.0000 accuracy with zero NonFresh-to-Fresh confusion. Under the reduced local attack budget, the strongest poisoning-style result is the Sleeper-Agent-style backdoor at 0.9400 stealth-trigger ASR; BadNets reaches 0.5306 trigger ASR, while label/subpopulation poisoning produce small targeted effects and the current clean-label feature-collision and Witches' Brew-style pilots do not increase the safety-critical confusion. The generated \texttt{results/fish\_attack\_comparison.*}, \texttt{results/seafood\_attack\_comparison.*}, and \texttt{results/food\_dataset\_comparison.*} files contain the source rows.
+Table~\ref{tab:fishresults} reports the fish freshness extension explicitly but frames it as a few-shot micro-batch proof of concept. It uses the same method table on a much smaller split: 30 training images and 10 validation images. The clean baseline reaches 0.8000 accuracy, which is 8/10 validation images, with 0/5 non-fresh validation images classified as fresh. Several poisoned retraining rows reach 10/10 clean validation accuracy; this is not interpreted as poison ``improving'' the model, but as high-variance behavior on a tiny validation set where one or two image decisions move the rate by 0.1000--0.2000. Likewise, the flat 0.0000 values for BadNets, clean-label patch, Poison Frogs, and Witches' Brew are reported as negative/tuning results on a rigid few-shot MobileNetV3 transfer setup rather than as evidence that those attacks are generally ineffective. The only successful fish poisoning-style row is the Sleeper-Agent-style trigger at 4/5 stealth-trigger ASR. Table~\ref{tab:seafoodresults} reports the new seafood hierarchy with 300 training and 100 validation images. The clean seafood baseline reaches 1.0000 accuracy with zero NonFresh-to-Fresh confusion. Under the reduced local attack budget, the strongest poisoning-style result is the Sleeper-Agent-style backdoor at 0.9400 stealth-trigger ASR; BadNets reaches 0.5306 trigger ASR, while label/subpopulation poisoning produce small targeted effects and the current clean-label feature-collision and Witches' Brew-style pilots do not increase the safety-critical confusion. The generated \texttt{results/fish\_attack\_comparison.*}, \texttt{results/seafood\_attack\_comparison.*}, and \texttt{results/food\_dataset\_comparison.*} files contain the source rows.
 
 \subsection{Evasion Analog Stress Tests}
 
-Evasion rows are reported as stress tests, not as evidence that those methods poison data. On fungi, PGD, DeepFool, and UAP reach 1.0000 conditional untargeted success. These values are conditional on the clean-correct subset and therefore should be read with the sample count and baseline accuracy, not as a claim that the whole validation set is perfectly vulnerable. JSMA remains a strong sparse targeted method at 0.9375, while Carlini-Wagner reaches 0.7429 targeted ASR. On fish, FGSM, PGD, DeepFool, Carlini-Wagner, and UAP reach 1.0000 conditional success, while EAD and Boundary/HopSkipJump reach 0.8000 targeted ASR. On seafood, FGSM, PGD, DeepFool, Carlini-Wagner, EAD, UAP, adversarial patch, and Boundary/HopSkipJump reach 1.0000 conditional success; JSMA reaches 0.2500, and One-Pixel, SparseFool-style, and ZOO do not succeed in the reduced pilot budget. These stress-test values are useful for comparing fragility, but they are not averaged with poisoning outcomes in the taxonomy.
+Evasion rows are reported as stress tests, not as evidence that those methods poison data. On fungi, PGD, DeepFool, and UAP reach 1.0000 conditional untargeted success. These values are conditional on the clean-correct subset and therefore should be read with the sample count and baseline accuracy, not as a claim that the whole validation set is perfectly vulnerable. JSMA remains a strong sparse targeted method at 0.9375, while Carlini-Wagner reaches 0.7429 targeted ASR. On fish, FGSM, PGD, DeepFool, Carlini-Wagner, and UAP reach 1.0000 conditional success, while EAD and Boundary/HopSkipJump reach 0.8000 targeted ASR; in this table, those values correspond to 5/5 or 4/5 eligible non-fresh images, not stable population estimates. On seafood, FGSM, PGD, DeepFool, Carlini-Wagner, EAD, UAP, adversarial patch, and Boundary/HopSkipJump reach 1.0000 conditional success; JSMA reaches 0.2500, and One-Pixel, SparseFool-style, and ZOO do not succeed in the reduced pilot budget. These stress-test values are useful for comparing fragility, but they are not averaged with poisoning outcomes in the taxonomy.
 
 \begin{table}[t]
 \centering
@@ -707,7 +707,7 @@ Seafood & 300 & 1.0000 & 0.9400 & 1.0000 \\
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.98\textwidth]{fish_attack_comparison_split.png}
-\caption{Fish freshness comparison split by stage. The fish dataset is small, so exact values should be interpreted with the validation size shown in Table~\ref{tab:foodcomparison}.}
+\caption{Fish freshness comparison split by stage. This is a few-shot micro-batch proof of concept: the validation split has 10 images, and most targeted rates move in increments of one image out of five.}
 \label{fig:fishsplitbars}
 \end{figure*}
 
@@ -763,7 +763,7 @@ Artifact & Type & Role in paper \\
 
 \textbf{RQ1:} The risk matrix answers the organization question by making every coordinate auditable: the vertical coordinate is the assigned R1, R2, R3, or R4 level; the horizontal coordinate is the mechanism family; and the panel determines whether a method is poisoning proper or an evasion/transfer analog. This removes arbitrary chemical-table gaps, prevents a cell labeled R1 from appearing in an R2 or R3 row, and separates related evasion methods from data-poisoning methods.
 
-\textbf{RQ2:} On the fungi pilot task, the largest evasion stress-test failures are PGD, DeepFool, and UAP with 1.0000 conditional untargeted success; JSMA reaches 0.9375 conditional targeted ASR and Carlini-Wagner reaches 0.7429. On the fish pilot task, FGSM, PGD, DeepFool, Carlini-Wagner, and UAP reach 1.0000 conditional success, while the Sleeper-Agent-style backdoor reaches 0.8000 stealth-trigger ASR. On the seafood replacement benchmark, the clean baseline reaches 1.0000 accuracy; the strongest poisoning-style result is the Sleeper-Agent-style backdoor at 0.9400 stealth-trigger ASR, and the strongest evasion stress tests again reach 1.0000 conditional success. These results answer RQ2 by showing that inference-time methods can be strongest under conditional evaluation, while subgroup and backdoor poisoning create the most important training-time targeted failures under the stage-aware metrics in Table~\ref{tab:metrics}. They should not be interpreted as journal-final food-domain effect estimates until repeated-seed runs are completed.
+\textbf{RQ2:} On the fungi pilot task, the largest evasion stress-test failures are PGD, DeepFool, and UAP with 1.0000 conditional untargeted success; JSMA reaches 0.9375 conditional targeted ASR and Carlini-Wagner reaches 0.7429. On the fish micro-batch proof of concept, FGSM, PGD, DeepFool, Carlini-Wagner, and UAP reach 5/5 conditional success, while the Sleeper-Agent-style backdoor reaches 4/5 stealth-trigger ASR. These fish values demonstrate code-path coverage and a safety-critical direction on a tiny specialty dataset, not a robust estimate. On the seafood replacement benchmark, the clean baseline reaches 1.0000 accuracy; the strongest poisoning-style result is the Sleeper-Agent-style backdoor at 0.9400 stealth-trigger ASR, and the strongest evasion stress tests again reach 1.0000 conditional success. These results answer RQ2 by showing that inference-time methods can be strongest under conditional evaluation, while subgroup and backdoor poisoning create the most important training-time targeted failures under the stage-aware metrics in Table~\ref{tab:metrics}. They should not be interpreted as journal-final food-domain effect estimates until repeated-seed runs are completed.
 
 \textbf{RQ3:} The experiment answers the implementation question by replacing in-memory image stacking with lazy loading, replacing a weak from-scratch CNN with pretrained MobileNetV3-Small transfer learning, using true latent-space feature collision instead of pixel blending, adding explicit poster-method implementations, vectorizing JSMA, batching ZOO finite-difference queries, reporting conditional attack success only on clean-correct examples, and disclosing seeds plus the repeated-run protocol required for journal submission.
 
@@ -801,7 +801,7 @@ Out-of-scope but related privacy/system attacks & Model extraction, membership i
 
 \section{Limitations}
 
-Several limitations matter before journal submission. First, the fish dataset is very small: only 40 images total and 10 validation images after the deterministic split. Fish results are therefore pilot evidence and implementation checks, not statistically powered estimates. Second, the fungi baseline accuracy is modest at 0.6667, which means attack effects must be interpreted alongside baseline instability and clean-correct conditional metrics. Third, the seafood replacement benchmark is larger and cleaner than the fish pilot, but the reported run still uses \(96\times96\) images, two training epochs, and \texttt{attack\_scale=0.12}; full-budget attacks and repeated seeds are needed before journal claims. Fourth, the current food-image artifact set reports deterministic single-seed pilot runs. A journal version should execute the seed sets in Table~\ref{tab:seeds}, report mean \(\pm\) standard deviation for every metric, and regenerate all bar plots with seed-level error bars. Fifth, several implemented attacks are explicitly style variants or approximations as documented in Table~\ref{tab:fidelity}. Sixth, the paper includes evasion analogs for stress testing and comparison, but those methods are not counted as data poisoning proper unless their outputs enter a training, retrieval, or adaptation loop. Finally, the taxonomy includes literature-level entries for RAG, supply-chain, federated, generative, and alignment poisoning that are not all executed in the image experiments.
+Several limitations matter before journal submission. First, the fish dataset is very small: only 40 images total and 10 validation images after the deterministic split. Fish results are therefore a few-shot micro-batch proof of concept and implementation check, not statistically powered estimates. The apparent ``healing'' in some fish poisoning rows, where clean accuracy rises from 8/10 to 10/10, is a warning sign of tiny-split variance and overfitting rather than evidence that poisoning regularizes the model. The wall of 0/5 attack metrics for several fish poisoning rows is also a negative hyperparameter-transfer result: those settings were not tuned for a 30-image MobileNetV3 fine-tuning regime. Second, the fungi baseline accuracy is modest at 0.6667, which means attack effects must be interpreted alongside baseline instability and clean-correct conditional metrics. Third, the seafood replacement benchmark is larger and cleaner than the fish pilot, but the reported run still uses \(96\times96\) images, two training epochs, and \texttt{attack\_scale=0.12}; full-budget attacks and repeated seeds are needed before journal claims. Fourth, the current food-image artifact set reports deterministic single-seed pilot runs. A journal version should execute the seed sets in Table~\ref{tab:seeds}, report mean \(\pm\) standard deviation for every metric, and regenerate all bar plots with seed-level error bars. Fifth, several implemented attacks are explicitly style variants or approximations as documented in Table~\ref{tab:fidelity}. Sixth, the paper includes evasion analogs for stress testing and comparison, but those methods are not counted as data poisoning proper unless their outputs enter a training, retrieval, or adaptation loop. Finally, the taxonomy includes literature-level entries for RAG, supply-chain, federated, generative, and alignment poisoning that are not all executed in the image experiments.
 
 \section{Conclusion}
 

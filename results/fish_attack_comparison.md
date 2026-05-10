@@ -1,5 +1,7 @@
 # Fish Attack Comparison
 
+Few-shot micro-batch proof of concept. The validation split has only 10 images, with five non-fresh validation samples in the safety-critical source class, so rates such as 0.8000 and 0.4000 correspond to 4/5 and 2/5 images. Perfect clean accuracy in poisoned rows should be read as tiny-split variance/overfitting, not as evidence that poisoned data improves the classifier.
+
 | Method | Stage | Mechanism | Risk | Poison rate | Clean acc. | Metric | Success | L0 | Linf | Notes |
 |---|---|---|---|---:|---:|---|---:|---:|---:|---|
 | Clean baseline | reference | none | none | 0 | 0.8 | non-fresh2_to_fresh2_confusion | 0.0 |  |  | Dataset=fish; split=deterministic stratified split from flat class folders; val_fraction=0.25; model=mobilenet_v3_small, pretrained=True, freeze_features=True; classes=['fresh2', 'non-fresh2']. |
