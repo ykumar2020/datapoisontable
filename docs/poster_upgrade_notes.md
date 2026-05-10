@@ -46,6 +46,17 @@ Suggested levels:
 | R3 Moderate | 100-199 | meaningful but narrower, noisier, or more detectable |
 | R4 Low | 1-99 | mainly educational, costly, or limited to constrained settings |
 
+## Layout Integrity Update
+
+The conference version should not force the attacks into the literal shape of the chemical periodic table. The final figure now uses the periodic-table visual language only at the cell level: each method has a compact element-style tile with a number, symbol, name, and risk/mechanism label. The coordinates are functional:
+
+- rows are strictly R1, R2, R3, and R4
+- columns are strictly mechanism families
+- inference-time evasion attacks are in a separate companion panel, not inside the data-poisoning grid
+- `results/table_layout_audit.*` verifies that every printed R label matches its visual row
+
+This removes the reviewer-facing contradiction where a cell could be labeled R1 while physically sitting in an R2/R3 row.
+
 ## Stronger Results Section
 
 Replace "most mathematically powerful" with a clearer takeaway:
@@ -70,7 +81,7 @@ Important implementation audit: the code reproduces the core experimental mechan
 
 ## Suggested Future Work
 
-- Add a "data poisoning vs evasion" comparison panel.
+- Keep the "data poisoning vs evasion" separation explicit in the visual.
 - Validate the risk scores with consistent MNIST experiments and literature-backed case studies.
 - Add defenses beside each block: provenance, deduplication, anomaly detection, trusted data snapshots, robust aggregation, backdoor scanning, and retrieval-source auditing.
-- Extend the visual periodic table to LLM/RAG/federated settings, which are now more relevant than only image classifiers.
+- Extend the risk matrix to LLM/RAG/federated settings, which are now more relevant than only image classifiers.

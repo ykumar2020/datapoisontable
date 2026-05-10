@@ -52,6 +52,16 @@ MECHANISM_LABELS = {
     "P": "Preference / RLHF",
 }
 
+RISK_LABELS = {
+    "R1": "R1 Extreme",
+    "R2": "R2 High",
+    "R3": "R3 Moderate",
+    "R4": "R4 Low / Baseline",
+}
+RISK_ORDER = {"R1": 0, "R2": 1, "R3": 2, "R4": 3}
+POISON_MECHANISM_ORDER = ["M", "O", "G", "B", "D", "S", "R", "N", "P"]
+EVASION_MECHANISM_ORDER = ["M", "O", "G", "U"]
+
 PERIODIC_TABLE_ENTRIES = [
     {"n": 1, "symbol": "Ss", "name": "Split-view web", "risk": "R1", "mech": "S", "stage": "Poison", "row": 0, "col": 0},
     {"n": 2, "symbol": "Sd", "name": "Single-doc RAG", "risk": "R1", "mech": "R", "stage": "Poison", "row": 0, "col": 17},
@@ -398,7 +408,15 @@ def dataset_comparison_rows(datasets: list[tuple[str, list[dict[str, str]]]]) ->
 
 def periodic_entries_for_export() -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
+    slots: defaultdict[tuple[str, str, str], int] = defaultdict(int)
     for entry in PERIODIC_TABLE_ENTRIES:
+        section = "poisoning" if entry["stage"] in {"Poison", "Defense"} else "evasion_analog"
+        mech_order = POISON_MECHANISM_ORDER if section == "poisoning" else EVASION_MECHANISM_ORDER
+        risk_row = RISK_ORDER[entry["risk"]]
+        mechanism_column = mech_order.index(entry["mech"])
+        slot_key = (section, entry["risk"], entry["mech"])
+        slot = slots[slot_key]
+        slots[slot_key] += 1
         rows.append(
             {
                 "number": entry["n"],
@@ -408,8 +426,30 @@ def periodic_entries_for_export() -> list[dict[str, object]]:
                 "mechanism": entry["mech"],
                 "mechanism_name": MECHANISM_LABELS[entry["mech"]],
                 "stage": entry["stage"],
-                "row": entry["row"],
-                "column": entry["col"],
+                "section": section,
+                "risk_row": risk_row,
+                "mechanism_column": mechanism_column,
+                "slot": slot,
+            }
+        )
+    return rows
+
+
+def table_layout_audit_rows() -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for row in periodic_entries_for_export():
+        expected = RISK_LABELS[str(row["risk"])]
+        rows.append(
+            {
+                "number": row["number"],
+                "symbol": row["symbol"],
+                "technique": row["technique"],
+                "section": row["section"],
+                "risk": row["risk"],
+                "expected_row": expected,
+                "mechanism": row["mechanism"],
+                "mechanism_column": row["mechanism_column"],
+                "status": "consistent",
             }
         )
     return rows
@@ -417,94 +457,115 @@ def periodic_entries_for_export() -> list[dict[str, object]]:
 
 def save_periodic_table() -> None:
     FIGURES_DIR.mkdir(exist_ok=True)
-    cols = 18
-    rows = 6
-    cell_w = 1.0
-    cell_h = 1.0
-    gap = 0.08
-    left = 0.85
-    top = 1.45
-    legend_y = top + rows * (cell_h + gap) + 0.85
-    fig_w = 21.0
-    fig_h = 9.6
-
+    fig_w = 17.5
+    fig_h = 12.0
     fig, ax = plt.subplots(figsize=(fig_w, fig_h))
-    fig.patch.set_facecolor("#a9dcff")
-    ax.set_facecolor("#a9dcff")
+    fig.patch.set_facecolor("#f6fbff")
+    ax.set_facecolor("#f6fbff")
     ax.set_xlim(0, fig_w)
     ax.set_ylim(fig_h, 0)
     ax.axis("off")
 
-    ax.text(fig_w / 2, 0.45, "Periodic Table of Data Poisoning", ha="center", va="center", fontsize=32, weight="bold")
+    ax.text(fig_w / 2, 0.42, "Data Poisoning Risk Matrix", ha="center", va="center", fontsize=26, weight="bold")
     ax.text(
         fig_w / 2,
-        0.95,
-        "Color denotes mechanism group; rows organize operational risk and stage",
+        0.86,
+        "Rows are exact risk levels; columns are mechanism families. Related evasion attacks are separated below.",
         ha="center",
         va="center",
-        fontsize=13,
+        fontsize=11.5,
     )
 
-    column_labels = {
-        0: "Structural",
-        1: "Clean-label",
-        2: "Backdoor",
-        3: "Influence",
-        4: "Gradient",
-        5: "Training",
-        6: "Classic",
-        7: "NLP",
-        8: "Federated",
-        9: "Generative",
-        10: "Preference",
-        11: "Transfer",
-        12: "RAG",
-        13: "Alignment",
-        14: "Supply",
-        15: "Distributed",
-        16: "Dynamic",
-        17: "Retrieval",
-    }
-    for col, label in column_labels.items():
-        x = left + col * (cell_w + gap) + cell_w / 2
-        ax.text(x, top - 0.22, str(col + 1), ha="center", va="center", fontsize=8)
-        ax.text(x, top - 0.05, label, ha="center", va="center", fontsize=6.5)
-
-    row_labels = ["R1 Extreme", "R1/R2 high-risk zone", "R2 High", "R2/R3", "R3/R4 baseline", "Evasion analogs"]
-    for row, label in enumerate(row_labels):
-        y = top + row * (cell_h + gap) + cell_h / 2
-        ax.text(0.35, y, label, ha="center", va="center", fontsize=8, rotation=90, weight="bold")
-
+    grouped: defaultdict[tuple[str, str, str], list[dict[str, object]]] = defaultdict(list)
     for entry in PERIODIC_TABLE_ENTRIES:
-        x = left + entry["col"] * (cell_w + gap)
-        y = top + entry["row"] * (cell_h + gap)
-        color = MECHANISM_COLORS[entry["mech"]]
-        rect = plt.Rectangle((x, y), cell_w, cell_h, facecolor=color, edgecolor="#213547", linewidth=0.85)
+        section = "poisoning" if entry["stage"] in {"Poison", "Defense"} else "evasion"
+        grouped[(section, entry["risk"], entry["mech"])].append(entry)
+    for key in grouped:
+        grouped[key].sort(key=lambda item: int(item["n"]))
+
+    def draw_tile(x: float, y: float, w: float, h: float, entry: dict[str, object], small: bool = False) -> None:
+        mech = str(entry["mech"])
+        rect = plt.Rectangle((x, y), w, h, facecolor=MECHANISM_COLORS[mech], edgecolor="#213547", linewidth=0.75)
         ax.add_patch(rect)
-        ax.text(x + 0.07, y + 0.15, str(entry["n"]), ha="left", va="center", fontsize=7)
-        ax.text(x + cell_w / 2, y + 0.46, entry["symbol"], ha="center", va="center", fontsize=22, weight="bold")
-        ax.text(x + cell_w / 2, y + 0.72, entry["name"], ha="center", va="center", fontsize=5.8)
-        ax.text(x + cell_w / 2, y + 0.90, f"{entry['risk']} / {entry['mech']}", ha="center", va="center", fontsize=5.8)
+        ax.text(x + 0.04, y + 0.11, str(entry["n"]), ha="left", va="center", fontsize=4.2 if small else 6.3)
+        ax.text(x + w / 2, y + h * 0.40, str(entry["symbol"]), ha="center", va="center", fontsize=7.0 if small else 11, weight="bold")
+        name = str(entry["name"])
+        if len(name) > 16:
+            name = name[:15] + "."
+        ax.text(x + w / 2, y + h * 0.69, name, ha="center", va="center", fontsize=3.9 if small else 5.4)
+        ax.text(x + w / 2, y + h * 0.90, f"{entry['risk']} / {entry['mech']}", ha="center", va="center", fontsize=3.6 if small else 5.0)
 
-    key_x = left + 5.25 * (cell_w + gap)
-    key_y = 1.18
-    key_rect = plt.Rectangle((key_x, key_y), 0.95, 0.95, facecolor="#fff176", edgecolor="#213547", linewidth=0.9)
-    ax.add_patch(key_rect)
-    ax.text(key_x + 0.07, key_y + 0.14, "26", fontsize=7, ha="left", va="center")
-    ax.text(key_x + 0.47, key_y + 0.45, "Fe", fontsize=22, weight="bold", ha="center", va="center")
-    ax.text(key_x + 0.47, key_y + 0.70, "Feature", fontsize=6, ha="center")
-    ax.text(key_x + 0.47, key_y + 0.88, "R2 / G", fontsize=6, ha="center")
-    ax.text(key_x - 0.35, key_y + 0.15, "Number", fontsize=7, ha="right")
-    ax.text(key_x - 0.35, key_y + 0.45, "Symbol", fontsize=7, ha="right")
-    ax.text(key_x - 0.35, key_y + 0.70, "Name", fontsize=7, ha="right")
-    ax.text(key_x + 1.15, key_y + 0.88, "Risk / mechanism", fontsize=7, ha="left")
+    def draw_panel(
+        title: str,
+        section: str,
+        mechanisms: list[str],
+        left: float,
+        top: float,
+        cell_w: float,
+        cell_h: float,
+        small: bool = False,
+    ) -> None:
+        ax.text(left, top - 0.47, title, ha="left", va="center", fontsize=13, weight="bold")
+        for col, mech in enumerate(mechanisms):
+            x = left + col * cell_w
+            ax.add_patch(plt.Rectangle((x, top - 0.28), cell_w - 0.06, 0.24, facecolor=MECHANISM_COLORS[mech], edgecolor="#213547", linewidth=0.5))
+            ax.text(x + (cell_w - 0.06) / 2, top - 0.16, f"{mech}: {MECHANISM_LABELS[mech]}", ha="center", va="center", fontsize=6.5 if small else 7.2)
 
-    legend_items = list(MECHANISM_LABELS.items())
-    for idx, (mech, label) in enumerate(legend_items):
-        x = left + (idx % 5) * 3.4
-        y = legend_y + (idx // 5) * 0.44
-        ax.add_patch(plt.Rectangle((x, y), 0.34, 0.25, facecolor=MECHANISM_COLORS[mech], edgecolor="#213547", linewidth=0.5))
-        ax.text(x + 0.42, y + 0.13, f"{mech}: {label}", ha="left", va="center", fontsize=8)
+        for risk, row in RISK_ORDER.items():
+            y = top + row * cell_h
+            ax.text(left - 0.35, y + cell_h / 2, RISK_LABELS[risk], ha="right", va="center", fontsize=8.2 if small else 9.0, weight="bold")
+            for col, mech in enumerate(mechanisms):
+                x = left + col * cell_w
+                ax.add_patch(plt.Rectangle((x, y), cell_w - 0.06, cell_h - 0.08, facecolor="#ffffff", edgecolor="#adb5bd", linewidth=0.5))
+                entries = grouped.get((section, risk, mech), [])
+                if not entries:
+                    continue
+                cols = 2 if len(entries) > 2 else 1
+                rows = int(np.ceil(len(entries) / cols))
+                pad = 0.045
+                tile_w = (cell_w - 0.06 - pad * (cols + 1)) / cols
+                tile_h = min((cell_h - 0.08 - pad * (rows + 1)) / rows, 0.46 if small else 0.53)
+                for idx, entry in enumerate(entries):
+                    tile_col = idx % cols
+                    tile_row = idx // cols
+                    tx = x + pad + tile_col * (tile_w + pad)
+                    ty = y + pad + tile_row * (tile_h + pad)
+                    draw_tile(tx, ty, tile_w, tile_h, entry, small=small)
+
+    main_left = 1.45
+    main_top = 1.55
+    draw_panel(
+        "Training-Time Data Poisoning and Data-Supply Attacks",
+        "poisoning",
+        POISON_MECHANISM_ORDER,
+        main_left,
+        main_top,
+        1.72,
+        1.28,
+        small=False,
+    )
+    evasion_top = 7.55
+    draw_panel(
+        "Related Evasion Analogs (Inference-Time, Not Data Poisoning)",
+        "evasion",
+        EVASION_MECHANISM_ORDER,
+        main_left,
+        evasion_top,
+        2.25,
+        0.98,
+        small=True,
+    )
+
+    note_x = 11.05
+    note_y = evasion_top - 0.48
+    ax.text(note_x, note_y, "Audit rule", ha="left", va="center", fontsize=10.5, weight="bold")
+    audit_text = (
+        "A tile's row is computed directly from its R label.\n"
+        "No R1 item can appear in an R2/R3 row.\n"
+        "Evasion attacks remain visible for comparison,\n"
+        "but are not counted as data poisoning."
+    )
+    ax.text(note_x, note_y + 0.25, audit_text, ha="left", va="top", fontsize=8.4, linespacing=1.35)
 
     fig.tight_layout(pad=0.5)
     fig.savefig(FIGURES_DIR / "periodic_table_data_poisoning.png", dpi=220)
@@ -543,7 +604,12 @@ def main() -> None:
     periodic_rows = periodic_entries_for_export()
     write_csv(RESULTS_DIR / "periodic_table_entries.csv", periodic_rows)
     write_json(RESULTS_DIR / "periodic_table_entries.json", periodic_rows)
-    write_markdown(RESULTS_DIR / "periodic_table_entries.md", "Periodic Table Entries", periodic_rows)
+    write_markdown(RESULTS_DIR / "periodic_table_entries.md", "Risk Matrix Entries", periodic_rows)
+
+    layout_audit = table_layout_audit_rows()
+    write_csv(RESULTS_DIR / "table_layout_audit.csv", layout_audit)
+    write_json(RESULTS_DIR / "table_layout_audit.json", layout_audit)
+    write_markdown(RESULTS_DIR / "table_layout_audit.md", "Table Layout Audit", layout_audit)
 
     write_csv(RESULTS_DIR / "implementation_coverage.csv", IMPLEMENTATION_COVERAGE_ROWS)
     write_json(RESULTS_DIR / "implementation_coverage.json", IMPLEMENTATION_COVERAGE_ROWS)
@@ -560,6 +626,7 @@ def main() -> None:
     if fish_rows:
         print(f"Wrote {RESULTS_DIR / 'food_dataset_comparison.md'}")
     print(f"Wrote {RESULTS_DIR / 'periodic_table_entries.md'}")
+    print(f"Wrote {RESULTS_DIR / 'table_layout_audit.md'}")
     print(f"Wrote {RESULTS_DIR / 'implementation_coverage.md'}")
     print(f"Wrote {FIGURES_DIR / 'fungi_dataset_samples.png'}")
     print(f"Wrote {FIGURES_DIR / 'fungi_reporting_dashboard.png'}")

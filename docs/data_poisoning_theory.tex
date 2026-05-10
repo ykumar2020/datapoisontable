@@ -12,7 +12,7 @@
 
 \graphicspath{{../figures/}{figures/}}
 
-\title{Periodic Table of Data Poisoning: A Risk-Based Framework for AI Security}
+\title{Data Poisoning Risk Matrix: A Periodic-Table-Inspired Framework for AI Security}
 
 \author{
 \IEEEauthorblockN{Yulia Kumar}
@@ -38,7 +38,7 @@ juli@kean.edu}
 \maketitle
 
 \begin{abstract}
-Data poisoning attacks manipulate training, fine-tuning, retrieval, feedback, or model-supply-chain data so that a learned model behaves incorrectly after deployment. This paper presents a compact ``Periodic Table of Data Poisoning'' framework that separates training-time poisoning from test-time evasion, groups techniques by mechanism, and scores operational danger using impact, stealth, scalability, and cost-efficiency. The framework is supported by executable experiments on MNIST, fungi, and fish freshness images. The food-image experiments use lazy PyTorch data loading, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, all original poster evasion methods, and ten additional poisoning or evasion methods shared during project development. Results show that aggregate clean accuracy is not enough: subpopulation poisoning, clean-label backdoors, and conditional evasion can create severe targeted failures even when ordinary validation metrics look acceptable.
+Data poisoning attacks manipulate training, fine-tuning, retrieval, feedback, or model-supply-chain data so that a learned model behaves incorrectly after deployment. This paper presents a compact, periodic-table-inspired risk matrix that separates training-time poisoning from test-time evasion, groups techniques by mechanism, and scores operational danger using impact, stealth, scalability, and cost-efficiency. Unlike a literal Mendeleev layout, every matrix coordinate is functional: each row is a risk level and each column is a mechanism family. The framework is supported by executable experiments on MNIST, fungi, and fish freshness images. The food-image experiments use lazy PyTorch data loading, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, all original poster evasion methods, and ten additional poisoning or evasion methods shared during project development. Results show that aggregate clean accuracy is not enough: subpopulation poisoning, clean-label backdoors, and conditional evasion can create severe targeted failures even when ordinary validation metrics look acceptable.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -47,18 +47,18 @@ data poisoning, backdoor attacks, adversarial machine learning, fungi classifica
 
 \section{Introduction}
 
-Machine learning systems increasingly depend on data that is scraped, labeled, filtered, retrieved, fine-tuned, or reused across organizations. These data pipelines create an attack surface. A poisoning attacker does not need to break the model code; changing a small portion of the data can change the learned behavior. This project organizes that landscape into a risk-based periodic table for AI security presentations.
+Machine learning systems increasingly depend on data that is scraped, labeled, filtered, retrieved, fine-tuned, or reused across organizations. These data pipelines create an attack surface. A poisoning attacker does not need to break the model code; changing a small portion of the data can change the learned behavior. This project organizes that landscape into a risk-by-mechanism matrix for AI security presentations.
 
 The key correction is stage separation. Poisoning methods modify data before or during training, fine-tuning, retrieval, or alignment. Evasion methods such as FGSM, PGD, DeepFool, Carlini-Wagner, Boundary, One-Pixel, UAP, JSMA, ZOO, SparseFool, HopSkipJump, and Adversarial Patch modify inputs at inference time. They are related adversarial ML techniques, but they are not data poisoning unless the adversarial examples are fed back into training or adaptation.
 
 This paper is organized around three research questions:
 \begin{itemize}
-    \item \textbf{RQ1:} How can data poisoning and related adversarial methods be organized so that mechanism, attack stage, and operational danger are visible at a glance?
+    \item \textbf{RQ1:} How can data poisoning and related adversarial methods be organized so that mechanism, attack stage, and operational danger are visible at a glance without forcing contradictory visual coordinates?
     \item \textbf{RQ2:} When these methods are implemented on real image data, which attacks create the largest targeted failures under comparable evaluation metrics?
     \item \textbf{RQ3:} What implementation and evaluation choices are necessary to avoid misleading results when moving from a simple benchmark to a realistic fungi image task?
 \end{itemize}
 
-The contributions are: (i) a mechanism-and-risk taxonomy for poisoning and related attacks; (ii) implementations for the original poster methods plus ten additional shared methods, audited in \texttt{results/implementation\_coverage.*}; (iii) a transfer-learning fungi experiment that avoids in-memory dataset loading and weak from-scratch baselines; and (iv) reporting artifacts, tables, and graphs for conference presentation.
+The contributions are: (i) a mechanism-and-risk taxonomy for poisoning and related attacks; (ii) implementations for the original poster methods plus ten additional shared methods, audited in \texttt{results/implementation\_coverage.*}; (iii) a transfer-learning fungi experiment that avoids in-memory dataset loading and weak from-scratch baselines; and (iv) reporting artifacts, tables, graphs, and a layout audit for conference presentation.
 
 \section{Related Work}
 
@@ -78,18 +78,18 @@ Let \(D=\{(x_i,y_i)\}_{i=1}^{n}\) be a clean training set and let \(\theta^\star
    & \theta^\star=\arg\min_{\theta}\mathcal{L}(\theta;D_{\mathrm{clean}}\cup D_{\mathrm{poison}}),
 \end{aligned}
 \end{equation}
-where \(\mathcal{A}\) is the attacker's objective and \(\mathcal{C}\) encodes access constraints. The table columns are mechanism families: gradient-based (G), optimization-based (O), minimal/structural (M), universal/transferable (U), backdoor/trigger (B), supply-chain (S), retrieval/RAG (R), and preference or alignment-data poisoning (P).
+where \(\mathcal{A}\) is the attacker's objective and \(\mathcal{C}\) encodes access constraints. The table columns are mechanism families: gradient-based (G), optimization-based (O), minimal/structural (M), universal/transferable (U), backdoor/trigger (B), distributed/federated (D), supply-chain (S), retrieval/RAG (R), generative (N), and preference or alignment-data poisoning (P).
 
 Operational danger is scored as
 \begin{equation}
 \mathrm{DangerScore}=I\times S\times G\times C,
 \end{equation}
-where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is attacker cost-efficiency. Risk levels are R1: 400--625, R2: 200--399, R3: 100--199, and R4: below 100. Figure~\ref{fig:periodic} is the final periodic-table artifact. Each element-like cell contains an index, a short symbol, the attack family, and its risk/mechanism label; colors denote mechanism groups.
+where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is attacker cost-efficiency. Risk levels are R1: 400--625, R2: 200--399, R3: 100--199, and R4: below 100. Figure~\ref{fig:periodic} is the final visual artifact. Each element-like cell contains an index, a short symbol, the attack family, and its risk/mechanism label; colors denote mechanism groups. The layout deliberately abandons the literal chemical-table geometry: every row is computed from the attack's R label, and inference-time evasion analogs are placed in a separate companion panel rather than mixed into the poisoning grid.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.98\textwidth]{periodic_table_data_poisoning.png}
-\caption{Final chemical-table-style Periodic Table of Data Poisoning. The cell color denotes mechanism group: minimal/structural, optimization, gradient, universal/transfer, backdoor, distributed, supply-chain, retrieval, generative, or preference/RLHF.}
+\caption{Final risk-by-mechanism Data Poisoning Risk Matrix. Rows are exact operational risk levels and columns are mechanism groups; related inference-time evasion analogs are separated below the poisoning grid and are not counted as data poisoning.}
 \label{fig:periodic}
 \end{figure*}
 
@@ -141,7 +141,7 @@ The fungi code addresses common pitfalls. It uses a custom \texttt{Dataset} and 
 
 \section{Results}
 
-Table~\ref{tab:results} gives a compact at-a-glance comparison. Full CSV, JSON, Markdown, and additional plots are generated under \texttt{results/} and \texttt{figures/}.
+Table~\ref{tab:results} gives a compact at-a-glance comparison. Full CSV, JSON, Markdown, and additional plots are generated under \texttt{results/} and \texttt{figures/}. The file \texttt{results/table\_layout\_audit.*} verifies that each visual cell's risk row matches the R label printed inside the cell.
 
 \begin{table*}[t]
 \centering
@@ -204,7 +204,7 @@ The fish freshness extension uses the same method table on a much smaller split:
 
 \subsection{Answers to Research Questions}
 
-\textbf{RQ1:} The periodic-table representation answers the organization question by placing attacks into mechanism-colored element cells and labeling each cell by risk and stage. This makes it clear which methods are training-time poisoning, which are test-time evasion analogs, and which categories deserve higher operational concern.
+\textbf{RQ1:} The risk matrix answers the organization question by making every coordinate auditable: the vertical coordinate is exactly R1, R2, R3, or R4; the horizontal coordinate is the mechanism family; and the stage determines whether a method belongs in the poisoning grid or the separate evasion-analog panel. This removes arbitrary chemical-table gaps and prevents a cell labeled R1 from appearing in an R2 or R3 row.
 
 \textbf{RQ2:} On the fungi task, the largest evasion failures are PGD, DeepFool, and UAP with 1.0000 conditional untargeted success; JSMA reaches 0.9375 conditional targeted ASR and Carlini-Wagner reaches 0.7429. On the fish task, FGSM, PGD, DeepFool, Carlini-Wagner, and UAP reach 1.0000 conditional success, while the Sleeper-Agent-style backdoor reaches 0.8000 stealth-trigger ASR. These results answer RQ2 by showing that inference-time methods can be strongest under conditional evaluation, while subgroup and backdoor poisoning create the most important training-time targeted failures.
 
@@ -218,7 +218,7 @@ The implementation audit is intentionally conservative. The code reproduces the 
 
 \section{Conclusion}
 
-This paper answers the three research questions as follows. First, data poisoning can be organized as a chemical-table-style risk map by separating stage, mechanism, and operational danger. Second, the fungi and fish experiments show that PGD, DeepFool, UAP, JSMA, and Carlini-Wagner can produce the strongest evasion failures, while subpopulation poisoning and Sleeper-Agent-style backdoors produce the strongest training-time targeted failures. Third, realistic conclusions require careful engineering: lazy loading, transfer learning, latent-space poisoning, explicit implementation coverage, vectorized/batched attacks, and conditional success metrics. The final framework is suitable for a short IEEE-style AI security conference paper and for an at-a-glance presentation of operational risk.
+This paper answers the three research questions as follows. First, data poisoning can be organized as an auditable risk-by-mechanism matrix by separating stage, mechanism, and operational danger. Second, the fungi and fish experiments show that PGD, DeepFool, UAP, JSMA, and Carlini-Wagner can produce the strongest evasion failures, while subpopulation poisoning and Sleeper-Agent-style backdoors produce the strongest training-time targeted failures. Third, realistic conclusions require careful engineering: lazy loading, transfer learning, latent-space poisoning, explicit implementation coverage, vectorized/batched attacks, and conditional success metrics. The final framework is suitable for a short IEEE-style AI security conference paper and for an at-a-glance presentation of operational risk.
 
 \section*{Reproducibility and Safety}
 
@@ -226,7 +226,7 @@ The experiments are local and do not target deployed systems, private data, or p
 \texttt{python scripts/mnist\_attack\_comparison.py --download},
 \texttt{python scripts/fungi\_attack\_comparison.py}, and
 \texttt{python scripts/generate\_reporting\_artifacts.py}.
-The \texttt{fungi/} dataset and pretrained-weight cache are excluded from version control.
+The generated table-layout audit should contain only \texttt{consistent} statuses. The \texttt{fungi/} dataset and pretrained-weight cache are excluded from version control.
 
 \begin{thebibliography}{99}
 

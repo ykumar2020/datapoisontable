@@ -1,0 +1,55 @@
+# Table Layout Audit
+
+| number | symbol | technique | section | risk | expected_row | mechanism | mechanism_column | status |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Ss | Split-view web | poisoning | R1 | R1 Extreme | S | 5 | consistent |
+| 2 | Sd | Single-doc RAG | poisoning | R1 | R1 Extreme | R | 6 | consistent |
+| 3 | Fr | Frontrun web | poisoning | R1 | R1 Extreme | S | 5 | consistent |
+| 4 | Wa | WaNet | poisoning | R1 | R1 Extreme | B | 3 | consistent |
+| 5 | Rg | RAG poison | poisoning | R1 | R1 Extreme | R | 6 | consistent |
+| 6 | Ns | Nightshade | poisoning | R1 | R1 Extreme | N | 7 | consistent |
+| 7 | Fl | Fed replace | poisoning | R1 | R1 Extreme | D | 4 | consistent |
+| 8 | Db | DBA | poisoning | R1 | R1 Extreme | D | 4 | consistent |
+| 9 | Sp | Subpopulation | poisoning | R2 | R2 High | M | 0 | consistent |
+| 10 | Wb | Witches Brew | poisoning | R2 | R2 High | G | 2 | consistent |
+| 11 | Bn | BadNets | poisoning | R2 | R2 High | B | 3 | consistent |
+| 12 | Hb | Hidden backdoor | poisoning | R2 | R2 High | B | 3 | consistent |
+| 13 | Sa | Sleeper agent | poisoning | R1 | R1 Extreme | B | 3 | consistent |
+| 14 | Bv | Best-of-Venom | poisoning | R2 | R2 High | P | 8 | consistent |
+| 15 | Rl | RLHF backdoor | poisoning | R2 | R2 High | P | 8 | consistent |
+| 16 | Td | TrojDiff | poisoning | R2 | R2 High | N | 7 | consistent |
+| 17 | Ip | Input-aware BD | poisoning | R2 | R2 High | B | 3 | consistent |
+| 18 | Gg | Gradient RAG | poisoning | R2 | R2 High | R | 6 | consistent |
+| 19 | Tf | Target label flip | poisoning | R3 | R3 Moderate | M | 0 | consistent |
+| 20 | Fc | Feature collision | poisoning | R1 | R1 Extreme | O | 1 | consistent |
+| 21 | Bp | Bullseye poly | poisoning | R2 | R2 High | O | 1 | consistent |
+| 22 | If | Influence | poisoning | R2 | R2 High | O | 1 | consistent |
+| 23 | Hp | Hessian | poisoning | R2 | R2 High | O | 1 | consistent |
+| 24 | Cp | Curriculum | poisoning | R2 | R2 High | O | 1 | consistent |
+| 25 | Cl | Clean-label BD | poisoning | R1 | R1 Extreme | B | 3 | consistent |
+| 26 | Nl | NLP trigger | poisoning | R2 | R2 High | B | 3 | consistent |
+| 27 | Al | ALIE | poisoning | R2 | R2 High | D | 4 | consistent |
+| 28 | Gd | Glaze | poisoning | R3 | R3 Moderate | N | 7 | consistent |
+| 29 | Dp | DPO poison | poisoning | R3 | R3 Moderate | P | 8 | consistent |
+| 30 | Rp | Reward poison | poisoning | R3 | R3 Moderate | P | 8 | consistent |
+| 31 | Lf | Random label flip | poisoning | R4 | R4 Low / Baseline | M | 0 | consistent |
+| 32 | Svm | SVM poison | poisoning | R4 | R4 Low / Baseline | O | 1 | consistent |
+| 33 | Ko | KNN poison | poisoning | R3 | R3 Moderate | M | 0 | consistent |
+| 34 | Oo | Outlier inject | poisoning | R4 | R4 Low / Baseline | M | 0 | consistent |
+| 35 | RgN | Regression poison | poisoning | R4 | R4 Low / Baseline | O | 1 | consistent |
+| 36 | Ts | Time-series | poisoning | R3 | R3 Moderate | M | 0 | consistent |
+| 37 | Cf | Collab filter | poisoning | R2 | R2 High | M | 0 | consistent |
+| 38 | Js | JSMA | evasion_analog | R3 | R3 Moderate | M | 0 | consistent |
+| 39 | Sf | SparseFool | evasion_analog | R4 | R4 Low / Baseline | M | 0 | consistent |
+| 40 | Fg | FGSM | evasion_analog | R3 | R3 Moderate | G | 2 | consistent |
+| 41 | Pg | PGD | evasion_analog | R2 | R2 High | G | 2 | consistent |
+| 42 | Df | DeepFool | evasion_analog | R3 | R3 Moderate | M | 0 | consistent |
+| 43 | Cw | Carlini-Wagner | evasion_analog | R2 | R2 High | O | 1 | consistent |
+| 44 | Ead | Elastic Net | evasion_analog | R2 | R2 High | O | 1 | consistent |
+| 45 | Zo | ZOO | evasion_analog | R3 | R3 Moderate | O | 1 | consistent |
+| 46 | Bd | Boundary | evasion_analog | R3 | R3 Moderate | O | 1 | consistent |
+| 47 | Op | One-Pixel | evasion_analog | R4 | R4 Low / Baseline | M | 0 | consistent |
+| 48 | Ap | Adv. patch | evasion_analog | R2 | R2 High | U | 3 | consistent |
+| 49 | Uap | Universal pert. | evasion_analog | R2 | R2 High | U | 3 | consistent |
+| 50 | Eot | EOT | evasion_analog | R2 | R2 High | U | 3 | consistent |
+| 51 | St | Surrogate transfer | evasion_analog | R2 | R2 High | U | 3 | consistent |
