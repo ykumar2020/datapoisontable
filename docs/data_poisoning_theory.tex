@@ -754,6 +754,32 @@ The results support three security lessons. First, aggregate accuracy is not a s
 
 The implementation audit is intentionally conservative. The code reproduces the core mechanism of all poster methods plus ten additional shared methods: Poison Frogs, Sleeper-Agent-style backdoor, Adversarial Patch, Witches' Brew-style gradient matching, JSMA, ZOO, SparseFool-style sparse boundary search, EAD, subpopulation poisoning, and BadNets. It does not claim industrial-scale transferability, full physical-world patch robustness, or long-horizon LLM sleeper-agent persistence.
 
+\subsection{Synthesis from Taxonomy Elicitation}
+
+The extended candidate lists used while building the table are useful as elicitation material, but they are not treated as primary literature evidence. Their value is that many independent descriptions converged on the same operational themes. First, the highest-risk poisoning entries tend to be stealth-preserving: clean-label feature collision, bullseye/polytope variants, clean-label backdoors, and gradient-matching poisons all aim to avoid obvious label errors while moving the model in feature or gradient space. Second, trigger attacks form a spectrum from visible patch backdoors to hidden, semantic, augmentation-stable, or sleeper-style triggers; the common defense failure is that clean validation accuracy can remain high while triggered behavior is uncontrolled. Third, universal and transfer attacks, including adversarial patches, UAP, EOT, and surrogate-transfer attacks, are best interpreted as stress tests unless their artifacts are inserted into training or retrieval data. Fourth, minimal attacks such as label flipping, KNN/geometric poisoning, JSMA, One-Pixel, and SparseFool are valuable because they reveal how little structural change may be needed, but their operational risk depends strongly on scale, access, and detectability.
+
+The elicitation also exposed taxonomy pressure points that shaped the final table. Some methods can reasonably fit more than one mechanism column: Poison Frogs can be described as optimization-based, gradient-assisted, or feature-space minimal depending on the implementation; adversarial patch can be localized/minimal in geometry but universal in reuse; and influence-function attacks are optimization attacks that rely on first- or second-order gradient information. Rather than forcing a single universal truth, the table assigns the mechanism that is most useful for the threat model and explains implementation fidelity in Table~\ref{tab:fidelity}. The strongest future extension is an ecosystem-stage axis: pretraining poisoning, fine-tuning poisoning, federated/update poisoning, retrieval poisoning, preference/alignment poisoning, and inference-time evasion have different defenders, observability, and recovery options even when their mathematics look similar.
+
+\begin{table*}[t]
+\centering
+\caption{Cross-cutting themes distilled from the extended candidate-attack elicitation. The table records how the material informed the manuscript rather than treating generated suggestions as citations.}
+\label{tab:elicitationthemes}
+\small
+\begin{tabular}{p{0.19\textwidth}p{0.30\textwidth}p{0.42\textwidth}}
+\toprule
+Theme & Representative attacks & How it is reflected in this paper \\
+\midrule
+Feature-space stealth & Poison Frogs, feature collision, bullseye/polytope, clean-label backdoor & R1/R2 clean-label entries; true latent-space feature collision implementation; warning that label audits are insufficient \\
+Gradient and influence control & Witches' Brew, MetaPoison, influence functions, Hessian/eigenvector poisoning, gradient ascent poisoning & Gradient family G, Witches' Brew-style implementation, and future scope for full second-order poison optimization \\
+Trigger persistence & BadNets, clean-label backdoor, hidden trigger, WaNet, semantic backdoor, sleeper-agent-style attacks & Backdoor family B and triggered-test evaluation; explicit style-variant limitation for Sleeper-Agent-style results \\
+Universal and physical robustness & Adversarial patch, UAP, EOT, surrogate transfer, spectral/transferable poisoning & Separate evasion analog panel plus discussion that universal artifacts become poisoning only when reused in data pipelines \\
+Minimal structural change & Label flipping, KNN/geometric poisoning, ALIE, One-Pixel, JSMA, SparseFool, feature corruption & Minimal/structural family M and perturbation-footprint reporting \\
+System and ecosystem attacks & Federated gradient backdoors, RAG poisoning, supply-chain/pretraining poisoning, generative latent poisoning, preference poisoning & Separate mechanism families D, S, R, N, and P; future journal scope beyond the image pilots \\
+Out-of-scope but related privacy/system attacks & Model extraction, membership inference, replay, sponge/availability examples & Mentioned only as boundary cases because they target privacy, API cloning, repeated inputs, or resource exhaustion rather than classic data poisoning \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
 \section{Limitations}
 
 Several limitations matter before journal submission. First, the fish dataset is very small: only 40 images total and 10 validation images after the deterministic split. Fish results are therefore pilot evidence and implementation checks, not statistically powered estimates. Second, the fungi baseline accuracy is modest at 0.6667, which means attack effects must be interpreted alongside baseline instability and clean-correct conditional metrics. Third, the current food-image artifact set reports deterministic single-seed pilot runs. A journal version should execute the seed sets in Table~\ref{tab:seeds}, report mean \(\pm\) standard deviation for every metric, and regenerate all bar plots with seed-level error bars. Fourth, several implemented attacks are explicitly style variants or approximations as documented in Table~\ref{tab:fidelity}. Fifth, the paper includes evasion analogs for stress testing and comparison, but those methods are not counted as data poisoning proper unless their outputs enter a training, retrieval, or adaptation loop. Finally, the taxonomy includes literature-level entries for RAG, supply-chain, federated, generative, and alignment poisoning that are not all executed in the image experiments.
