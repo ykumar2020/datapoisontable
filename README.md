@@ -7,7 +7,7 @@ The original poster framed several test-time adversarial examples as data poison
 - **Data poisoning** changes training, fine-tuning, feedback, retrieval, or supply-chain data.
 - **Backdoors** are a high-risk poisoning subfamily because they preserve normal accuracy while adding trigger-activated behavior.
 - **Evasion attacks** such as FGSM, PGD, CW, DeepFool, Boundary, One-Pixel, and UAP are related adversarial ML techniques, but they are not data poisoning unless used to craft poisoned training samples.
-- **The final visual is a strict risk-by-mechanism matrix, not a literal Mendeleev table:** rows are exact `R1`-`R4` levels, columns are the mechanism families, and evasion analogs are separated from the poisoning grid.
+- **The final visual is a strict risk-by-mechanism matrix, not a literal Mendeleev table:** rows encode this study's assigned `R1`-`R4` levels, columns are the mechanism families, and evasion analogs are separated from the poisoning grid.
 
 ## Contents
 
@@ -43,6 +43,7 @@ The script uses real MNIST data through `torchvision`, trains real scikit-learn 
 - `figures/mnist_backdoor_examples.png`
 - `figures/mnist_metric_bars.png`
 - `figures/mnist_confusion_*.png`
+- `figures/mnist_confusion_visible_patch_backdoor_triggered.png`
 
 The expanded comparison additionally writes:
 
@@ -50,6 +51,7 @@ The expanded comparison additionally writes:
 - `results/mnist_attack_comparison.json`
 - `results/mnist_attack_comparison.md`
 - `figures/mnist_attack_comparison_bars.png`
+- `figures/mnist_attack_comparison_split.png`
 - `figures/mnist_attack_examples.png`
 
 The experiment is local to this project: it uses a public research dataset, trains real classifiers, applies real poisoning transformations to the training split, and reports the exact poison rates and metrics used.
@@ -115,8 +117,10 @@ The script writes:
 - `results/citation_verification.csv`
 - `results/citation_verification.md`
 - `figures/fungi_attack_comparison_bars.png`
+- `figures/fungi_attack_comparison_split.png`
 - `figures/fungi_attack_examples.png`
 - `figures/fish_attack_comparison_bars.png`
+- `figures/fish_attack_comparison_split.png`
 - `figures/fish_attack_examples.png`
 - `figures/fungi_dataset_samples.png`
 - `figures/fungi_dataset_split.png`

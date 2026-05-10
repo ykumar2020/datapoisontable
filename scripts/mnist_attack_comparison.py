@@ -562,7 +562,15 @@ def save_attack_examples(
     for ax in axes.ravel():
         ax.axis("off")
     fig.suptitle("MNIST attack examples", fontsize=14)
-    fig.tight_layout()
+    fig.text(
+        0.5,
+        0.02,
+        "Perturbation magnitudes are chosen for visual interpretability; smaller settings are possible but are not the focus of this audit figure.",
+        ha="center",
+        fontsize=8,
+        color="#495057",
+    )
+    fig.tight_layout(rect=(0, 0.045, 1, 0.96))
     fig.savefig(path, dpi=220)
     plt.close(fig)
 

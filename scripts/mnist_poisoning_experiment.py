@@ -185,7 +185,7 @@ def save_backdoor_examples(
         axes[0, i].imshow(original[i], cmap="gray", vmin=0, vmax=1)
         axes[0, i].set_title(f"true {int(labels[idx])}", fontsize=8)
         axes[1, i].imshow(patched[i], cmap="gray", vmin=0, vmax=1)
-        axes[1, i].set_title(f"poison label {target_digit}", fontsize=8)
+        axes[1, i].set_title(f"target label {target_digit}", fontsize=8)
         rect = plt.Rectangle(
             (28 - trigger_size - 0.5, 28 - trigger_size - 0.5),
             trigger_size,
@@ -215,6 +215,29 @@ def save_confusion(clf: SGDClassifier, images: np.ndarray, labels: np.ndarray, p
     plt.close(fig)
 
 
+def save_triggered_confusion(
+    clf: SGDClassifier,
+    images: np.ndarray,
+    labels: np.ndarray,
+    target_digit: int,
+    trigger_size: int,
+    path: Path,
+    title: str,
+) -> None:
+    mask = labels != target_digit
+    triggered = apply_trigger(images[mask], trigger_size)
+    pred = clf.predict(flatten(triggered))
+    cm = confusion_matrix(labels[mask], pred, labels=list(range(10)))
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=list(range(10)))
+    fig, ax = plt.subplots(figsize=(6.8, 6.2))
+    disp.plot(ax=ax, cmap="Reds", colorbar=False, values_format="d")
+    ax.set_title(title)
+    ax.set_xlabel(f"Predicted label after {trigger_size}x{trigger_size} trigger")
+    fig.tight_layout()
+    fig.savefig(path, dpi=220)
+    plt.close(fig)
+
+
 def save_metric_bars(rows: list[dict[str, float | str]], path: Path) -> None:
     scenario_rows = [row for row in rows if row["scenario"] != "dataset"]
     labels = [str(row["scenario"]).replace("_", "\n") for row in scenario_rows]
@@ -224,14 +247,22 @@ def save_metric_bars(rows: list[dict[str, float | str]], path: Path) -> None:
     width = 0.36
     fig, ax = plt.subplots(figsize=(11, 4.8))
     ax.bar(x - width / 2, clean_acc, width, label="Clean accuracy")
-    ax.bar(x + width / 2, attack_metric, width, label="Attack metric")
+    ax.bar(x + width / 2, attack_metric, width, label="Attack-specific effect / ASR")
     ax.set_ylim(0, 1.05)
-    ax.set_ylabel("Rate")
+    ax.set_ylabel("Accuracy / normalized attack-specific effect")
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=8)
     ax.legend()
     ax.set_title("MNIST poisoning results")
-    fig.tight_layout()
+    fig.text(
+        0.5,
+        0.02,
+        "Orange bars are metric-specific: clean-accuracy drop, targeted confusion, or trigger ASR depending on scenario.",
+        ha="center",
+        fontsize=8,
+        color="#495057",
+    )
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
     fig.savefig(path, dpi=220)
     plt.close(fig)
 
@@ -261,7 +292,7 @@ def write_results(rows: list[dict[str, float | str]]) -> None:
     with md_path.open("w", encoding="utf-8") as f:
         f.write("# MNIST Poisoning Experiment Results\n\n")
         f.write("Dataset: real MNIST handwritten digits loaded through `torchvision.datasets.MNIST`.\n\n")
-        f.write("| Scenario | Poison rate | Clean accuracy | Attack metric | Value | Train size | Notes |\n")
+        f.write("| Scenario | Poison rate | Clean accuracy | Attack-specific metric | Value | Train size | Notes |\n")
         f.write("|---|---:|---:|---|---:|---:|---|\n")
         for row in rows:
             f.write(
@@ -398,6 +429,15 @@ def main() -> None:
         y_test,
         FIGURES_DIR / "mnist_confusion_visible_patch_backdoor.png",
         "MNIST visible patch-backdoor clean-test confusion matrix",
+    )
+    save_triggered_confusion(
+        backdoor_model,
+        x_test,
+        y_test,
+        args.target_digit,
+        args.trigger_size,
+        FIGURES_DIR / "mnist_confusion_visible_patch_backdoor_triggered.png",
+        "MNIST visible patch-backdoor triggered-test confusion matrix",
     )
 
     save_metric_bars(rows, FIGURES_DIR / "mnist_metric_bars.png")

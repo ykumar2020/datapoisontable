@@ -38,7 +38,7 @@ juli@kean.edu}
 \maketitle
 
 \begin{abstract}
-Data poisoning attacks manipulate training, fine-tuning, retrieval, feedback, or model-supply-chain data so that a learned model behaves incorrectly after deployment. This paper presents a compact, periodic-table-inspired risk matrix that separates training-time poisoning from test-time evasion, groups techniques by mechanism family, and scores operational danger using impact, stealth, scalability, and cost-efficiency. Unlike a literal Mendeleev layout, every matrix coordinate is functional: rows are exact risk levels, columns are the nine mechanism families, and related evasion attacks are placed in a separate comparison panel. The framework is supported by executable experiments on MNIST, fungi, and fish freshness images. The food-image experiments use lazy PyTorch data loading, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, all original poster evasion methods, and ten additional poisoning or evasion methods shared during project development. Results show that aggregate clean accuracy is not enough: subpopulation poisoning, clean-label backdoors, and conditional evasion can create severe targeted failures even when ordinary validation metrics look acceptable.
+Data poisoning attacks manipulate training, fine-tuning, retrieval, feedback, or model-supply-chain data so that a learned model behaves incorrectly after deployment. This paper presents a compact, periodic-table-inspired risk matrix that separates training-time poisoning from test-time evasion, groups techniques by mechanism family, and scores operational danger using impact, stealth, scalability, and cost-efficiency. Unlike a literal Mendeleev layout, every matrix coordinate is functional: rows encode this study's assigned operational risk levels, columns encode the nine mechanism families, and related evasion attacks are placed in a separate comparison panel. The framework is supported by executable experiments on MNIST, fungi, and fish freshness images. The food-image experiments use lazy PyTorch data loading, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, all original poster evasion methods, and ten additional poisoning or evasion methods shared during project development. Results show that aggregate clean accuracy is not enough: subpopulation poisoning, clean-label backdoors, and conditional evasion can create severe targeted failures even when ordinary validation metrics look acceptable.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -54,7 +54,7 @@ The key correction is stage separation. Poisoning methods modify data before or 
 This paper is organized around three research questions:
 \begin{itemize}
     \item \textbf{RQ1:} How can data poisoning and related adversarial methods be organized so that mechanism, attack stage, and operational danger are visible at a glance without forcing contradictory visual coordinates?
-    \item \textbf{RQ2:} When these methods are implemented on real image data, which attacks create the largest targeted failures under comparable evaluation metrics?
+    \item \textbf{RQ2:} When these methods are implemented on real image data, which attacks create the largest targeted failures under stage-aware normalized evaluation metrics?
     \item \textbf{RQ3:} What implementation and evaluation choices are necessary to avoid misleading results when moving from a simple benchmark to a realistic fungi image task?
 \end{itemize}
 
@@ -84,12 +84,12 @@ Operational danger is scored as
 \begin{equation}
 \mathrm{DangerScore}=I\times S\times G\times C,
 \end{equation}
-where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is attacker cost-efficiency. Risk levels are R1: 400--625, R2: 200--399, R3: 100--199, and R4: below 100. Figure~\ref{fig:periodic} is the paper-readable visual artifact. The poster/slide version additionally uses element-like cells with index, symbol, attack name, and risk/mechanism label. The layout deliberately abandons literal chemical-table geometry: a tile's row is computed directly from the printed R label, so no R1 item can appear in an R2/R3 row. Inference-time evasion analogs are separated from poisoning attacks. Glaze is retained as a defensive poisoning-like cloak, not as an ordinary malicious poisoning attack. Numbers are reference identifiers only, not chronology or severity ranking.
+where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is attacker cost-efficiency. Risk levels are R1: 400--625, R2: 200--399, R3: 100--199, and R4: below 100. Figure~\ref{fig:periodic} is the paper-readable visual artifact. The poster/slide version additionally uses element-like cells with index, symbol, attack name, and risk/mechanism label. The layout deliberately abandons literal chemical-table geometry: a tile's row is computed directly from the printed R label, so no R1 item can appear in an R2/R3 row. Inference-time evasion analogs are separated from poisoning attacks. Split-view web, frontend web, and single-document RAG entries are treated as data-source poisoning because they corrupt material later consumed by training, retrieval, or agent context rather than classic fixed training-set rows. Collaborative-filtering poisoning is represented as sparse profile-injection or shilling. Glaze is retained as a defensive poisoning-like cloak, not as an ordinary malicious poisoning attack. Numbers are reference identifiers only, not chronology or severity ranking.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.98\textwidth]{paper_taxonomy_panels.png}
-\caption{Paper-readable Data Poisoning Risk Matrix. Rows are exact R1--R4 operational risk levels and columns are mechanism families. The lower panel contains related inference-time evasion/transfer analogs for comparison, not poisoning attacks proper.}
+\caption{Paper-readable Data Poisoning Risk Matrix. Rows encode this study's assigned R1--R4 operational risk levels and columns encode mechanism families. The lower panel contains related inference-time evasion/transfer analogs for comparison, not poisoning attacks proper.}
 \label{fig:periodic}
 \end{figure*}
 
@@ -97,7 +97,7 @@ where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is atta
 
 \subsection{Datasets}
 
-MNIST provides a transparent benchmark with 60,000 training and 10,000 test handwritten digits~\cite{mnist}. The main visual-security experiment uses a local fungi dataset with two classes: edible and poisonous. A second food-safety dataset was added from the FoodDDP fish freshness setup: local folders \texttt{fresh2} and \texttt{non-fresh2} contain 40 horse-mackerel images total, and the safety-critical direction is non-fresh fish classified as fresh. Because the fish folder is flat rather than split into \texttt{train/val}, the runner creates a deterministic stratified 75/25 split. Table~\ref{tab:dataset} reports the actual fungi sample statistics generated from the local image folders. Figure~\ref{fig:samples} shows representative fungi images from the train and validation splits.
+MNIST provides a transparent benchmark with 60,000 training and 10,000 test handwritten digits~\cite{mnist}. The main visual-security experiment uses a local fungi dataset with two classes: edible and poisonous. Here ``poisonous'' is the biological mushroom label, not a data-poisoned image. A second food-safety dataset was added from the FoodDDP fish freshness setup: local folders \texttt{fresh2} and \texttt{non-fresh2} contain 40 horse-mackerel images total, and the safety-critical direction is non-fresh fish classified as fresh. Because the fish folder is flat rather than split into \texttt{train/val}, the runner creates a deterministic stratified 75/25 split. Table~\ref{tab:dataset} reports the actual fungi sample statistics generated from the local image folders; the split is stratified but small enough that confidence should be interpreted cautiously. Figure~\ref{fig:samples} shows representative fungi images from the train and validation splits.
 
 \begin{table}[t]
 \centering
@@ -119,7 +119,7 @@ Val & Poisonous & 48 & 259 & 194 & 11.3 \\
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{fungi_dataset_samples.png}
-\caption{Sample images from the local fungi dataset. The code uses lazy loading through a PyTorch \texttt{Dataset}; images are not stacked into memory before batching.}
+\caption{Sample images from the local fungi dataset. The word ``poisonous'' denotes the biological class label, not a poisoned training sample. The code uses lazy loading through a PyTorch \texttt{Dataset}; images are not stacked into memory before batching.}
 \label{fig:samples}
 \end{figure}
 
@@ -135,13 +135,31 @@ For poisoning and backdoors, the model is retrained on modified training data an
 \end{equation}
 This prevents inflated attack success caused by baseline errors.
 
+\begin{table}[t]
+\centering
+\caption{Stage-aware normalized attack-effect metrics.}
+\label{tab:metrics}
+\small
+\begin{tabular}{p{0.23\columnwidth}p{0.29\columnwidth}p{0.34\columnwidth}}
+\toprule
+Attack type & Metric & Higher means \\
+\midrule
+Label flip or availability poison & Baseline accuracy minus attacked clean accuracy, clipped to \([0,1]\) & More global degradation \\
+Targeted data poison & Target/source error rate or safety-critical confusion on clean validation data & Stronger targeted poisoning \\
+Backdoor poison & Triggered test samples predicted as target label & Stronger trigger control \\
+Clean-label poison & Target misclassification or critical confusion after retraining & Stronger clean-label effect \\
+Evasion analog & Conditional success rate in Eq.~(3) & Stronger inference-time failure \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Implementation Corrections}
 
 The fungi code addresses common pitfalls. It uses a custom \texttt{Dataset} and \texttt{DataLoader} for out-of-core batching. Clean-label Poison Frogs is implemented as latent feature optimization, minimizing feature distance while projecting the poison image back into an \(L_\infty\) ball around the base image. The poster methods are implemented as FGSM, PGD, DeepFool L2, Carlini-Wagner L2, Boundary/HopSkipJump search, One-Pixel differential evolution, and UAP. EAD uses a formal ISTA proximal solver: a gradient step on the smooth targeted objective followed by soft-thresholding for the \(L_1\) term and projection into the box and \(L_\infty\) constraints. JSMA saliency is vectorized across a batch. ZOO batches finite-difference coordinate probes. The adversarial patch is trained with random-location expectation over transformation.
 
 \section{Results}
 
-Table~\ref{tab:results} gives a compact at-a-glance comparison. Full CSV, JSON, Markdown, and additional plots are generated under \texttt{results/} and \texttt{figures/}. The file \texttt{results/table\_layout\_audit.*} verifies the panel assignment, expected risk row, mechanism column, risk label, and poisoning-versus-evasion separation for each visual cell.
+Table~\ref{tab:results} gives a compact at-a-glance comparison. The orange-bar result figures use the metric family in Table~\ref{tab:metrics}; evasion analogs are upper-bound stress tests and are not counted as direct poisoning results. Full CSV, JSON, Markdown, and additional plots are generated under \texttt{results/} and \texttt{figures/}. The file \texttt{results/table\_layout\_audit.*} verifies the panel assignment, expected risk row, mechanism column, risk label, and poisoning-versus-evasion separation for each visual cell.
 
 \begin{table*}[t]
 \centering
@@ -184,7 +202,7 @@ Boundary/HopSkipJump search & Evasion & R3 & 0.6667 & Conditional targeted ASR t
 \small
 \begin{tabular}{llrr}
 \toprule
-Dataset & Group & Mean effect & Max effect \\
+Dataset & Group & Mean norm. effect & Max effect \\
 \midrule
 Fungi & Poisoning/B & 0.3650 & 0.6296 \\
 Fungi & Poisoning/M & 0.3619 & 0.6842 \\
@@ -198,21 +216,21 @@ MNIST & Evasion/G & 1.0000 & 1.0000 \\
 \end{tabular}
 \end{table}
 
-The highest fungi evasion effects are PGD, DeepFool, and UAP, each reaching 1.0000 conditional untargeted success. JSMA remains a strong sparse targeted method at 0.9375, while Carlini-Wagner reaches 0.7429 targeted ASR. The strongest poisoning-style selected-slice result is subpopulation poisoning, while the strongest trigger result is the gradient-aligned Sleeper-Agent-style backdoor. Poison Frogs increases the safety-critical poisonous-to-edible confusion above the clean baseline while preserving clean-label constraints. The Witches' Brew-style run demonstrates gradient alignment, but its measured effect is weaker on this small validation split than the subgroup and backdoor attacks.
+The highest fungi evasion effects are PGD, DeepFool, and UAP, each reaching 1.0000 conditional untargeted success. These values are conditional on the clean-correct subset and therefore should be read with the sample count and baseline accuracy, not as a claim that the whole validation set is perfectly vulnerable. JSMA remains a strong sparse targeted method at 0.9375, while Carlini-Wagner reaches 0.7429 targeted ASR. The strongest poisoning-style selected-slice result is subpopulation poisoning, while the strongest trigger result is the gradient-aligned Sleeper-Agent-style backdoor. Poison Frogs increases the safety-critical poisonous-to-edible confusion above the clean baseline while preserving clean-label constraints. The Witches' Brew-style run demonstrates gradient alignment, but its measured effect is weaker on this small validation split than the subgroup and backdoor attacks.
 
 The fish freshness extension uses the same method table on a much smaller split: 30 training images and 10 validation images. The clean baseline reaches 0.8000 accuracy with 0.0000 non-fresh-to-fresh confusion. The top poisoning/backdoor result is the Sleeper-Agent-style backdoor at 0.8000 stealth-trigger ASR. The strongest fish evasion results are FGSM, PGD, DeepFool, Carlini-Wagner, and UAP at 1.0000 conditional success, while EAD and Boundary/HopSkipJump reach 0.8000 targeted ASR. The generated \texttt{results/food\_dataset\_comparison.*} files compare fungi and fish directly.
 
 \subsection{Answers to Research Questions}
 
-\textbf{RQ1:} The risk matrix answers the organization question by making every coordinate auditable: the vertical coordinate is exactly R1, R2, R3, or R4; the horizontal coordinate is the mechanism family; and the panel determines whether a method is poisoning proper or an evasion/transfer analog. This removes arbitrary chemical-table gaps, prevents a cell labeled R1 from appearing in an R2 or R3 row, and separates related evasion methods from data-poisoning methods.
+\textbf{RQ1:} The risk matrix answers the organization question by making every coordinate auditable: the vertical coordinate is the assigned R1, R2, R3, or R4 level; the horizontal coordinate is the mechanism family; and the panel determines whether a method is poisoning proper or an evasion/transfer analog. This removes arbitrary chemical-table gaps, prevents a cell labeled R1 from appearing in an R2 or R3 row, and separates related evasion methods from data-poisoning methods.
 
-\textbf{RQ2:} On the fungi task, the largest evasion failures are PGD, DeepFool, and UAP with 1.0000 conditional untargeted success; JSMA reaches 0.9375 conditional targeted ASR and Carlini-Wagner reaches 0.7429. On the fish task, FGSM, PGD, DeepFool, Carlini-Wagner, and UAP reach 1.0000 conditional success, while the Sleeper-Agent-style backdoor reaches 0.8000 stealth-trigger ASR. These results answer RQ2 by showing that inference-time methods can be strongest under conditional evaluation, while subgroup and backdoor poisoning create the most important training-time targeted failures.
+\textbf{RQ2:} On the fungi task, the largest evasion failures are PGD, DeepFool, and UAP with 1.0000 conditional untargeted success; JSMA reaches 0.9375 conditional targeted ASR and Carlini-Wagner reaches 0.7429. On the fish task, FGSM, PGD, DeepFool, Carlini-Wagner, and UAP reach 1.0000 conditional success, while the Sleeper-Agent-style backdoor reaches 0.8000 stealth-trigger ASR. These results answer RQ2 by showing that inference-time methods can be strongest under conditional evaluation, while subgroup and backdoor poisoning create the most important training-time targeted failures under the stage-aware metrics in Table~\ref{tab:metrics}.
 
 \textbf{RQ3:} The experiment answers the implementation question by replacing in-memory image stacking with lazy loading, replacing a weak from-scratch CNN with pretrained MobileNetV3-Small transfer learning, using true latent-space feature collision instead of pixel blending, adding explicit poster-method implementations, vectorizing JSMA, batching ZOO finite-difference queries, and reporting conditional attack success only on clean-correct examples.
 
 \section{Discussion}
 
-The results support three security lessons. First, aggregate accuracy is not a sufficient safety metric. The clean fungi baseline already confuses some poisonous samples as edible, and several attacks worsen a targeted failure mode without simply maximizing visible accuracy collapse. Second, attack stage matters. Evasion methods can be dramatic, but they should not be described as poisoning unless they enter the training or adaptation data. Third, realistic baselines matter: pretrained transfer learning, lazy loading, and conditional success metrics make the fungi experiment much closer to a real AI safety presentation than a purely toy implementation.
+The results support three security lessons. First, aggregate accuracy is not a sufficient safety metric. The clean fungi baseline already confuses some poisonous samples as edible, and several attacks worsen a targeted failure mode without simply maximizing visible accuracy collapse; because the baseline is only 0.6667 accurate, fungi attack effects are interpreted as stress-test evidence rather than a mature production classifier result. Second, attack stage matters. Evasion methods can be dramatic, but they should not be described as poisoning unless they enter the training or adaptation data. Third, realistic baselines matter: pretrained transfer learning, lazy loading, and conditional success metrics make the fungi experiment much closer to a real AI safety presentation than a purely toy implementation. The broad MNIST comparison keeps a near-zero prototype feature-collision result as a negative result rather than hiding it.
 
 The implementation audit is intentionally conservative. The code reproduces the core mechanism of all poster methods plus ten additional shared methods: Poison Frogs, Sleeper-Agent-style backdoor, Adversarial Patch, Witches' Brew-style gradient matching, JSMA, ZOO, SparseFool-style sparse boundary search, EAD, subpopulation poisoning, and BadNets. It does not claim industrial-scale transferability, full physical-world patch robustness, or long-horizon LLM sleeper-agent persistence.
 

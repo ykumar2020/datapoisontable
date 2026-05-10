@@ -2,7 +2,7 @@
 
 Dataset: real MNIST handwritten digits loaded through `torchvision.datasets.MNIST`.
 
-| Scenario | Poison rate | Clean accuracy | Attack metric | Value | Train size | Notes |
+| Scenario | Poison rate | Clean accuracy | Attack-specific metric | Value | Train size | Notes |
 |---|---:|---:|---|---:|---:|---|
 | dataset | 0 |  | train/test images |  | 60000 | MNIST train=60000, test=10000, image_shape=28x28 |
 | clean_baseline | 0 | 0.9153 | 7_to_1_confusion | 0.0117 | 60000 | Unpoisoned reference model |

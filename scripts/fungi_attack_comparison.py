@@ -1158,7 +1158,15 @@ def save_examples(clean: torch.Tensor, attacked: list[tuple[str, torch.Tensor]],
     for ax in axes.ravel():
         ax.axis("off")
     fig.suptitle(f"{dataset_title(dataset_name)} attack examples", fontsize=14)
-    fig.tight_layout()
+    fig.text(
+        0.5,
+        0.02,
+        "Images are shown as loaded from local folders; the patch row uses a deliberately visible synthetic trigger for auditability, not stealth.",
+        ha="center",
+        fontsize=8,
+        color="#495057",
+    )
+    fig.tight_layout(rect=(0, 0.045, 1, 0.96))
     fig.savefig(path, dpi=220)
     plt.close(fig)
 

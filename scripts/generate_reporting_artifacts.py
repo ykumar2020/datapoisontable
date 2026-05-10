@@ -273,13 +273,17 @@ def save_dataset_split_chart(stats_rows: list[dict[str, object]]) -> None:
     val = [int(next(r["count"] for r in stats_rows if r["split"] == "val" and r["class"] == c)) for c in labels]
     x = np.arange(len(labels))
     fig, ax = plt.subplots(figsize=(5.0, 3.2))
-    ax.bar(x, train, label="train")
-    ax.bar(x, val, bottom=train, label="val")
+    train_bars = ax.bar(x, train, label="train")
+    val_bars = ax.bar(x, val, bottom=train, label="val")
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     ax.set_ylabel("Images")
-    ax.set_title("Fungi dataset split")
+    ax.set_title("Fungi dataset split (stratified train/validation)")
     ax.legend()
+    ax.bar_label(train_bars, labels=[str(v) for v in train], label_type="center", fontsize=8, color="white")
+    ax.bar_label(val_bars, labels=[str(v) for v in val], label_type="center", fontsize=8, color="white")
+    for xi, total in zip(x, np.array(train) + np.array(val)):
+        ax.text(xi, total + max(total * 0.025, 2), str(total), ha="center", va="bottom", fontsize=8)
     fig.tight_layout()
     fig.savefig(FIGURES_DIR / "fungi_dataset_split.png", dpi=220)
     plt.close(fig)
@@ -299,8 +303,8 @@ def save_attack_dashboard(fungi_rows: list[dict[str, str]]) -> None:
     ax.set_yticks(range(len(labels)))
     ax.set_yticklabels(labels, fontsize=8)
     ax.set_xlim(0, 1.05)
-    ax.set_title("Top fungi attack success")
-    ax.set_xlabel("Success / damage")
+    ax.set_title("Top fungi attack/evasion effects")
+    ax.set_xlabel("Normalized attack-specific effect")
 
     ax = axes[0, 1]
     stage_colors = {"poisoning": "#9b2226", "evasion": "#005f73", "reference": "#6c757d"}
@@ -315,7 +319,7 @@ def save_attack_dashboard(fungi_rows: list[dict[str, str]]) -> None:
             color=stage_colors.get(stage, "#555555"),
         )
     ax.set_xlabel("Clean accuracy")
-    ax.set_ylabel("Attack success / damage")
+    ax.set_ylabel("Normalized attack-specific effect")
     ax.set_xlim(0.52, 0.74)
     ax.set_ylim(0, 1.05)
     ax.set_title("Accuracy vs attack effect")
@@ -347,7 +351,7 @@ def save_attack_dashboard(fungi_rows: list[dict[str, str]]) -> None:
         color="#0a9396",
     )
     ax.set_xscale("log")
-    ax.set_xlabel("Avg changed features, log scale")
+    ax.set_xlabel("Mean nonzero perturbed input dimensions (log scale)")
     ax.set_title("Evasion perturbation footprint")
     ax.tick_params(axis="y", labelsize=8)
 
@@ -365,15 +369,17 @@ def save_success_by_stage_chart(datasets: list[tuple[str, list[dict[str, str]]]]
     offsets = (np.arange(len(datasets)) - (len(datasets) - 1) / 2.0) * width
     for offset, (dataset, rows) in zip(offsets, datasets):
         values = []
+        errors = []
         for stage in stages:
             group = [float(r["attack_success"]) for r in rows if r["stage"] == stage]
             values.append(float(np.mean(group)) if group else 0.0)
-        ax.bar(x + offset, values, width, label=dataset)
+            errors.append(float(np.std(group, ddof=1) / np.sqrt(len(group))) if len(group) > 1 else 0.0)
+        ax.bar(x + offset, values, width, yerr=errors, capsize=3, label=dataset)
     ax.set_xticks(x)
     ax.set_xticklabels(stages)
     ax.set_ylim(0, 1.05)
-    ax.set_ylabel("Mean attack success / damage")
-    ax.set_title("Mean effect by attack stage")
+    ax.set_ylabel("Mean normalized attack effect (0-1)")
+    ax.set_title("Mean normalized attack effect by attack stage and dataset")
     ax.legend()
     fig.tight_layout()
     fig.savefig(FIGURES_DIR / "attack_success_by_stage.png", dpi=220)
@@ -409,6 +415,58 @@ def dataset_comparison_rows(datasets: list[tuple[str, list[dict[str, str]]]]) ->
 
 def wrap_label(text: str, width: int = 17) -> str:
     return "\n".join(textwrap.wrap(text, width=width, break_long_words=False))
+
+
+def save_attack_split_bars(dataset: str, rows: list[dict[str, str]]) -> None:
+    plot_rows = [
+        r
+        for r in rows
+        if r.get("stage") in {"poisoning", "evasion"} and r.get("attack_success") not in {"", None}
+    ]
+    if not plot_rows:
+        return
+
+    fig, axes = plt.subplots(2, 1, figsize=(11.6, 7.2), sharey=True)
+    stages = [
+        ("poisoning", "Training-time poisoning / data-supply attacks", "#9b2226"),
+        ("evasion", "Related evasion analogs (not poisoning proper)", "#005f73"),
+    ]
+    for ax, (stage, title, color) in zip(axes, stages):
+        group = sorted(
+            [r for r in plot_rows if r["stage"] == stage],
+            key=lambda r: float(r["attack_success"]),
+            reverse=True,
+        )
+        if not group:
+            ax.axis("off")
+            continue
+
+        x = np.arange(len(group))
+        clean = [float(r["clean_accuracy"]) if r.get("clean_accuracy") else 0.0 for r in group]
+        effect = [float(r["attack_success"]) for r in group]
+        width = 0.38
+        ax.bar(x - width / 2, clean, width, label="Clean accuracy", color="#adb5bd")
+        ax.bar(x + width / 2, effect, width, label="Normalized attack-specific effect", color=color)
+        ax.set_title(title)
+        ax.set_ylabel("Rate / effect")
+        ax.set_ylim(0, 1.05)
+        ax.set_xticks(x)
+        ax.set_xticklabels([wrap_label(r["method"], width=15) for r in group], fontsize=7, rotation=30, ha="right")
+        ax.grid(axis="y", alpha=0.18)
+        ax.legend(fontsize=8, loc="upper right")
+
+    fig.suptitle(f"{dataset} attack comparison split by stage", fontsize=13.5, weight="bold")
+    fig.text(
+        0.5,
+        0.015,
+        "Evasion values are conditional on clean-correct samples; poisoning values are attack-specific normalized effects.",
+        ha="center",
+        fontsize=8,
+        color="#495057",
+    )
+    fig.tight_layout(rect=(0, 0.04, 1, 0.94))
+    fig.savefig(FIGURES_DIR / f"{dataset.lower()}_attack_comparison_split.png", dpi=220)
+    plt.close(fig)
 
 
 def periodic_entries_for_export() -> list[dict[str, object]]:
@@ -481,7 +539,7 @@ def save_periodic_table() -> None:
     ax.text(
         fig_w / 2,
         0.86,
-        "Rows are exact operational risk levels; columns are the nine functional mechanism families.",
+        "Rows encode this study's assigned operational risk levels; columns are the nine functional mechanism families.",
         ha="center",
         va="center",
         fontsize=11.5,
@@ -662,6 +720,8 @@ def main() -> None:
     save_dataset_split_chart(dataset_stats)
     save_attack_dashboard(fungi_rows)
     save_success_by_stage_chart(summary_datasets)
+    for dataset, rows in summary_datasets:
+        save_attack_split_bars(dataset, rows)
     save_periodic_table()
     save_paper_taxonomy_panels()
 
@@ -674,6 +734,7 @@ def main() -> None:
     print(f"Wrote {RESULTS_DIR / 'implementation_coverage.md'}")
     print(f"Wrote {FIGURES_DIR / 'fungi_dataset_samples.png'}")
     print(f"Wrote {FIGURES_DIR / 'fungi_reporting_dashboard.png'}")
+    print(f"Wrote {FIGURES_DIR / 'attack_success_by_stage.png'}")
     print(f"Wrote {FIGURES_DIR / 'periodic_table_data_poisoning.png'}")
     print(f"Wrote {FIGURES_DIR / 'paper_taxonomy_panels.png'}")
 
