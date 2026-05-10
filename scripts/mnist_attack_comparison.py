@@ -326,15 +326,16 @@ def ead_target(
     l2_weight: float,
     iters: int,
 ) -> np.ndarray:
-    adv = images.copy()
+    """Targeted EAD with a formal ISTA proximal step for the L1 term."""
+    delta = np.zeros_like(images)
     for _ in range(iters):
-        grad = targeted_ce_gradient(clf, adv, target_digit) + l2_weight * (adv - images)
-        adv = adv - step * np.sign(grad)
-        delta = adv - images
-        delta = np.sign(delta) * np.maximum(np.abs(delta) - step * l1_weight, 0.0)
-        delta = np.clip(delta, -eps, eps)
         adv = np.clip(images + delta, 0.0, 1.0)
-    return adv
+        grad = targeted_ce_gradient(clf, adv, target_digit) + l2_weight * (adv - images)
+        z = delta - step * grad
+        delta = np.sign(z) * np.maximum(np.abs(z) - step * l1_weight, 0.0)
+        delta = np.clip(delta, -eps, eps)
+        delta = np.minimum(np.maximum(delta, -images), 1.0 - images)
+    return np.clip(images + delta, 0.0, 1.0)
 
 
 def jsma_target(
@@ -636,7 +637,7 @@ def main() -> None:
 
     adv = ead_target(baseline, evasion_x, args.target_digit, eps=0.35, step=0.035, l1_weight=0.002, l2_weight=0.02, iters=35)
     l0, linf, l2 = perturbation_stats(evasion_x, adv)
-    rows.append(metric_row("Elastic Net EAD", "evasion", "O", "R2", baseline_acc, f"targeted_ASR_to_{args.target_digit}", targeted_success(baseline, adv, args.target_digit), len(x_train), l0=l0, linf=linf, l2=l2, notes="Targeted elastic-net style update with L1 shrinkage."))
+    rows.append(metric_row("Elastic Net EAD", "evasion", "O", "R2", baseline_acc, f"targeted_ASR_to_{args.target_digit}", targeted_success(baseline, adv, args.target_digit), len(x_train), l0=l0, linf=linf, l2=l2, notes="Formal ISTA proximal solver for targeted elastic-net objective."))
 
     adv = jsma_target(baseline, evasion_x[:300], args.target_digit, max_pixels=45)
     l0, linf, l2 = perturbation_stats(evasion_x[:300], adv)

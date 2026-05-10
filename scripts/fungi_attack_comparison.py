@@ -684,15 +684,28 @@ def ead_target(
     l2_weight: float,
     iters: int,
 ) -> torch.Tensor:
-    adv = x.clone()
+    """Targeted EAD solved by proximal-gradient ISTA.
+
+    The smooth term is targeted cross-entropy plus an L2 penalty. The nonsmooth
+    L1 term is handled by the ISTA proximal operator, then projected back into
+    the L-infinity and image-box constraints.
+    """
+    model.eval()
+    delta = torch.zeros_like(x)
     target_y = torch.full((len(x),), target, dtype=torch.long)
     for _ in range(iters):
-        grad = input_gradient(model, adv, target_y, targeted=True) + l2_weight * (adv - x)
-        z = (adv - x) + step * grad
-        delta = z.sign() * torch.clamp(z.abs() - step * l1_weight, min=0.0)
-        delta = torch.clamp(delta, -eps, eps)
-        adv = torch.clamp(x + delta, 0.0, 1.0).detach()
-    return adv
+        delta_var = delta.detach().requires_grad_(True)
+        adv = x + delta_var
+        logits = model(adv)
+        attack_loss = F.cross_entropy(logits, target_y)
+        l2_loss = 0.5 * l2_weight * delta_var.flatten(1).pow(2).sum(dim=1).mean()
+        grad = torch.autograd.grad(attack_loss + l2_loss, delta_var)[0]
+        with torch.no_grad():
+            z = delta_var - step * grad
+            delta = z.sign() * torch.clamp(z.abs() - step * l1_weight, min=0.0)
+            delta = torch.clamp(delta, -eps, eps)
+            delta = torch.maximum(torch.minimum(delta, 1.0 - x), -x)
+    return torch.clamp(x + delta, 0.0, 1.0)
 
 
 def universal_adversarial_perturbation(
@@ -1211,7 +1224,7 @@ def main() -> None:
 
     adv = ead_target(baseline, attack_x, target, eps=0.16, step=0.025, l1_weight=0.0015, l2_weight=0.01, iters=24)
     l0, linf, l2 = perturbation_stats(attack_x, adv)
-    rows.append(metric_row("Elastic Net EAD", "evasion", "O", "R2", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, attack_x, adv, attack_y, target), "Targeted ISTA-style elastic-net update.", l0, linf, l2))
+    rows.append(metric_row("Elastic Net EAD", "evasion", "O", "R2", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, attack_x, adv, attack_y, target), "Formal ISTA proximal solver for targeted elastic-net objective.", l0, linf, l2))
 
     small_x = attack_x[: min(16, len(attack_x))]
     small_y = attack_y[: len(small_x)]

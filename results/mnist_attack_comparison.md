@@ -11,7 +11,7 @@
 | Prototype feature collision | poisoning | O | R2 | 900 appended | 0.9174 | 1_to_7_confusion | 0.0018 |  |  | Clean-label source samples blended toward target prototype. |
 | FGSM | evasion | G | R3 | 0 | 0.9173 | untargeted_misclassification | 1.0 | 430.8 | 0.22 | Single-step gradient sign attack on clean baseline. |
 | PGD | evasion | G | R2 | 0 | 0.9173 | untargeted_misclassification | 1.0 | 440.23 | 0.25 | Projected gradient ascent within an L-infinity ball. |
-| Elastic Net EAD | evasion | O | R2 | 0 | 0.9173 | targeted_ASR_to_1 | 0.989 | 433.56 | 0.3407 | Targeted elastic-net style update with L1 shrinkage. |
+| Elastic Net EAD | evasion | O | R2 | 0 | 0.9173 | targeted_ASR_to_1 | 0.981 | 399.03 | 0.3468 | Formal ISTA proximal solver for targeted elastic-net objective. |
 | JSMA saliency | evasion | M | R3 | 0 | 0.9173 | targeted_ASR_to_1 | 0.6433 | 19.5 | 0.9994 | Greedy sparse-pixel saliency using model Jacobian/logit weights. |
 | SparseFool-style boundary | evasion | M | R4 | 0 | 0.9173 | untargeted_misclassification | 1.0 | 4.79 | 0.9935 | SparseFool specialization for this linear MNIST classifier: sparse linear-boundary crossing. |
 | Adversarial patch | evasion | U | R2 | 0 | 0.9173 | untargeted_misclassification | 0.829 | 79.31 | 1.0 | Universal fixed-position patch optimized to maximize baseline loss; EOT is not yet implemented. |

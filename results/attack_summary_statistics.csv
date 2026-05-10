@@ -10,7 +10,7 @@ fungi,poisoning,O,1,0.6333,0.3542,0.3542
 fungi,reference,none,1,0.6667,0.2708,0.2708
 mnist,evasion,G,2,0.9173,1.0,1.0
 mnist,evasion,M,2,0.9173,0.8216,1.0
-mnist,evasion,O,3,0.9173,0.6647,0.989
+mnist,evasion,O,3,0.9173,0.662,0.981
 mnist,evasion,U,1,0.9173,0.829,0.829
 mnist,poisoning,B,2,0.9136,0.6853,0.9988
 mnist,poisoning,M,3,0.8987,0.1739,0.4434

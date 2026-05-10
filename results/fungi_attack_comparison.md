@@ -15,7 +15,7 @@
 | PGD | evasion | G | R2 | 0 | 0.6667 | conditional_untargeted_misclassification | 1.0 | 76755.86 | 0.1 | Projected gradient ascent. |
 | DeepFool L2 | evasion | M | R3 | 0 | 0.6667 | conditional_untargeted_misclassification | 1.0 | 75912.62 | 0.0133 | Poster method: iterative local linearization of the nearest logit boundary. |
 | Carlini-Wagner L2 | evasion | O | R2 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.7429 | 76675.54 | 0.0769 | Poster method: targeted CW margin objective with L2 regularization. |
-| Elastic Net EAD | evasion | O | R2 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.0286 | 1304.94 | 0.0039 | Targeted ISTA-style elastic-net update. |
+| Elastic Net EAD | evasion | O | R2 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.0286 | 1303.06 | 0.0039 | Formal ISTA proximal solver for targeted elastic-net objective. |
 | JSMA saliency | evasion | M | R3 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.9375 | 134.25 | 0.9539 | Vectorized sparse-feature saliency using input Jacobian. |
 | One-Pixel DE | evasion | M | R4 | 0 | 0.6667 | conditional_targeted_ASR_to_edible | 0.0625 | 3.0 | 0.757 | Poster method: differential evolution over one pixel coordinate and RGB value. |
 | SparseFool-style boundary | evasion | M | R4 | 0 | 0.6667 | conditional_untargeted_misclassification | 0.0625 | 41.81 | 0.889 | Vectorized sparse local-boundary crossing approximation. |

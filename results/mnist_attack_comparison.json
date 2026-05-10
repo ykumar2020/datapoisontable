@@ -143,11 +143,11 @@
     "train_size": 60000,
     "clean_accuracy": 0.9173,
     "attack_metric": "targeted_ASR_to_1",
-    "attack_success": 0.989,
-    "avg_l0_pixels": 433.56,
-    "avg_linf": 0.3407,
-    "avg_l2": 3.4887,
-    "notes": "Targeted elastic-net style update with L1 shrinkage."
+    "attack_success": 0.981,
+    "avg_l0_pixels": 399.03,
+    "avg_linf": 0.3468,
+    "avg_l2": 2.8305,
+    "notes": "Formal ISTA proximal solver for targeted elastic-net objective."
   },
   {
     "method": "JSMA saliency",

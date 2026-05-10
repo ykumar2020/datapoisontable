@@ -104,8 +104,8 @@
     "mechanism": "O",
     "methods": 3,
     "clean_accuracy_mean": 0.9173,
-    "attack_success_mean": 0.6647,
-    "attack_success_max": 0.989
+    "attack_success_mean": 0.662,
+    "attack_success_max": 0.981
   },
   {
     "dataset": "mnist",

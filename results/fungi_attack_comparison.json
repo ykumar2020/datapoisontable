@@ -204,10 +204,10 @@
     "clean_accuracy": 0.6667,
     "attack_metric": "conditional_targeted_ASR_to_edible",
     "attack_success": 0.0286,
-    "avg_l0_features": 1304.94,
+    "avg_l0_features": 1303.06,
     "avg_linf": 0.0039,
     "avg_l2": 0.0227,
-    "notes": "Targeted ISTA-style elastic-net update."
+    "notes": "Formal ISTA proximal solver for targeted elastic-net objective."
   },
   {
     "method": "JSMA saliency",
