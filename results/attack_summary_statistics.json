@@ -162,75 +162,84 @@
     "attack_success_max": 0.0
   },
   {
-    "dataset": "mnist",
+    "dataset": "seafood",
     "stage": "evasion",
     "mechanism": "G",
     "methods": 2,
-    "clean_accuracy_mean": 0.9173,
+    "clean_accuracy_mean": 1.0,
     "attack_success_mean": 1.0,
     "attack_success_max": 1.0
   },
   {
-    "dataset": "mnist",
+    "dataset": "seafood",
     "stage": "evasion",
     "mechanism": "M",
-    "methods": 2,
-    "clean_accuracy_mean": 0.9173,
-    "attack_success_mean": 0.8216,
+    "methods": 4,
+    "clean_accuracy_mean": 1.0,
+    "attack_success_mean": 0.3125,
     "attack_success_max": 1.0
   },
   {
-    "dataset": "mnist",
+    "dataset": "seafood",
     "stage": "evasion",
     "mechanism": "O",
-    "methods": 3,
-    "clean_accuracy_mean": 0.9173,
-    "attack_success_mean": 0.662,
-    "attack_success_max": 0.981
+    "methods": 4,
+    "clean_accuracy_mean": 1.0,
+    "attack_success_mean": 0.75,
+    "attack_success_max": 1.0
   },
   {
-    "dataset": "mnist",
+    "dataset": "seafood",
     "stage": "evasion",
     "mechanism": "U",
-    "methods": 1,
-    "clean_accuracy_mean": 0.9173,
-    "attack_success_mean": 0.829,
-    "attack_success_max": 0.829
+    "methods": 2,
+    "clean_accuracy_mean": 1.0,
+    "attack_success_mean": 1.0,
+    "attack_success_max": 1.0
   },
   {
-    "dataset": "mnist",
+    "dataset": "seafood",
     "stage": "poisoning",
     "mechanism": "B",
-    "methods": 2,
-    "clean_accuracy_mean": 0.9136,
-    "attack_success_mean": 0.6853,
-    "attack_success_max": 0.9988
+    "methods": 3,
+    "clean_accuracy_mean": 0.9967,
+    "attack_success_mean": 0.4902,
+    "attack_success_max": 0.94
   },
   {
-    "dataset": "mnist",
+    "dataset": "seafood",
+    "stage": "poisoning",
+    "mechanism": "G",
+    "methods": 1,
+    "clean_accuracy_mean": 1.0,
+    "attack_success_mean": 0.0,
+    "attack_success_max": 0.0
+  },
+  {
+    "dataset": "seafood",
     "stage": "poisoning",
     "mechanism": "M",
     "methods": 3,
-    "clean_accuracy_mean": 0.8987,
-    "attack_success_mean": 0.1739,
-    "attack_success_max": 0.4434
+    "clean_accuracy_mean": 0.99,
+    "attack_success_mean": 0.03,
+    "attack_success_max": 0.05
   },
   {
-    "dataset": "mnist",
+    "dataset": "seafood",
     "stage": "poisoning",
     "mechanism": "O",
     "methods": 1,
-    "clean_accuracy_mean": 0.9174,
-    "attack_success_mean": 0.0018,
-    "attack_success_max": 0.0018
+    "clean_accuracy_mean": 1.0,
+    "attack_success_mean": 0.0,
+    "attack_success_max": 0.0
   },
   {
-    "dataset": "mnist",
+    "dataset": "seafood",
     "stage": "reference",
     "mechanism": "none",
     "methods": 1,
-    "clean_accuracy_mean": 0.9173,
-    "attack_success_mean": 0.0117,
-    "attack_success_max": 0.0117
+    "clean_accuracy_mean": 1.0,
+    "attack_success_mean": 0.0,
+    "attack_success_max": 0.0
   }
 ]

@@ -678,11 +678,13 @@ def main() -> None:
     RESULTS_DIR.mkdir(exist_ok=True)
     FIGURES_DIR.mkdir(exist_ok=True)
     fungi_rows = read_rows(RESULTS_DIR / "fungi_attack_comparison.csv")
-    mnist_rows = read_rows(RESULTS_DIR / "mnist_attack_comparison.csv")
     fish_rows = read_optional_rows(RESULTS_DIR / "fish_attack_comparison.csv")
-    summary_datasets = [("Fungi", fungi_rows), ("MNIST", mnist_rows)]
+    seafood_rows = read_optional_rows(RESULTS_DIR / "seafood_attack_comparison.csv")
+    summary_datasets = [("Fungi", fungi_rows)]
     if fish_rows:
-        summary_datasets.insert(1, ("Fish", fish_rows))
+        summary_datasets.append(("Fish", fish_rows))
+    if seafood_rows:
+        summary_datasets.append(("Seafood", seafood_rows))
 
     dataset_stats = collect_fungi_dataset_statistics()
     write_csv(RESULTS_DIR / "fungi_dataset_statistics.csv", dataset_stats)
@@ -696,7 +698,11 @@ def main() -> None:
     write_json(RESULTS_DIR / "attack_summary_statistics.json", attack_stats)
     write_markdown(RESULTS_DIR / "attack_summary_statistics.md", "Attack Summary Statistics", attack_stats)
 
-    food_comparison = dataset_comparison_rows([("Fungi", fungi_rows)] + ([("Fish", fish_rows)] if fish_rows else []))
+    food_comparison = dataset_comparison_rows(
+        [("Fungi", fungi_rows)]
+        + ([("Fish", fish_rows)] if fish_rows else [])
+        + ([("Seafood", seafood_rows)] if seafood_rows else [])
+    )
     if food_comparison:
         write_csv(RESULTS_DIR / "food_dataset_comparison.csv", food_comparison)
         write_json(RESULTS_DIR / "food_dataset_comparison.json", food_comparison)

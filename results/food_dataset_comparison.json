@@ -22,5 +22,17 @@
     "top_poisoning_success": "0.8",
     "top_evasion_method": "FGSM",
     "top_evasion_success": "1.0"
+  },
+  {
+    "dataset": "seafood",
+    "methods": 20,
+    "train_size": "300",
+    "clean_accuracy": "1.0",
+    "critical_confusion_metric": "NonFresh_to_Fresh_confusion",
+    "critical_confusion": "0.0",
+    "top_poisoning_method": "Sleeper Agent-style backdoor",
+    "top_poisoning_success": "0.94",
+    "top_evasion_method": "FGSM",
+    "top_evasion_success": "1.0"
   }
 ]

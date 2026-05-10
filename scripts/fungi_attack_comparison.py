@@ -26,7 +26,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from PIL import Image, ImageOps
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, TensorDataset
 from torchvision import models
 from torchvision.models import MobileNet_V3_Small_Weights, ResNet18_Weights
 
@@ -185,20 +185,47 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run food image attack comparison.")
     parser.add_argument("--dataset-root", type=Path, default=ROOT / "fungi")
     parser.add_argument("--dataset-name", default="fungi")
+    parser.add_argument(
+        "--label-mode",
+        choices=["auto", "parent", "leaf", "path"],
+        default="auto",
+        help=(
+            "How to assign labels for image folders without explicit train/val splits. "
+            "'parent' uses the first directory under the root, 'leaf' uses the immediate image parent, "
+            "'path' uses the full relative parent path, and 'auto' detects repeated leaf labels."
+        ),
+    )
+    parser.add_argument(
+        "--exclude-dirs",
+        default="working,__pycache__",
+        help="Comma-separated directory names to ignore when recursively discovering images.",
+    )
     parser.add_argument("--val-fraction", type=float, default=0.25)
     parser.add_argument("--image-size", type=int, default=160)
     parser.add_argument("--model", choices=["mobilenet_v3_small", "resnet18"], default="mobilenet_v3_small")
     parser.add_argument("--pretrained", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--freeze-features", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument(
+        "--cache-frozen-features",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="When the backbone is frozen, precompute features and train only the classifier head for speed.",
+    )
     parser.add_argument("--epochs", type=int, default=12)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--seed", type=int, default=2027)
-    parser.add_argument("--target-class", default="edible")
-    parser.add_argument("--source-class", default="poisonous")
+    parser.add_argument("--target-class", default=None)
+    parser.add_argument("--source-class", default=None)
     parser.add_argument("--eval-samples", type=int, default=40)
     parser.add_argument("--zoo-samples", type=int, default=8)
     parser.add_argument("--trigger-size", type=int, default=18)
     parser.add_argument("--adversarial-patch-size", type=int, default=32)
+    parser.add_argument(
+        "--attack-scale",
+        type=float,
+        default=1.0,
+        help="Scale expensive poison counts, optimizer iterations, and query budgets. Use <1 for pilot runs.",
+    )
     return parser.parse_args()
 
 
@@ -209,6 +236,10 @@ def seed_everything(seed: int) -> None:
     torch.set_num_threads(max(1, min(4, torch.get_num_threads())))
 
 
+def scaled_int(value: int, scale: float, minimum: int = 1) -> int:
+    return max(minimum, int(round(value * scale)))
+
+
 def image_to_tensor(path: Path, image_size: int) -> torch.Tensor:
     with Image.open(path) as img:
         img = ImageOps.exif_transpose(img).convert("RGB")
@@ -217,9 +248,66 @@ def image_to_tensor(path: Path, image_size: int) -> torch.Tensor:
     return torch.from_numpy(arr).permute(2, 0, 1).contiguous()
 
 
-def discover_classes(root: Path) -> list[str]:
+def excluded_dir_names(raw: str) -> set[str]:
+    return {item.strip() for item in raw.split(",") if item.strip()}
+
+
+def is_excluded(path: Path, root: Path, exclude_dirs: set[str]) -> bool:
+    try:
+        rel_parts = path.relative_to(root).parts
+    except ValueError:
+        rel_parts = path.parts
+    return any(part in exclude_dirs or part.startswith(".") for part in rel_parts)
+
+
+def iter_image_paths(root: Path, exclude_dirs: set[str]) -> list[Path]:
+    return sorted(
+        p
+        for p in root.rglob("*")
+        if p.is_file()
+        and p.suffix.lower() in IMAGE_EXTENSIONS
+        and not is_excluded(p.parent, root, exclude_dirs)
+    )
+
+
+def infer_label_mode(root: Path, exclude_dirs: set[str]) -> str:
+    direct_class_dirs = [p for p in root.iterdir() if p.is_dir() and not is_excluded(p, root, exclude_dirs)]
+    if any(any(f.is_file() and f.suffix.lower() in IMAGE_EXTENSIONS for f in d.iterdir()) for d in direct_class_dirs):
+        return "parent"
+    image_paths = iter_image_paths(root, exclude_dirs)
+    leaf_to_ancestors: dict[str, set[str]] = {}
+    for path in image_paths:
+        rel = path.relative_to(root)
+        if len(rel.parts) < 2:
+            continue
+        leaf = path.parent.name
+        ancestor = rel.parts[0]
+        leaf_to_ancestors.setdefault(leaf, set()).add(ancestor)
+    repeated_leaf_labels = [leaf for leaf, ancestors in leaf_to_ancestors.items() if len(ancestors) > 1]
+    if len(repeated_leaf_labels) >= 2:
+        return "leaf"
+    return "parent"
+
+
+def label_for_path(path: Path, root: Path, label_mode: str) -> str:
+    rel = path.relative_to(root)
+    if label_mode == "parent":
+        return rel.parts[0]
+    if label_mode == "leaf":
+        return path.parent.name
+    if label_mode == "path":
+        return "/".join(rel.parts[:-1])
+    raise ValueError(f"Unsupported label_mode={label_mode}")
+
+
+def discover_classes(root: Path, label_mode: str = "auto", exclude_dirs: set[str] | None = None) -> list[str]:
+    exclude_dirs = exclude_dirs or set()
     class_root = root / "train" if (root / "train").is_dir() else root
-    class_names = sorted(p.name for p in class_root.iterdir() if p.is_dir() and not p.name.startswith("."))
+    if class_root != root:
+        class_names = sorted(p.name for p in class_root.iterdir() if p.is_dir() and not p.name.startswith("."))
+    else:
+        effective_mode = infer_label_mode(root, exclude_dirs) if label_mode == "auto" else label_mode
+        class_names = sorted({label_for_path(path, root, effective_mode) for path in iter_image_paths(root, exclude_dirs)})
     if len(class_names) < 2:
         raise RuntimeError(f"Expected at least two classes under {class_root}")
     return class_names
@@ -235,15 +323,24 @@ def flat_train_val_datasets(
     image_size: int,
     val_fraction: float,
     seed: int,
+    label_mode: str = "auto",
+    exclude_dirs: set[str] | None = None,
 ) -> tuple[ImagePathDataset, ImagePathDataset]:
     rng = np.random.default_rng(seed)
+    exclude_dirs = exclude_dirs or set()
+    effective_mode = infer_label_mode(root, exclude_dirs) if label_mode == "auto" else label_mode
+    all_files = iter_image_paths(root, exclude_dirs)
+    files_by_label: dict[str, list[Path]] = {name: [] for name in class_names}
+    for path in all_files:
+        label_name = label_for_path(path, root, effective_mode)
+        if label_name in files_by_label:
+            files_by_label[label_name].append(path)
     train_samples: list[tuple[Path, int]] = []
     val_samples: list[tuple[Path, int]] = []
     for label, class_name in enumerate(class_names):
-        class_dir = root / class_name
-        files = sorted(p for p in class_dir.iterdir() if p.is_file() and p.suffix.lower() in IMAGE_EXTENSIONS)
+        files = sorted(files_by_label[class_name])
         if len(files) < 2:
-            raise RuntimeError(f"Need at least two images in {class_dir} for a train/validation split")
+            raise RuntimeError(f"Need at least two images for class={class_name} under {root}")
         order = rng.permutation(len(files))
         shuffled = [files[int(i)] for i in order]
         val_count = int(round(len(shuffled) * val_fraction))
@@ -306,6 +403,7 @@ def train_model(
     model_name: str,
     pretrained: bool,
     freeze_features: bool,
+    cache_frozen_features: bool = False,
     augment: bool = True,
 ) -> TransferFungiModel:
     torch.manual_seed(seed)
@@ -313,6 +411,28 @@ def train_model(
     counts = class_counts(labels_of(dataset), num_classes)
     weights = counts.sum() / (num_classes * torch.clamp(counts, min=1.0))
     optimizer = torch.optim.AdamW((p for p in model.parameters() if p.requires_grad), lr=1e-3, weight_decay=1e-4)
+
+    if freeze_features and cache_frozen_features:
+        model.eval()
+        features: list[torch.Tensor] = []
+        labels: list[torch.Tensor] = []
+        feature_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+        with torch.no_grad():
+            for xb, yb in feature_loader:
+                features.append(model.forward_features(xb))
+                labels.append(yb.long())
+        feature_ds = TensorDataset(torch.cat(features), torch.cat(labels))
+        loader = DataLoader(feature_ds, batch_size=batch_size, shuffle=True, num_workers=0)
+        optimizer = torch.optim.AdamW(model.classifier.parameters(), lr=1e-3, weight_decay=1e-4)
+        for _ in range(epochs):
+            model.classifier.train()
+            for zb, yb in loader:
+                optimizer.zero_grad(set_to_none=True)
+                loss = F.cross_entropy(model.classifier(zb), yb, weight=weights)
+                loss.backward()
+                optimizer.step()
+        return model.eval()
+
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0)
     for _ in range(epochs):
         model.train()
@@ -1177,7 +1297,8 @@ def main() -> None:
     RESULTS_DIR.mkdir(exist_ok=True)
     FIGURES_DIR.mkdir(exist_ok=True)
 
-    class_names = discover_classes(args.dataset_root)
+    exclude_dirs = excluded_dir_names(args.exclude_dirs)
+    class_names = discover_classes(args.dataset_root, args.label_mode, exclude_dirs)
     if has_explicit_split(args.dataset_root):
         train_ds = FungiImageDataset(args.dataset_root, "train", class_names, args.image_size)
         val_ds = FungiImageDataset(args.dataset_root, "val", class_names, args.image_size)
@@ -1189,10 +1310,17 @@ def main() -> None:
             args.image_size,
             args.val_fraction,
             args.seed,
+            args.label_mode,
+            exclude_dirs,
         )
-        split_note = f"deterministic stratified split from flat class folders; val_fraction={args.val_fraction}"
+        effective_mode = infer_label_mode(args.dataset_root, exclude_dirs) if args.label_mode == "auto" else args.label_mode
+        split_note = f"deterministic stratified split from class folders; label_mode={effective_mode}; val_fraction={args.val_fraction}; excluded={sorted(exclude_dirs)}"
     val_x, val_y = materialize_dataset(val_ds)
     class_to_idx = {name: i for i, name in enumerate(class_names)}
+    if args.target_class is None:
+        args.target_class = "edible" if "edible" in class_to_idx else ("Fresh" if "Fresh" in class_to_idx else class_names[0])
+    if args.source_class is None:
+        args.source_class = "poisonous" if "poisonous" in class_to_idx else ("NonFresh" if "NonFresh" in class_to_idx else class_names[-1])
     if args.target_class not in class_to_idx or args.source_class not in class_to_idx:
         raise RuntimeError(f"Classes are {class_names}; requested source={args.source_class}, target={args.target_class}")
     target = class_to_idx[args.target_class]
@@ -1206,10 +1334,12 @@ def main() -> None:
         model_name=args.model,
         pretrained=args.pretrained,
         freeze_features=args.freeze_features,
+        cache_frozen_features=args.cache_frozen_features,
     )
 
     baseline = train_model(train_ds, seed=args.seed, **train_kwargs)
     baseline_acc = accuracy_on_dataset(baseline, val_ds)
+    attack_scale = max(0.01, float(args.attack_scale))
 
     rows: list[dict[str, str | int | float]] = [
         metric_row(
@@ -1222,7 +1352,7 @@ def main() -> None:
             baseline_acc,
             f"{args.source_class}_to_{args.target_class}_confusion",
             source_to_target_rate(baseline, val_x, val_y, source, target),
-            f"Dataset={args.dataset_name}; split={split_note}; model={args.model}, pretrained={args.pretrained}, freeze_features={args.freeze_features}; classes={class_names}.",
+            f"Dataset={args.dataset_name}; split={split_note}; model={args.model}, pretrained={args.pretrained}, freeze_features={args.freeze_features}; cache_frozen_features={args.cache_frozen_features}; attack_scale={attack_scale}; classes={class_names}.",
         )
     ]
 
@@ -1260,10 +1390,10 @@ def main() -> None:
         train_ds,
         source,
         target,
-        40,
+        scaled_int(40, attack_scale, 4),
         trigger_eps=0.055,
         poison_eps=0.05,
-        iters=70,
+        iters=scaled_int(70, attack_scale, 8),
         seed=args.seed + 6,
     )
     ds = TensorAppendDataset(train_ds, base_labels, poison_x, poison_y)
@@ -1271,13 +1401,31 @@ def main() -> None:
     acc = accuracy_on_dataset(model, val_ds)
     rows.append(metric_row("Sleeper Agent-style backdoor", "poisoning", "B", "R1", f"{count} appended", len(ds), acc, f"stealth_trigger_ASR_to_{args.target_class}", additive_trigger_asr(model, val_x, val_y, source, target, stealth_trigger), "Clean-label target poisons optimized by gradient alignment to a low-amplitude trigger objective."))
 
-    poison_x, poison_y, count = true_feature_collision(baseline, train_ds, target, source, 60, eps=0.08, iters=150, seed=args.seed + 7)
+    poison_x, poison_y, count = true_feature_collision(
+        baseline,
+        train_ds,
+        target,
+        source,
+        scaled_int(60, attack_scale, 4),
+        eps=0.08,
+        iters=scaled_int(150, attack_scale, 10),
+        seed=args.seed + 7,
+    )
     ds = TensorAppendDataset(train_ds, base_labels, poison_x, poison_y)
     model = train_model(ds, seed=args.seed + 7, **train_kwargs)
     acc = accuracy_on_dataset(model, val_ds)
     rows.append(metric_row("Clean-label Poison Frogs", "poisoning", "O", "R1", f"{count} appended", len(ds), acc, f"{args.source_class}_to_{args.target_class}_confusion", source_to_target_rate(model, val_x, val_y, source, target), f"Optimized {args.target_class} clean-label poisons toward {args.source_class} latent features with L-infinity projection."))
 
-    poison_x, poison_y, count = gradient_matching_poison(baseline, train_ds, source, target, 40, eps=0.08, iters=70, seed=args.seed + 8)
+    poison_x, poison_y, count = gradient_matching_poison(
+        baseline,
+        train_ds,
+        source,
+        target,
+        scaled_int(40, attack_scale, 4),
+        eps=0.08,
+        iters=scaled_int(70, attack_scale, 8),
+        seed=args.seed + 8,
+    )
     ds = TensorAppendDataset(train_ds, base_labels, poison_x, poison_y)
     model = train_model(ds, seed=args.seed + 8, **train_kwargs)
     acc = accuracy_on_dataset(model, val_ds)
@@ -1300,51 +1448,88 @@ def main() -> None:
     l0, linf, l2 = perturbation_stats(attack_x, adv)
     rows.append(metric_row("PGD", "evasion", "G", "R2", "0", len(train_ds), baseline_acc, "conditional_untargeted_misclassification", conditional_untargeted_success(baseline, attack_x, adv, attack_y), "Projected gradient ascent.", l0, linf, l2))
 
-    adv = deepfool_l2(baseline, attack_x, max_iter=18, overshoot=0.02)
+    adv = deepfool_l2(baseline, attack_x, max_iter=scaled_int(18, attack_scale, 4), overshoot=0.02)
     l0, linf, l2 = perturbation_stats(attack_x, adv)
     rows.append(metric_row("DeepFool L2", "evasion", "M", "R3", "0", len(train_ds), baseline_acc, "conditional_untargeted_misclassification", conditional_untargeted_success(baseline, attack_x, adv, attack_y), "Poster method: iterative local linearization of the nearest logit boundary.", l0, linf, l2))
 
-    adv = carlini_wagner_l2_target(baseline, attack_x, target, c=4.0, lr=0.025, iters=55, kappa=0.0)
+    adv = carlini_wagner_l2_target(baseline, attack_x, target, c=4.0, lr=0.025, iters=scaled_int(55, attack_scale, 8), kappa=0.0)
     l0, linf, l2 = perturbation_stats(attack_x, adv)
     rows.append(metric_row("Carlini-Wagner L2", "evasion", "O", "R2", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, attack_x, adv, attack_y, target), "Poster method: targeted CW margin objective with L2 regularization.", l0, linf, l2))
 
-    adv = ead_target(baseline, attack_x, target, eps=0.16, step=0.025, l1_weight=0.0015, l2_weight=0.01, iters=24)
+    adv = ead_target(baseline, attack_x, target, eps=0.16, step=0.025, l1_weight=0.0015, l2_weight=0.01, iters=scaled_int(24, attack_scale, 6))
     l0, linf, l2 = perturbation_stats(attack_x, adv)
     rows.append(metric_row("Elastic Net EAD", "evasion", "O", "R2", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, attack_x, adv, attack_y, target), "Formal ISTA proximal solver for targeted elastic-net objective.", l0, linf, l2))
 
     small_x = attack_x[: min(16, len(attack_x))]
     small_y = attack_y[: len(small_x)]
-    adv = vectorized_jsma_saliency(baseline, small_x, target, max_features=280)
+    adv = vectorized_jsma_saliency(baseline, small_x, target, max_features=scaled_int(280, attack_scale, 32))
     l0, linf, l2 = perturbation_stats(small_x, adv)
     rows.append(metric_row("JSMA saliency", "evasion", "M", "R3", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, small_x, adv, small_y, target), "Vectorized sparse-feature saliency using input Jacobian.", l0, linf, l2))
 
-    adv = one_pixel_de_target(baseline, small_x, target, pixels=1, population=28, generations=16, mutation=0.55, crossover=0.75, seed=args.seed + 9)
+    adv = one_pixel_de_target(
+        baseline,
+        small_x,
+        target,
+        pixels=1,
+        population=scaled_int(28, attack_scale, 8),
+        generations=scaled_int(16, attack_scale, 4),
+        mutation=0.55,
+        crossover=0.75,
+        seed=args.seed + 9,
+    )
     l0, linf, l2 = perturbation_stats(small_x, adv)
     rows.append(metric_row("One-Pixel DE", "evasion", "M", "R4", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, small_x, adv, small_y, target), "Poster method: differential evolution over one pixel coordinate and RGB value.", l0, linf, l2))
 
-    adv = sparse_boundary(baseline, small_x, max_features=280)
+    adv = sparse_boundary(baseline, small_x, max_features=scaled_int(280, attack_scale, 32))
     l0, linf, l2 = perturbation_stats(small_x, adv)
     rows.append(metric_row("SparseFool-style boundary", "evasion", "M", "R4", "0", len(train_ds), baseline_acc, "conditional_untargeted_misclassification", conditional_untargeted_success(baseline, small_x, adv, small_y), "Vectorized sparse local-boundary crossing approximation.", l0, linf, l2))
 
     source_train_idx = [i for i, label in enumerate(base_labels) if label == source][: min(96, len(train_ds))]
     uap_train_x, uap_train_y = materialize_indices(train_ds, source_train_idx)
-    delta = universal_adversarial_perturbation(baseline, uap_train_x, uap_train_y, eps=0.08, step=0.015, iters=5, batch_size=24, seed=args.seed + 10)
+    delta = universal_adversarial_perturbation(
+        baseline,
+        uap_train_x,
+        uap_train_y,
+        eps=0.08,
+        step=0.015,
+        iters=scaled_int(5, attack_scale, 1),
+        batch_size=24,
+        seed=args.seed + 10,
+    )
     adv = torch.clamp(attack_x + delta, 0.0, 1.0)
     l0, linf, l2 = perturbation_stats(attack_x, adv)
     rows.append(metric_row("Universal adversarial perturbation", "evasion", "U", "R2", "0", len(train_ds), baseline_acc, "conditional_untargeted_misclassification", conditional_untargeted_success(baseline, attack_x, adv, attack_y), "Poster method: one learned L-infinity perturbation shared by all source-class images.", l0, linf, l2))
 
-    patch = adversarial_patch_eot(baseline, train_ds, source, target, args.adversarial_patch_size, iters=100, batch_size=min(24, len(train_ds)), seed=args.seed + 12)
+    patch = adversarial_patch_eot(
+        baseline,
+        train_ds,
+        source,
+        target,
+        args.adversarial_patch_size,
+        iters=scaled_int(100, attack_scale, 10),
+        batch_size=min(24, len(train_ds)),
+        seed=args.seed + 12,
+    )
     patched = apply_patch(attack_x, patch, attack_x.shape[2] - args.adversarial_patch_size, attack_x.shape[3] - args.adversarial_patch_size)
     l0, linf, l2 = perturbation_stats(attack_x, patched)
     rows.append(metric_row("Adversarial patch", "evasion", "U", "R2", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, attack_x, patched, attack_y, target), "EOT-trained patch with random training locations; evaluated lower-right.", l0, linf, l2))
 
     zoo_x = attack_x[: min(args.zoo_samples, len(attack_x))]
     zoo_y = attack_y[: len(zoo_x)]
-    adv, queries = zoo_target(baseline, zoo_x, target, eps=0.16, step=0.04, iters=10, coords_per_iter=64, seed=args.seed + 11)
+    adv, queries = zoo_target(
+        baseline,
+        zoo_x,
+        target,
+        eps=0.16,
+        step=0.04,
+        iters=scaled_int(10, attack_scale, 3),
+        coords_per_iter=scaled_int(64, attack_scale, 8),
+        seed=args.seed + 11,
+    )
     l0, linf, l2 = perturbation_stats(zoo_x, adv)
     rows.append(metric_row("ZOO finite difference", "evasion", "O", "R3", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, zoo_x, adv, zoo_y, target), f"Batched black-box finite differences; {queries} model queries.", l0, linf, l2))
 
-    adv = boundary_search(baseline, small_x, target_guides, target, steps=12)
+    adv = boundary_search(baseline, small_x, target_guides, target, steps=scaled_int(12, attack_scale, 3))
     l0, linf, l2 = perturbation_stats(small_x, adv)
     rows.append(metric_row("Boundary / HopSkipJump search", "evasion", "O", "R3", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, small_x, adv, small_y, target), "Poster Boundary method represented by decision-only binary search to target-class guide images.", l0, linf, l2))
 

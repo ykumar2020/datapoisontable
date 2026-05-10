@@ -1,5 +1,6 @@
 data/
 fungi/
+Datasets/
 __fish*/
 .cache/
 __pycache__/
