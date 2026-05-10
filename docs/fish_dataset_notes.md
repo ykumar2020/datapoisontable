@@ -1,11 +1,13 @@
-# Fish Dataset Notes From `hw1 (12).pdf`
+# Fish Dataset Notes From SC25 AdversaGuard Poster
 
-The added `__fish2/` folder matches the FoodDDP fish freshness example described in the attached PDF.
+The added `__fish2/` folder matches the fish freshness setup referenced by the SC25 poster paper:
+
+Yulia Kumar, Solomon Thomas, Dejaun Gayle, J. Jenny Li, and Dov Kruger. 2025. "AdversaGuard: A Distributed Data-Poisoning Benchmark for Parallel AI." SC25 Posters. https://sc25.supercomputing.org/proceedings/posters/poster_files/post110s2-file3.pdf
 
 Relevant extracted details:
 
-- Dataset context: average-size fish freshness dataset used in the FoodDDP distributed data poisoning study.
-- Source described in PDF: Kaggle seafood / fish freshness data from Turkey.
+- Dataset context: food-domain freshness classification used in the AdversaGuard distributed data-poisoning benchmark.
+- Source described in the SC25 poster references: Kaggle seafood / fish freshness data from Turkey.
 - Task used here: binary classification for horse mackerel freshness.
 - Local classes: `fresh2` and `non-fresh2`.
 - Local size: 40 images total, 20 per class.
