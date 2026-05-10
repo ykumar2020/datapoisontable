@@ -11,6 +11,8 @@
 \usepackage{xcolor}
 
 \graphicspath{{../figures/}{figures/}}
+\newcommand{\atk}[2]{\textbf{#1}~#2}
+\newcommand{\emptycell}{--}
 
 \title{Data Poisoning Risk Matrix: A Periodic-Table-Inspired Framework for AI Security}
 
@@ -38,7 +40,7 @@ juli@kean.edu}
 \maketitle
 
 \begin{abstract}
-Data poisoning attacks manipulate training, fine-tuning, retrieval, feedback, or model-supply-chain data so that a learned model behaves incorrectly after deployment. This paper presents a compact, periodic-table-inspired risk matrix that separates training-time poisoning from test-time evasion, groups techniques by mechanism family, and scores operational danger using impact, stealth, scalability, and cost-efficiency. The visual keeps a Mendeleev-like element-table grammar, but every coordinate is functional: rows encode this study's assigned operational risk levels, columns encode the nine mechanism families, and related evasion attacks are placed in a separate comparison panel. The framework is supported by executable experiments on MNIST, fungi, and fish freshness images. The food-image experiments use lazy PyTorch data loading, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, all original poster evasion methods, and ten additional poisoning or evasion methods shared during project development. Results show that aggregate clean accuracy is not enough: subpopulation poisoning, clean-label backdoors, and conditional evasion can create severe targeted failures even when ordinary validation metrics look acceptable.
+Data poisoning attacks manipulate training, fine-tuning, retrieval, feedback, or model-supply-chain data so that a learned model behaves incorrectly after deployment. This paper presents a compact, periodic-table-inspired risk matrix that separates training-time poisoning from test-time evasion, groups techniques by mechanism family, and scores operational danger using impact, stealth, scalability, and cost-efficiency. The taxonomy keeps a Mendeleev-like element-table grammar, but every coordinate is functional: rows encode this study's assigned operational risk levels, columns encode the nine mechanism families, and related evasion attacks are placed in a separate comparison panel. The framework is supported by executable experiments on MNIST, fungi, and fish freshness images. The food-image experiments use lazy PyTorch data loading, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, all original poster evasion methods, and ten additional poisoning or evasion methods shared during project development. Results show that aggregate clean accuracy is not enough: subpopulation poisoning, clean-label backdoors, and conditional evasion can create severe targeted failures even when ordinary validation metrics look acceptable.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -84,21 +86,105 @@ Operational danger is scored as
 \begin{equation}
 \mathrm{DangerScore}=I\times S\times G\times C,
 \end{equation}
-where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is attacker cost-efficiency. Risk levels are R1: 400--625, R2: 200--399, R3: 100--199, and R4: below 100. Figure~\ref{fig:periodic} is the paper-readable visual artifact. The poster/slide version uses element-like cells with index, symbol, attack name, and risk/mechanism label. The layout keeps the Mendeleev-like table feel while avoiding literal chemical-table geometry: a tile's row is computed directly from the printed R label, so no R1 item can appear in an R2/R3 row. Inference-time evasion analogs are separated from poisoning attacks. Split-view web, frontend web, and single-document RAG entries are treated as data-source poisoning because they corrupt material later consumed by training, retrieval, or agent context rather than classic fixed training-set rows. Collaborative-filtering poisoning is represented as sparse profile-injection or shilling. Glaze is retained as a defensive poisoning-like cloak, not as an ordinary malicious poisoning attack. Numbers are reference identifiers only, not chronology or severity ranking.
+where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is attacker cost-efficiency. Risk levels are R1: 400--625, R2: 200--399, R3: 100--199, and R4: below 100. Tables~\ref{tab:periodicpoison}--\ref{tab:periodicevasion} are the paper-readable taxonomy. The poster/slide artifact still uses colored element-like cells, but the manuscript uses native \LaTeX{} tables so the entries remain readable at normal zoom. The layout keeps the Mendeleev-like table feel while avoiding literal chemical-table geometry: a tile's row is computed directly from the printed R label, so no R1 item can appear in an R2/R3 row. Inference-time evasion analogs are separated from poisoning attacks. Split-view web, frontend web, and single-document RAG entries are treated as data-source poisoning because they corrupt material later consumed by training, retrieval, or agent context rather than classic fixed training-set rows. Collaborative-filtering poisoning is represented as sparse profile-injection or shilling. Glaze is retained as a defensive poisoning-like cloak, not as an ordinary malicious poisoning attack. Numbers are reference identifiers only, not chronology or severity ranking.
 
-\begin{figure*}[t]
+\begin{table*}[t]
 \centering
-\includegraphics[width=0.98\textwidth]{periodic_table_data_poisoning.png}
-\caption{Mendeleev-like Data Poisoning Risk Matrix. The figure keeps the visual grammar of a chemical table--colored element tiles, compact symbols, short names, and a key--while using auditable coordinates: rows encode this study's assigned R1--R4 operational risk levels and columns encode mechanism families. The lower panel contains related inference-time evasion/transfer analogs for comparison, not poisoning attacks proper.}
-\label{fig:periodic}
-\end{figure*}
+\caption{Periodic table of data poisoning, block A: learning-mechanism families. Rows are assigned operational risk levels; cells list element-style symbol and technique name.}
+\label{tab:periodicpoison}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.24}
+\begin{tabular}{@{}p{0.075\textwidth}p{0.18\textwidth}p{0.20\textwidth}p{0.12\textwidth}p{0.24\textwidth}p{0.13\textwidth}@{}}
+\toprule
+Risk & M Minimal/Structural & O Optimization & G Gradient & B Backdoor/Trigger & D Distributed/Federated \\
+\midrule
+R1 Extreme &
+\emptycell &
+\atk{Fc}{Feature collision} &
+\emptycell &
+\atk{Wa}{WaNet}; \atk{Sa}{Sleeper agent}; \atk{Cl}{Clean-label BD} &
+\atk{Fl}{Fed replace}; \atk{Db}{DBA} \\
+\midrule
+R2 High &
+\atk{Sp}{Subpopulation}; \atk{Cf}{Collab filter} &
+\atk{Bp}{Bullseye poly}; \atk{If}{Influence}; \atk{Hp}{Hessian}; \atk{Cp}{Curriculum} &
+\atk{Wb}{Witches Brew} &
+\atk{Bn}{BadNets}; \atk{Hb}{Hidden backdoor}; \atk{Ip}{Input-aware BD}; \atk{Nl}{NLP trigger} &
+\atk{Al}{ALIE} \\
+\midrule
+R3 Moderate &
+\atk{Tf}{Target label flip}; \atk{Ko}{KNN poison}; \atk{Ts}{Time-series} &
+\emptycell &
+\emptycell &
+\emptycell &
+\emptycell \\
+\midrule
+R4 Low/Baseline &
+\atk{Lf}{Random label flip}; \atk{Oo}{Outlier inject} &
+\atk{Svm}{SVM poison}; \atk{RgN}{Regression poison} &
+\emptycell &
+\emptycell &
+\emptycell \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
-\begin{figure*}[t]
+\begin{table*}[t]
 \centering
-\includegraphics[width=0.82\textwidth]{paper_taxonomy_panels.png}
-\caption{Compressed paper-view rendering of the same taxonomy. This panel is not a replacement for the Mendeleev-like table in Fig.~\ref{fig:periodic}; it is included as a small-text reference view for readers.}
-\label{fig:compacttaxonomy}
-\end{figure*}
+\caption{Periodic table of data poisoning, block B: system, retrieval, generative, and alignment-data families.}
+\label{tab:periodicpoisonsystem}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.24}
+\begin{tabular}{@{}p{0.10\textwidth}p{0.22\textwidth}p{0.23\textwidth}p{0.18\textwidth}p{0.22\textwidth}@{}}
+\toprule
+Risk & S Supply Chain & R Retrieval/RAG & N Generative & P Preference/RLHF \\
+\midrule
+R1 Extreme &
+\atk{Ss}{Split-view web}; \atk{Fr}{Frontrun web} &
+\atk{Sd}{Single-doc RAG}; \atk{Rg}{RAG poison} &
+\atk{Ns}{Nightshade} &
+\emptycell \\
+\midrule
+R2 High &
+\emptycell &
+\atk{Gg}{Gradient RAG} &
+\atk{Td}{TrojDiff} &
+\atk{Bv}{Best-of-Venom pref.}; \atk{Rl}{RLHF backdoor} \\
+\midrule
+R3 Moderate &
+\emptycell &
+\emptycell &
+\atk{Gd}{Glaze cloak} &
+\atk{Dp}{DPO poison}; \atk{Rp}{Reward poison} \\
+\midrule
+R4 Low/Baseline &
+\emptycell &
+\emptycell &
+\emptycell &
+\emptycell \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\caption{Related adversarial/evasion analogs included for comparison, not counted as data poisoning proper.}
+\label{tab:periodicevasion}
+\small
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{@{}p{0.11\textwidth}p{0.20\textwidth}p{0.22\textwidth}p{0.16\textwidth}p{0.23\textwidth}@{}}
+\toprule
+Risk & M Minimal/Structural & O Optimization & G Gradient & U Universal/Transfer \\
+\midrule
+R2 High & \emptycell & \atk{Cw}{Carlini-Wagner}; \atk{Ead}{Elastic Net} & \atk{Pg}{PGD} & \atk{Ap}{Adv. patch}; \atk{Uap}{Universal pert.}; \atk{Eot}{EOT}; \atk{St}{Surrogate transfer} \\
+R3 Moderate & \atk{Js}{JSMA}; \atk{Df}{DeepFool} & \atk{Zo}{ZOO}; \atk{Bd}{Boundary} & \atk{Fg}{FGSM} & \emptycell \\
+R4 Low/Baseline & \atk{Sf}{SparseFool}; \atk{Op}{One-Pixel} & \emptycell & \emptycell & \emptycell \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \section{Experimental Design}
 
@@ -407,14 +493,14 @@ Fish & 30 & 0.8000 & 0.8000 & 1.0000 \\
 
 \begin{table*}[t]
 \centering
-\caption{Generated artifact inventory included in this manuscript.}
+\caption{Generated artifact inventory referenced by this manuscript.}
 \label{tab:artifactinventory}
 \small
 \begin{tabular}{p{0.25\textwidth}p{0.18\textwidth}p{0.49\textwidth}}
 \toprule
 Artifact & Type & Role in paper \\
 \midrule
-\texttt{periodic\_table\_data\_poisoning.png} & Figure & Full Mendeleev-like risk matrix. \\
+\texttt{periodic\_table\_data\_poisoning.png} & Poster artifact & Slide/poster rendering of the taxonomy; Tables~\ref{tab:periodicpoison}--\ref{tab:periodicevasion} are the readable manuscript version. \\
 \texttt{fungi\_dataset\_samples.png}, \texttt{fungi\_dataset\_split.png} & Figures & Dataset sanity check and exact split counts. \\
 \texttt{attack\_success\_by\_stage.png}, \texttt{fungi\_reporting\_dashboard.png} & Figures & Normalized effect summary and fungi dashboard. \\
 \texttt{*\_attack\_comparison\_split.png} & Figures & Stage-separated attack comparisons for fungi, fish, and MNIST. \\

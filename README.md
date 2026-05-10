@@ -7,7 +7,7 @@ The original poster framed several test-time adversarial examples as data poison
 - **Data poisoning** changes training, fine-tuning, feedback, retrieval, or supply-chain data.
 - **Backdoors** are a high-risk poisoning subfamily because they preserve normal accuracy while adding trigger-activated behavior.
 - **Evasion attacks** such as FGSM, PGD, CW, DeepFool, Boundary, One-Pixel, and UAP are related adversarial ML techniques, but they are not data poisoning unless used to craft poisoned training samples.
-- **The final visual is a Mendeleev-like risk-by-mechanism matrix, not a contradictory chemical clone:** it keeps colored element tiles, symbols, and a table key, while rows encode this study's assigned `R1`-`R4` levels, columns are the mechanism families, and evasion analogs are separated from the poisoning grid.
+- **The final taxonomy is a Mendeleev-like risk-by-mechanism table, not a contradictory chemical clone:** the paper uses readable native LaTeX tables with element-style symbols, while the generated PNG/SVG keeps colored element tiles for posters and slides.
 
 ## Contents
 
