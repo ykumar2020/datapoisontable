@@ -38,7 +38,7 @@ juli@kean.edu}
 \maketitle
 
 \begin{abstract}
-Data poisoning attacks manipulate training, fine-tuning, retrieval, feedback, or model-supply-chain data so that a learned model behaves incorrectly after deployment. This paper presents a compact, periodic-table-inspired risk matrix that separates training-time poisoning from test-time evasion, groups techniques by mechanism family, and scores operational danger using impact, stealth, scalability, and cost-efficiency. Unlike a literal Mendeleev layout, every matrix coordinate is functional: rows encode this study's assigned operational risk levels, columns encode the nine mechanism families, and related evasion attacks are placed in a separate comparison panel. The framework is supported by executable experiments on MNIST, fungi, and fish freshness images. The food-image experiments use lazy PyTorch data loading, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, all original poster evasion methods, and ten additional poisoning or evasion methods shared during project development. Results show that aggregate clean accuracy is not enough: subpopulation poisoning, clean-label backdoors, and conditional evasion can create severe targeted failures even when ordinary validation metrics look acceptable.
+Data poisoning attacks manipulate training, fine-tuning, retrieval, feedback, or model-supply-chain data so that a learned model behaves incorrectly after deployment. This paper presents a compact, periodic-table-inspired risk matrix that separates training-time poisoning from test-time evasion, groups techniques by mechanism family, and scores operational danger using impact, stealth, scalability, and cost-efficiency. The visual keeps a Mendeleev-like element-table grammar, but every coordinate is functional: rows encode this study's assigned operational risk levels, columns encode the nine mechanism families, and related evasion attacks are placed in a separate comparison panel. The framework is supported by executable experiments on MNIST, fungi, and fish freshness images. The food-image experiments use lazy PyTorch data loading, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, all original poster evasion methods, and ten additional poisoning or evasion methods shared during project development. Results show that aggregate clean accuracy is not enough: subpopulation poisoning, clean-label backdoors, and conditional evasion can create severe targeted failures even when ordinary validation metrics look acceptable.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -84,13 +84,20 @@ Operational danger is scored as
 \begin{equation}
 \mathrm{DangerScore}=I\times S\times G\times C,
 \end{equation}
-where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is attacker cost-efficiency. Risk levels are R1: 400--625, R2: 200--399, R3: 100--199, and R4: below 100. Figure~\ref{fig:periodic} is the paper-readable visual artifact. The poster/slide version additionally uses element-like cells with index, symbol, attack name, and risk/mechanism label. The layout deliberately abandons literal chemical-table geometry: a tile's row is computed directly from the printed R label, so no R1 item can appear in an R2/R3 row. Inference-time evasion analogs are separated from poisoning attacks. Split-view web, frontend web, and single-document RAG entries are treated as data-source poisoning because they corrupt material later consumed by training, retrieval, or agent context rather than classic fixed training-set rows. Collaborative-filtering poisoning is represented as sparse profile-injection or shilling. Glaze is retained as a defensive poisoning-like cloak, not as an ordinary malicious poisoning attack. Numbers are reference identifiers only, not chronology or severity ranking.
+where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is attacker cost-efficiency. Risk levels are R1: 400--625, R2: 200--399, R3: 100--199, and R4: below 100. Figure~\ref{fig:periodic} is the paper-readable visual artifact. The poster/slide version uses element-like cells with index, symbol, attack name, and risk/mechanism label. The layout keeps the Mendeleev-like table feel while avoiding literal chemical-table geometry: a tile's row is computed directly from the printed R label, so no R1 item can appear in an R2/R3 row. Inference-time evasion analogs are separated from poisoning attacks. Split-view web, frontend web, and single-document RAG entries are treated as data-source poisoning because they corrupt material later consumed by training, retrieval, or agent context rather than classic fixed training-set rows. Collaborative-filtering poisoning is represented as sparse profile-injection or shilling. Glaze is retained as a defensive poisoning-like cloak, not as an ordinary malicious poisoning attack. Numbers are reference identifiers only, not chronology or severity ranking.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.98\textwidth]{paper_taxonomy_panels.png}
-\caption{Paper-readable Data Poisoning Risk Matrix. Rows encode this study's assigned R1--R4 operational risk levels and columns encode mechanism families. The lower panel contains related inference-time evasion/transfer analogs for comparison, not poisoning attacks proper.}
+\includegraphics[width=0.98\textwidth]{periodic_table_data_poisoning.png}
+\caption{Mendeleev-like Data Poisoning Risk Matrix. The figure keeps the visual grammar of a chemical table--colored element tiles, compact symbols, short names, and a key--while using auditable coordinates: rows encode this study's assigned R1--R4 operational risk levels and columns encode mechanism families. The lower panel contains related inference-time evasion/transfer analogs for comparison, not poisoning attacks proper.}
 \label{fig:periodic}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.82\textwidth]{paper_taxonomy_panels.png}
+\caption{Compressed paper-view rendering of the same taxonomy. This panel is not a replacement for the Mendeleev-like table in Fig.~\ref{fig:periodic}; it is included as a small-text reference view for readers.}
+\label{fig:compacttaxonomy}
 \end{figure*}
 
 \section{Experimental Design}
@@ -121,6 +128,13 @@ Val & Poisonous & 48 & 259 & 194 & 11.3 \\
 \includegraphics[width=\columnwidth]{fungi_dataset_samples.png}
 \caption{Sample images from the local fungi dataset. The word ``poisonous'' denotes the biological class label, not a poisoned training sample. The code uses lazy loading through a PyTorch \texttt{Dataset}; images are not stacked into memory before batching.}
 \label{fig:samples}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fungi_dataset_split.png}
+\caption{Exact fungi train/validation counts used in the transfer-learning experiment. Counts are printed on the bars to make class balance and stratification visible.}
+\label{fig:fungisplit}
 \end{figure}
 
 \subsection{Model and Metrics}
@@ -219,6 +233,140 @@ MNIST & Evasion/G & 1.0000 & 1.0000 \\
 The highest fungi evasion effects are PGD, DeepFool, and UAP, each reaching 1.0000 conditional untargeted success. These values are conditional on the clean-correct subset and therefore should be read with the sample count and baseline accuracy, not as a claim that the whole validation set is perfectly vulnerable. JSMA remains a strong sparse targeted method at 0.9375, while Carlini-Wagner reaches 0.7429 targeted ASR. The strongest poisoning-style selected-slice result is subpopulation poisoning, while the strongest trigger result is the gradient-aligned Sleeper-Agent-style backdoor. Poison Frogs increases the safety-critical poisonous-to-edible confusion above the clean baseline while preserving clean-label constraints. The Witches' Brew-style run demonstrates gradient alignment, but its measured effect is weaker on this small validation split than the subgroup and backdoor attacks.
 
 The fish freshness extension uses the same method table on a much smaller split: 30 training images and 10 validation images. The clean baseline reaches 0.8000 accuracy with 0.0000 non-fresh-to-fresh confusion. The top poisoning/backdoor result is the Sleeper-Agent-style backdoor at 0.8000 stealth-trigger ASR. The strongest fish evasion results are FGSM, PGD, DeepFool, Carlini-Wagner, and UAP at 1.0000 conditional success, while EAD and Boundary/HopSkipJump reach 0.8000 targeted ASR. The generated \texttt{results/food\_dataset\_comparison.*} files compare fungi and fish directly.
+
+\begin{table}[t]
+\centering
+\caption{Food-image dataset comparison.}
+\label{tab:foodcomparison}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Dataset & Train & Clean & Top poison & Top evasion \\
+\midrule
+Fungi & 360 & 0.6667 & 0.6842 & 1.0000 \\
+Fish & 30 & 0.8000 & 0.8000 & 1.0000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.72\textwidth]{attack_success_by_stage.png}
+\caption{Mean normalized attack effect by stage and dataset. Error bars show standard error across implemented methods in the group. Evasion analogs are included as stress tests, not as poisoning methods.}
+\label{fig:stageeffect}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{fungi_reporting_dashboard.png}
+\caption{Fungi reporting dashboard summarizing top attack/evasion effects, clean accuracy versus normalized attack-specific effect, effect by risk level, and evasion perturbation footprint measured as mean nonzero perturbed input dimensions.}
+\label{fig:fungidashboard}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{fungi_attack_comparison_split.png}
+\caption{Fungi comparison split by stage. The upper panel isolates training-time poisoning and data-supply attacks; the lower panel isolates related evasion analogs.}
+\label{fig:fungisplitbars}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{fish_attack_comparison_split.png}
+\caption{Fish freshness comparison split by stage. The fish dataset is small, so exact values should be interpreted with the validation size shown in Table~\ref{tab:foodcomparison}.}
+\label{fig:fishsplitbars}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{mnist_attack_comparison_split.png}
+\caption{MNIST comparison split by stage. The near-zero prototype feature-collision result is retained as a negative result, while evasion analogs provide upper-bound stress tests.}
+\label{fig:mnistsplitbars}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{fungi_attack_examples.png}
+\caption{Fungi attack examples. The visible patch is deliberately synthetic and high-contrast to support auditability in the presentation, not to claim physical stealth.}
+\label{fig:fungiexamples}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{fish_attack_examples.png}
+\caption{Fish freshness attack examples. The images are the local fish samples used by the runner; the patch row is a visible audit trigger.}
+\label{fig:fishexamples}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{mnist_attack_examples.png}
+\caption{MNIST attack examples. Perturbation magnitudes are chosen for visual interpretability in the audit figure; smaller settings are possible.}
+\label{fig:mnistexamples}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{mnist_confusion_clean_baseline.png}
+\end{minipage}
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{mnist_confusion_targeted_label_flip.png}
+\end{minipage}
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{mnist_confusion_visible_patch_backdoor.png}
+\end{minipage}
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{mnist_confusion_visible_patch_backdoor_triggered.png}
+\end{minipage}
+\caption{MNIST confusion evidence. Top left: clean baseline. Top right: targeted label flip showing the digit-7 to digit-1 off-diagonal concentration. Bottom left: visible patch-backdoor clean-test behavior. Bottom right: triggered-test behavior, which is the actual backdoor evidence.}
+\label{fig:mnistconfusions}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{mnist_backdoor_examples.png}
+\end{minipage}
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{mnist_metric_bars.png}
+\end{minipage}
+\caption{MNIST poisoning artifacts. The left panel shows visible-trigger training examples with target label 1; the right panel separates clean accuracy from attack-specific effect or ASR.}
+\label{fig:mnistpoisoningartifacts}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.86\textwidth]{mnist_clean_samples.png}
+\caption{MNIST clean samples used as a dataset sanity-check figure.}
+\label{fig:mnistclean}
+\end{figure*}
+
+\begin{table*}[t]
+\centering
+\caption{Generated artifact inventory included in this manuscript.}
+\label{tab:artifactinventory}
+\small
+\begin{tabular}{p{0.25\textwidth}p{0.18\textwidth}p{0.49\textwidth}}
+\toprule
+Artifact & Type & Role in paper \\
+\midrule
+\texttt{periodic\_table\_data\_poisoning.png} & Figure & Full Mendeleev-like risk matrix. \\
+\texttt{fungi\_dataset\_samples.png}, \texttt{fungi\_dataset\_split.png} & Figures & Dataset sanity check and exact split counts. \\
+\texttt{attack\_success\_by\_stage.png}, \texttt{fungi\_reporting\_dashboard.png} & Figures & Normalized effect summary and fungi dashboard. \\
+\texttt{*\_attack\_comparison\_split.png} & Figures & Stage-separated attack comparisons for fungi, fish, and MNIST. \\
+\texttt{*\_attack\_examples.png} & Figures & Visual examples for fungi, fish, and MNIST attacks. \\
+\texttt{mnist\_confusion\_*.png} & Figures & Baseline, targeted poison, clean-test backdoor, and triggered-test backdoor evidence. \\
+\texttt{results/*comparison.*}, \texttt{results/*audit.*} & Tables & Source tables for reported values, implementation coverage, citation checks, and layout consistency. \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \subsection{Answers to Research Questions}
 
