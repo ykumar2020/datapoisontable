@@ -104,7 +104,7 @@ where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is atta
 
 \subsection{Datasets}
 
-MNIST provides a transparent benchmark with 60,000 training and 10,000 test handwritten digits~\cite{mnist}. The main visual-security experiment uses a local fungi dataset with two classes: edible and poisonous. Here ``poisonous'' is the biological mushroom label, not a data-poisoned image. A second food-safety dataset was added from the FoodDDP fish freshness setup: local folders \texttt{fresh2} and \texttt{non-fresh2} contain 40 horse-mackerel images total, and the safety-critical direction is non-fresh fish classified as fresh. Because the fish folder is flat rather than split into \texttt{train/val}, the runner creates a deterministic stratified 75/25 split. Table~\ref{tab:dataset} reports the actual fungi sample statistics generated from the local image folders; the split is stratified but small enough that confidence should be interpreted cautiously. Figure~\ref{fig:samples} shows representative fungi images from the train and validation splits.
+MNIST provides a transparent benchmark with 60,000 training and 10,000 test handwritten digits~\cite{mnist}. The main visual-security experiment uses a local fungi dataset with two classes: edible and poisonous. Here ``poisonous'' is the biological mushroom label, not a data-poisoned image. A second food-safety dataset was added from the FoodDDP fish freshness setup described in the attached course PDF: local folders \texttt{fresh2} and \texttt{non-fresh2} contain 40 horse-mackerel images total, and the safety-critical direction is non-fresh fish classified as fresh. Because the fish folder is flat rather than split into \texttt{train/val}, the runner creates a deterministic stratified 75/25 split. Table~\ref{tab:dataset} reports the actual fungi sample statistics generated from the local image folders; Table~\ref{tab:fishdata} reports the fish split used by the same runner. Both food-image splits are small, so confidence should be interpreted cautiously. Figure~\ref{fig:samples} shows representative fungi images from the train and validation splits.
 
 \begin{table}[t]
 \centering
@@ -119,6 +119,23 @@ Train & Edible & 158 & 261 & 190 & 9.9 \\
 Train & Poisonous & 202 & 259 & 194 & 10.9 \\
 Val & Edible & 42 & 259 & 194 & 10.3 \\
 Val & Poisonous & 48 & 259 & 194 & 11.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Fish freshness dataset used for the second food-safety experiment.}
+\label{tab:fishdata}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Class & Total & Train & Val \\
+\midrule
+Fresh fish (\texttt{fresh2}) & 20 & 15 & 5 \\
+Non-fresh fish (\texttt{non-fresh2}) & 20 & 15 & 5 \\
+\midrule
+Total & 40 & 30 & 10 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -209,6 +226,40 @@ Boundary/HopSkipJump search & Evasion & R3 & 0.6667 & Conditional targeted ASR t
 \end{tabular}
 \end{table*}
 
+\begin{table*}[t]
+\centering
+\caption{Fish freshness comparison table. Poisoning rows retrain MobileNetV3-Small; evasion rows attack the clean fish baseline.}
+\label{tab:fishresults}
+\small
+\begin{tabular}{p{0.23\textwidth}p{0.08\textwidth}p{0.05\textwidth}p{0.10\textwidth}p{0.28\textwidth}p{0.08\textwidth}}
+\toprule
+Method & Stage & Risk & Clean acc. & Metric & Value \\
+\midrule
+Clean baseline & Ref. & -- & 0.8000 & Non-fresh \(\rightarrow\) fresh confusion & 0.0000 \\
+Random label flip & Poison & R3 & 0.9000 & Clean accuracy drop & 0.0000 \\
+Targeted label flip & Poison & R2 & 0.8000 & Non-fresh \(\rightarrow\) fresh confusion & 0.0000 \\
+Subpopulation label poison & Poison & R2 & 0.8000 & Selected subgroup \(\rightarrow\) fresh & 0.0000 \\
+BadNets patch backdoor & Poison & R1 & 1.0000 & Trigger ASR to fresh & 0.0000 \\
+Clean-label patch backdoor & Poison & R1 & 1.0000 & Trigger ASR to fresh & 0.0000 \\
+Sleeper-Agent-style backdoor & Poison & R1 & 1.0000 & Stealth-trigger ASR to fresh & 0.8000 \\
+Clean-label Poison Frogs & Poison & R1 & 1.0000 & Non-fresh \(\rightarrow\) fresh confusion & 0.0000 \\
+Witches' Brew gradient match & Poison & R2 & 1.0000 & Non-fresh \(\rightarrow\) fresh confusion & 0.0000 \\
+FGSM & Evasion & R3 & 0.8000 & Conditional untargeted success & 1.0000 \\
+PGD & Evasion & R2 & 0.8000 & Conditional untargeted success & 1.0000 \\
+DeepFool L2 & Evasion & R3 & 0.8000 & Conditional untargeted success & 1.0000 \\
+Carlini-Wagner L2 & Evasion & R2 & 0.8000 & Conditional targeted ASR to fresh & 1.0000 \\
+Elastic Net EAD & Evasion & R2 & 0.8000 & Conditional targeted ASR to fresh & 0.8000 \\
+JSMA saliency & Evasion & R3 & 0.8000 & Conditional targeted ASR to fresh & 0.4000 \\
+One-Pixel DE & Evasion & R4 & 0.8000 & Conditional targeted ASR to fresh & 0.0000 \\
+SparseFool-style boundary & Evasion & R4 & 0.8000 & Conditional untargeted success & 0.0000 \\
+Universal adversarial perturbation & Evasion & R2 & 0.8000 & Conditional untargeted success & 1.0000 \\
+Adversarial patch & Evasion & R2 & 0.8000 & Conditional targeted ASR to fresh & 0.0000 \\
+ZOO finite difference & Evasion & R3 & 0.8000 & Conditional targeted ASR to fresh & 0.0000 \\
+Boundary/HopSkipJump search & Evasion & R3 & 0.8000 & Conditional targeted ASR to fresh & 0.8000 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
 \begin{table}[t]
 \centering
 \caption{Grouped attack statistics generated from CSV outputs.}
@@ -224,6 +275,12 @@ Fungi & Evasion/G & 0.9285 & 1.0000 \\
 Fungi & Evasion/M & 0.5156 & 1.0000 \\
 Fungi & Evasion/O & 0.3960 & 0.7429 \\
 Fungi & Evasion/U & 0.6429 & 1.0000 \\
+Fish & Poisoning/B & 0.2667 & 0.8000 \\
+Fish & Poisoning/M & 0.0000 & 0.0000 \\
+Fish & Evasion/G & 1.0000 & 1.0000 \\
+Fish & Evasion/M & 0.3500 & 1.0000 \\
+Fish & Evasion/O & 0.6500 & 1.0000 \\
+Fish & Evasion/U & 0.5000 & 1.0000 \\
 MNIST & Poisoning/B & 0.6853 & 0.9988 \\
 MNIST & Evasion/G & 1.0000 & 1.0000 \\
 \bottomrule
@@ -232,7 +289,7 @@ MNIST & Evasion/G & 1.0000 & 1.0000 \\
 
 The highest fungi evasion effects are PGD, DeepFool, and UAP, each reaching 1.0000 conditional untargeted success. These values are conditional on the clean-correct subset and therefore should be read with the sample count and baseline accuracy, not as a claim that the whole validation set is perfectly vulnerable. JSMA remains a strong sparse targeted method at 0.9375, while Carlini-Wagner reaches 0.7429 targeted ASR. The strongest poisoning-style selected-slice result is subpopulation poisoning, while the strongest trigger result is the gradient-aligned Sleeper-Agent-style backdoor. Poison Frogs increases the safety-critical poisonous-to-edible confusion above the clean baseline while preserving clean-label constraints. The Witches' Brew-style run demonstrates gradient alignment, but its measured effect is weaker on this small validation split than the subgroup and backdoor attacks.
 
-The fish freshness extension uses the same method table on a much smaller split: 30 training images and 10 validation images. The clean baseline reaches 0.8000 accuracy with 0.0000 non-fresh-to-fresh confusion. The top poisoning/backdoor result is the Sleeper-Agent-style backdoor at 0.8000 stealth-trigger ASR. The strongest fish evasion results are FGSM, PGD, DeepFool, Carlini-Wagner, and UAP at 1.0000 conditional success, while EAD and Boundary/HopSkipJump reach 0.8000 targeted ASR. The generated \texttt{results/food\_dataset\_comparison.*} files compare fungi and fish directly.
+Table~\ref{tab:fishresults} reports the fish freshness extension explicitly. It uses the same method table on a much smaller split: 30 training images and 10 validation images. The clean baseline reaches 0.8000 accuracy with 0.0000 non-fresh-to-fresh confusion. The top poisoning/backdoor result is the Sleeper-Agent-style backdoor at 0.8000 stealth-trigger ASR. The strongest fish evasion results are FGSM, PGD, DeepFool, Carlini-Wagner, and UAP at 1.0000 conditional success, while EAD and Boundary/HopSkipJump reach 0.8000 targeted ASR. The generated \texttt{results/fish\_attack\_comparison.*} files contain the source rows, and \texttt{results/food\_dataset\_comparison.*} compares fungi and fish directly.
 
 \begin{table}[t]
 \centering
