@@ -51,6 +51,13 @@ Machine learning systems increasingly depend on data that is scraped, labeled, f
 
 The key correction is stage separation. Poisoning methods modify data before or during training, fine-tuning, retrieval, or alignment. Evasion methods such as FGSM, PGD, JSMA, ZOO, SparseFool, HopSkipJump, and Adversarial Patch modify inputs at inference time. They are related adversarial ML techniques, but they are not data poisoning unless the adversarial examples are fed back into training or adaptation.
 
+This paper is organized around three research questions:
+\begin{itemize}
+    \item \textbf{RQ1:} How can data poisoning and related adversarial methods be organized so that mechanism, attack stage, and operational danger are visible at a glance?
+    \item \textbf{RQ2:} When these methods are implemented on real image data, which attacks create the largest targeted failures under comparable evaluation metrics?
+    \item \textbf{RQ3:} What implementation and evaluation choices are necessary to avoid misleading results when moving from a simple benchmark to a realistic fungi image task?
+\end{itemize}
+
 The contributions are: (i) a mechanism-and-risk taxonomy for poisoning and related attacks; (ii) real implementations for more than ten methods; (iii) a transfer-learning fungi experiment that avoids in-memory dataset loading and weak from-scratch baselines; and (iv) reporting artifacts, tables, and graphs for conference presentation.
 
 \section{Related Work}
@@ -187,6 +194,14 @@ MNIST & Evasion/G & 1.0000 & 1.0000 \\
 
 The highest fungi evasion effects are PGD and JSMA. The strongest poisoning-style selected-slice result is subpopulation poisoning, while the strongest trigger result is the gradient-aligned Sleeper-Agent-style backdoor. Poison Frogs increases the safety-critical poisonous-to-edible confusion above the clean baseline while preserving clean-label constraints. The Witches' Brew-style run demonstrates gradient alignment, but its measured effect is weaker on this small validation split than the subgroup and backdoor attacks.
 
+\subsection{Answers to Research Questions}
+
+\textbf{RQ1:} The periodic-table representation answers the organization question by placing attacks into mechanism-colored element cells and labeling each cell by risk and stage. This makes it clear which methods are training-time poisoning, which are test-time evasion analogs, and which categories deserve higher operational concern.
+
+\textbf{RQ2:} On the fungi task, the largest evasion failures are PGD with 1.0000 conditional untargeted success and JSMA with 0.9375 conditional targeted ASR. Among poisoning and backdoor methods, subpopulation poisoning reaches 0.6842 selected-slice confusion, and the Sleeper-Agent-style backdoor reaches 0.6296 stealth-trigger ASR. These results answer RQ2 by showing that sparse or gradient evasion can be strongest at inference time, while subgroup and backdoor poisoning create the most important training-time targeted failures.
+
+\textbf{RQ3:} The experiment answers the implementation question by replacing in-memory image stacking with lazy loading, replacing a weak from-scratch CNN with pretrained MobileNetV3-Small transfer learning, using true latent-space feature collision instead of pixel blending, vectorizing JSMA, batching ZOO finite-difference queries, and reporting conditional attack success only on clean-correct examples.
+
 \section{Discussion}
 
 The results support three security lessons. First, aggregate accuracy is not a sufficient safety metric. The clean fungi baseline already confuses some poisonous samples as edible, and several attacks worsen a targeted failure mode without simply maximizing visible accuracy collapse. Second, attack stage matters. Evasion methods can be dramatic, but they should not be described as poisoning unless they enter the training or adaptation data. Third, realistic baselines matter: pretrained transfer learning, lazy loading, and conditional success metrics make the fungi experiment much closer to a real AI safety presentation than a purely toy implementation.
@@ -195,7 +210,7 @@ The implementation audit is intentionally conservative. The code reproduces the 
 
 \section{Conclusion}
 
-This paper presents a compact risk-based periodic-table framework for data poisoning and related adversarial methods. The accompanying code implements real attacks on MNIST and a fungi image dataset, generates comparison tables and graphs, and corrects several practical pitfalls: in-memory loading, weak baselines, pixel-blending feature collision, unvectorized saliency search, unbatched ZOO queries, and unconditional evasion metrics. The final framework is suitable for a short IEEE-style AI security conference paper and for an at-a-glance presentation of operational risk.
+This paper answers the three research questions as follows. First, data poisoning can be organized as a chemical-table-style risk map by separating stage, mechanism, and operational danger. Second, the fungi experiments show that PGD and JSMA produce the strongest evasion failures, while subpopulation poisoning and Sleeper-Agent-style backdoors produce the strongest training-time targeted failures. Third, realistic conclusions require careful engineering: lazy loading, transfer learning, latent-space poisoning, vectorized/batched attacks, and conditional success metrics. The final framework is suitable for a short IEEE-style AI security conference paper and for an at-a-glance presentation of operational risk.
 
 \section*{Reproducibility and Safety}
 
