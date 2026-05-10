@@ -118,8 +118,8 @@ PERIODIC_TABLE_ENTRIES = [
 ]
 
 IMPLEMENTATION_COVERAGE_ROWS = [
-    {"requirement_group": "Poster-required", "method": "FGSM", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::fgsm", "result_row": "FGSM", "status": "implemented"},
-    {"requirement_group": "Poster-required", "method": "PGD", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::pgd", "result_row": "PGD", "status": "implemented"},
+    {"requirement_group": "Poster-required", "method": "FGSM", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::fgsm; optional torchattacks.FGSM backend", "result_row": "FGSM", "status": "implemented"},
+    {"requirement_group": "Poster-required", "method": "PGD", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::pgd; optional torchattacks.PGD backend", "result_row": "PGD", "status": "implemented"},
     {"requirement_group": "Poster-required", "method": "DeepFool", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::deepfool_l2", "result_row": "DeepFool L2", "status": "implemented"},
     {"requirement_group": "Poster-required", "method": "Carlini-Wagner", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::carlini_wagner_l2_target", "result_row": "Carlini-Wagner L2", "status": "implemented"},
     {"requirement_group": "Poster-required", "method": "Boundary Attack", "stage": "evasion", "implemented_in": "scripts/fungi_attack_comparison.py::boundary_search", "result_row": "Boundary / HopSkipJump search", "status": "implemented"},
@@ -138,6 +138,9 @@ IMPLEMENTATION_COVERAGE_ROWS = [
     {"requirement_group": "Extra implemented", "method": "Random Label Flipping", "stage": "poisoning", "implemented_in": "scripts/fungi_attack_comparison.py::random_label_flip", "result_row": "Random label flip", "status": "implemented"},
     {"requirement_group": "Extra implemented", "method": "Targeted Label Flipping", "stage": "poisoning", "implemented_in": "scripts/fungi_attack_comparison.py::targeted_label_flip", "result_row": "Targeted label flip", "status": "implemented"},
     {"requirement_group": "Extra implemented", "method": "Clean-Label Patch Backdoor", "stage": "poisoning", "implemented_in": "scripts/fungi_attack_comparison.py::clean_label_backdoor_dataset", "result_row": "Clean-label patch backdoor", "status": "implemented"},
+    {"requirement_group": "Implementation-upgrade", "method": "MNIST CNN baseline", "stage": "reference", "implemented_in": "scripts/mnist_attack_comparison.py::MNISTCnn", "result_row": "Clean baseline", "status": "implemented"},
+    {"requirement_group": "Implementation-upgrade", "method": "Activation clustering defense", "stage": "defense", "implemented_in": "scripts/mnist_attack_comparison.py::activation_cluster_filter", "result_row": "--defense activation_clustering", "status": "implemented"},
+    {"requirement_group": "Implementation-upgrade", "method": "PGD epsilon sweep", "stage": "evaluation", "implemented_in": "scripts/fungi_attack_comparison.py::run_pgd_epsilon_sweep; scripts/mnist_attack_comparison.py::run_epsilon_sweep", "result_row": "*_attack_sweep.*", "status": "implemented"},
 ]
 
 

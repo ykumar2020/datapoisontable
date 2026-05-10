@@ -3,7 +3,7 @@
     "requirement_group": "Poster-required",
     "method": "FGSM",
     "stage": "evasion",
-    "implemented_in": "scripts/fungi_attack_comparison.py::fgsm",
+    "implemented_in": "scripts/fungi_attack_comparison.py::fgsm; optional torchattacks.FGSM backend",
     "result_row": "FGSM",
     "status": "implemented"
   },
@@ -11,7 +11,7 @@
     "requirement_group": "Poster-required",
     "method": "PGD",
     "stage": "evasion",
-    "implemented_in": "scripts/fungi_attack_comparison.py::pgd",
+    "implemented_in": "scripts/fungi_attack_comparison.py::pgd; optional torchattacks.PGD backend",
     "result_row": "PGD",
     "status": "implemented"
   },
@@ -157,6 +157,30 @@
     "stage": "poisoning",
     "implemented_in": "scripts/fungi_attack_comparison.py::clean_label_backdoor_dataset",
     "result_row": "Clean-label patch backdoor",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Implementation-upgrade",
+    "method": "MNIST CNN baseline",
+    "stage": "reference",
+    "implemented_in": "scripts/mnist_attack_comparison.py::MNISTCnn",
+    "result_row": "Clean baseline",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Implementation-upgrade",
+    "method": "Activation clustering defense",
+    "stage": "defense",
+    "implemented_in": "scripts/mnist_attack_comparison.py::activation_cluster_filter",
+    "result_row": "--defense activation_clustering",
+    "status": "implemented"
+  },
+  {
+    "requirement_group": "Implementation-upgrade",
+    "method": "PGD epsilon sweep",
+    "stage": "evaluation",
+    "implemented_in": "scripts/fungi_attack_comparison.py::run_pgd_epsilon_sweep; scripts/mnist_attack_comparison.py::run_epsilon_sweep",
+    "result_row": "*_attack_sweep.*",
     "status": "implemented"
   }
 ]

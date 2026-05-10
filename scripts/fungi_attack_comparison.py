@@ -30,6 +30,11 @@ from torch.utils.data import DataLoader, Dataset, TensorDataset
 from torchvision import models
 from torchvision.models import MobileNet_V3_Small_Weights, ResNet18_Weights
 
+try:  # Optional community-vetted robustness backend for FGSM/PGD.
+    import torchattacks  # type: ignore
+except ImportError:  # pragma: no cover - environment dependent
+    torchattacks = None
+
 
 ROOT = Path(__file__).resolve().parents[1]
 os.environ.setdefault("TORCH_HOME", str(ROOT / ".cache" / "torch"))
@@ -220,6 +225,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--zoo-samples", type=int, default=8)
     parser.add_argument("--trigger-size", type=int, default=18)
     parser.add_argument("--adversarial-patch-size", type=int, default=32)
+    parser.add_argument("--fgsm-eps", type=float, default=0.08)
+    parser.add_argument("--pgd-eps", type=float, default=0.10)
+    parser.add_argument("--pgd-step", type=float, default=0.025)
+    parser.add_argument("--pgd-iters", type=int, default=7)
+    parser.add_argument("--sweep-eps", action="store_true", help="Grid-search the smallest PGD eps reaching the ASR threshold.")
+    parser.add_argument("--sweep-grid", default="0.02,0.04,0.06,0.08,0.10,0.12,0.16")
+    parser.add_argument("--sweep-threshold", type=float, default=0.80)
     parser.add_argument(
         "--attack-scale",
         type=float,
@@ -777,12 +789,20 @@ def input_gradient(model: nn.Module, x: torch.Tensor, labels: torch.Tensor, targ
     return x_var.grad.detach()
 
 
+def attack_backend_note() -> str:
+    return "torchattacks backend" if torchattacks is not None else "local PyTorch fallback; install torchattacks for community-vetted FGSM/PGD"
+
+
 def fgsm(model: nn.Module, x: torch.Tensor, y: torch.Tensor, eps: float) -> torch.Tensor:
+    if torchattacks is not None:
+        return torchattacks.FGSM(model, eps=eps)(x, y).detach()
     grad = input_gradient(model, x, y, targeted=False)
     return torch.clamp(x + eps * grad.sign(), 0.0, 1.0)
 
 
 def pgd(model: nn.Module, x: torch.Tensor, y: torch.Tensor, eps: float, step: float, iters: int) -> torch.Tensor:
+    if torchattacks is not None:
+        return torchattacks.PGD(model, eps=eps, alpha=step, steps=iters, random_start=False)(x, y).detach()
     adv = x.clone()
     for _ in range(iters):
         grad = input_gradient(model, adv, y, targeted=False)
@@ -1239,6 +1259,60 @@ def write_results(rows: list[dict[str, str | int | float]], dataset_name: str) -
             )
 
 
+def write_sweep_results(rows: list[dict[str, str | int | float]], dataset_name: str) -> None:
+    if not rows:
+        return
+    RESULTS_DIR.mkdir(exist_ok=True)
+    fieldnames = list(rows[0].keys())
+    slug = dataset_slug(dataset_name)
+    title = dataset_title(dataset_name)
+    with (RESULTS_DIR / f"{slug}_attack_sweep.csv").open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+    with (RESULTS_DIR / f"{slug}_attack_sweep.json").open("w", encoding="utf-8") as f:
+        json.dump(rows, f, indent=2)
+    with (RESULTS_DIR / f"{slug}_attack_sweep.md").open("w", encoding="utf-8") as f:
+        f.write(f"# {title} Attack Epsilon Sweep\n\n")
+        f.write("| Attack | Eps | Step | Iters | Success | Meets threshold | Backend |\n")
+        f.write("|---|---:|---:|---:|---:|---|---|\n")
+        for row in rows:
+            f.write(
+                f"| {row['attack']} | {row['eps']} | {row['step']} | {row['iters']} | "
+                f"{row['success']} | {row['meets_threshold']} | {row['backend']} |\n"
+            )
+
+
+def run_pgd_epsilon_sweep(
+    model: nn.Module,
+    clean_x: torch.Tensor,
+    y: torch.Tensor,
+    eps_values: list[float],
+    threshold: float,
+    step_ratio: float,
+    iters: int,
+) -> tuple[list[dict[str, str | int | float]], dict[str, str | int | float] | None]:
+    rows: list[dict[str, str | int | float]] = []
+    first_hit: dict[str, str | int | float] | None = None
+    for eps in eps_values:
+        step = max(1e-4, eps * step_ratio)
+        adv = pgd(model, clean_x, y, eps=eps, step=step, iters=iters)
+        success = conditional_untargeted_success(model, clean_x, adv, y)
+        row: dict[str, str | int | float] = {
+            "attack": "PGD",
+            "eps": round(float(eps), 4),
+            "step": round(float(step), 4),
+            "iters": int(iters),
+            "success": round(float(success), 4),
+            "meets_threshold": "yes" if success >= threshold else "no",
+            "backend": attack_backend_note(),
+        }
+        rows.append(row)
+        if first_hit is None and success >= threshold:
+            first_hit = row
+    return rows, first_hit
+
+
 def save_bar_chart(rows: list[dict[str, str | int | float]], dataset_name: str) -> None:
     FIGURES_DIR.mkdir(exist_ok=True)
     slug = dataset_slug(dataset_name)
@@ -1440,13 +1514,31 @@ def main() -> None:
     attack_y = val_y[source_correct]
     target_guides = val_x[val_y == target]
 
-    adv = fgsm(baseline, attack_x, attack_y, eps=0.08)
+    adv = fgsm(baseline, attack_x, attack_y, eps=args.fgsm_eps)
     l0, linf, l2 = perturbation_stats(attack_x, adv)
-    rows.append(metric_row("FGSM", "evasion", "G", "R3", "0", len(train_ds), baseline_acc, "conditional_untargeted_misclassification", conditional_untargeted_success(baseline, attack_x, adv, attack_y), "Single-step gradient sign.", l0, linf, l2))
+    rows.append(metric_row("FGSM", "evasion", "G", "R3", "0", len(train_ds), baseline_acc, "conditional_untargeted_misclassification", conditional_untargeted_success(baseline, attack_x, adv, attack_y), f"eps={args.fgsm_eps}; {attack_backend_note()}.", l0, linf, l2))
 
-    adv = pgd(baseline, attack_x, attack_y, eps=0.10, step=0.025, iters=7)
+    adv = pgd(baseline, attack_x, attack_y, eps=args.pgd_eps, step=args.pgd_step, iters=args.pgd_iters)
     l0, linf, l2 = perturbation_stats(attack_x, adv)
-    rows.append(metric_row("PGD", "evasion", "G", "R2", "0", len(train_ds), baseline_acc, "conditional_untargeted_misclassification", conditional_untargeted_success(baseline, attack_x, adv, attack_y), "Projected gradient ascent.", l0, linf, l2))
+    rows.append(metric_row("PGD", "evasion", "G", "R2", "0", len(train_ds), baseline_acc, "conditional_untargeted_misclassification", conditional_untargeted_success(baseline, attack_x, adv, attack_y), f"eps={args.pgd_eps}, step={args.pgd_step}, iters={args.pgd_iters}; {attack_backend_note()}.", l0, linf, l2))
+
+    sweep_rows: list[dict[str, str | int | float]] = []
+    if args.sweep_eps:
+        eps_values = [float(value.strip()) for value in args.sweep_grid.split(",") if value.strip()]
+        sweep_rows, best_sweep = run_pgd_epsilon_sweep(
+            baseline,
+            attack_x,
+            attack_y,
+            eps_values,
+            args.sweep_threshold,
+            step_ratio=0.25,
+            iters=args.pgd_iters,
+        )
+        if best_sweep is not None:
+            rows.append(metric_row("PGD eps sweep", "evasion", "G", "R2", "0", len(train_ds), baseline_acc, "lowest_eps_for_threshold", float(best_sweep["eps"]), f"Lowest eps reaching >= {args.sweep_threshold:.2f} conditional success; success={best_sweep['success']}.", "", float(best_sweep["eps"]), ""))
+        elif sweep_rows:
+            best_sweep = max(sweep_rows, key=lambda row: float(row["success"]))
+            rows.append(metric_row("PGD eps sweep", "evasion", "G", "R2", "0", len(train_ds), baseline_acc, "best_swept_success", float(best_sweep["success"]), f"No eps reached threshold {args.sweep_threshold:.2f}; best eps={best_sweep['eps']}.", "", float(best_sweep["eps"]), ""))
 
     adv = deepfool_l2(baseline, attack_x, max_iter=scaled_int(18, attack_scale, 4), overshoot=0.02)
     l0, linf, l2 = perturbation_stats(attack_x, adv)
@@ -1534,13 +1626,14 @@ def main() -> None:
     rows.append(metric_row("Boundary / HopSkipJump search", "evasion", "O", "R3", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, small_x, adv, small_y, target), "Poster Boundary method represented by decision-only binary search to target-class guide images.", l0, linf, l2))
 
     write_results(rows, args.dataset_name)
+    write_sweep_results(sweep_rows, args.dataset_name)
     save_bar_chart(rows, args.dataset_name)
     sample_count = min(6, len(attack_x))
     save_examples(
         attack_x[:sample_count],
         [
-            ("FGSM", fgsm(baseline, attack_x[:sample_count], attack_y[:sample_count], eps=0.08)),
-            ("PGD", pgd(baseline, attack_x[:sample_count], attack_y[:sample_count], eps=0.10, step=0.025, iters=7)),
+            ("FGSM", fgsm(baseline, attack_x[:sample_count], attack_y[:sample_count], eps=args.fgsm_eps)),
+            ("PGD", pgd(baseline, attack_x[:sample_count], attack_y[:sample_count], eps=args.pgd_eps, step=args.pgd_step, iters=args.pgd_iters)),
             ("Patch", apply_patch(attack_x[:sample_count], patch, attack_x.shape[2] - args.adversarial_patch_size, attack_x.shape[3] - args.adversarial_patch_size)),
         ],
         FIGURES_DIR / f"{dataset_slug(args.dataset_name)}_attack_examples.png",
@@ -1551,6 +1644,8 @@ def main() -> None:
         print(f"{row['method']}: clean={row['clean_accuracy']} {row['attack_metric']}={row['attack_success']}")
     slug = dataset_slug(args.dataset_name)
     print(f"\nWrote {RESULTS_DIR / f'{slug}_attack_comparison.md'}")
+    if sweep_rows:
+        print(f"Wrote {RESULTS_DIR / f'{slug}_attack_sweep.md'}")
     print(f"Wrote {FIGURES_DIR / f'{slug}_attack_comparison_bars.png'}")
 
 
