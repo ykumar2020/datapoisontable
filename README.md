@@ -7,19 +7,19 @@ The original poster framed several test-time adversarial examples as data poison
 - **Data poisoning** changes training, fine-tuning, feedback, retrieval, or supply-chain data.
 - **Backdoors** are a high-risk poisoning subfamily because they preserve normal accuracy while adding trigger-activated behavior.
 - **Evasion attacks** such as FGSM, PGD, CW, DeepFool, Boundary, One-Pixel, and UAP are related adversarial ML techniques, but they are not data poisoning unless used to craft poisoned training samples.
-- **The final visual is a risk-by-mechanism matrix, not a literal Mendeleev table:** every row is an R-level, every column is a mechanism family, and evasion analogs are separated from the poisoning grid.
+- **The final visual is a stage-by-family taxonomy matrix, not a literal Mendeleev table:** rows are attack surfaces/stages, columns are consistent attack families, risk is printed inside each cell, and evasion analogs are separated from the poisoning grid.
 
 ## Contents
 
 - `catalog/data_poisoning_techniques.csv` - expanded technique catalog with risk scores and primary sources.
 - `docs/poster_upgrade_notes.md` - recommended changes to the poster/table.
-- `docs/visual_taxonomy_audit.md` - rationale for replacing the literal chemical-table shape with an auditable risk-by-mechanism matrix.
+- `docs/visual_taxonomy_audit.md` - rationale for replacing the literal chemical-table shape with an auditable stage-by-family taxonomy matrix.
 - `docs/fish_dataset_notes.md` - extracted notes from the attached FoodDDP PDF for the `__fish2/` fish freshness dataset.
 - `docs/data_poisoning_theory.tex` - IEEE two-column conference-style LaTeX paper with abstract, introduction, related work, methodology, results, discussion, and conclusion.
 - `scripts/mnist_poisoning_experiment.py` - actual training-time poisoning implementations on real MNIST: random label flipping, targeted source-to-target label flipping, and a BadNets-style visible trigger backdoor.
 - `scripts/mnist_attack_comparison.py` - 14-method MNIST comparison suite covering poisoning, backdoors, and related evasion attacks.
 - `scripts/fungi_attack_comparison.py` - fungi dataset comparison using lazy PyTorch datasets, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, every original poster method (FGSM, PGD, DeepFool, Carlini-Wagner, Boundary, One-Pixel, UAP), and the additional shared methods including Poison Frogs, Sleeper-Agent-style backdoor, Witches' Brew-style gradient matching, Adversarial Patch, JSMA, ZOO, SparseFool, EAD, subpopulation poisoning, and BadNets.
-- `scripts/generate_reporting_artifacts.py` - derived report tables and figures: fungi dataset statistics, sample image grid, dataset split chart, grouped attack statistics, implementation coverage audit, table layout audit, reporting dashboard, and cross-dataset stage comparison.
+- `scripts/generate_reporting_artifacts.py` - derived report tables and figures: fungi dataset statistics, sample image grid, dataset split chart, grouped attack statistics, implementation coverage audit, table layout audit, reporting dashboard, paper taxonomy panels, poster taxonomy matrix, and cross-dataset stage comparison.
 - `pptx_media/periodic_table_slide.jpg` - extracted image from the supplied PPTX for reference.
 
 ## Run The MNIST Experiment
@@ -124,5 +124,6 @@ The script writes:
 - `figures/attack_success_by_stage.png`
 - `figures/periodic_table_data_poisoning.png`
 - `figures/periodic_table_data_poisoning.svg`
+- `figures/paper_taxonomy_panels.png`
 
 The fungi dataset and pretrained-weight cache are intentionally ignored by git.
