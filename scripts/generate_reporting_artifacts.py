@@ -135,6 +135,12 @@ def read_rows(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(f))
 
 
+def read_optional_rows(path: Path) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+    return read_rows(path)
+
+
 def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
     path.parent.mkdir(exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
@@ -340,13 +346,13 @@ def save_attack_dashboard(fungi_rows: list[dict[str, str]]) -> None:
     plt.close(fig)
 
 
-def save_success_by_stage_chart(fungi_rows: list[dict[str, str]], mnist_rows: list[dict[str, str]]) -> None:
-    fig, ax = plt.subplots(figsize=(6.2, 3.4))
-    datasets = [("Fungi", fungi_rows), ("MNIST", mnist_rows)]
+def save_success_by_stage_chart(datasets: list[tuple[str, list[dict[str, str]]]]) -> None:
+    fig, ax = plt.subplots(figsize=(6.8, 3.5))
     stages = ["poisoning", "evasion"]
-    width = 0.34
+    width = min(0.24, 0.75 / max(1, len(datasets)))
     x = np.arange(len(stages))
-    for offset, (dataset, rows) in zip([-width / 2, width / 2], datasets):
+    offsets = (np.arange(len(datasets)) - (len(datasets) - 1) / 2.0) * width
+    for offset, (dataset, rows) in zip(offsets, datasets):
         values = []
         for stage in stages:
             group = [float(r["attack_success"]) for r in rows if r["stage"] == stage]
@@ -361,6 +367,33 @@ def save_success_by_stage_chart(fungi_rows: list[dict[str, str]], mnist_rows: li
     fig.tight_layout()
     fig.savefig(FIGURES_DIR / "attack_success_by_stage.png", dpi=220)
     plt.close(fig)
+
+
+def dataset_comparison_rows(datasets: list[tuple[str, list[dict[str, str]]]]) -> list[dict[str, object]]:
+    output: list[dict[str, object]] = []
+    for dataset, rows in datasets:
+        if not rows:
+            continue
+        baseline = next((r for r in rows if r["method"] == "Clean baseline"), rows[0])
+        poisoning = [r for r in rows if r["stage"] == "poisoning"]
+        evasion = [r for r in rows if r["stage"] == "evasion"]
+        top_poison = max(poisoning, key=lambda r: float(r["attack_success"])) if poisoning else None
+        top_evasion = max(evasion, key=lambda r: float(r["attack_success"])) if evasion else None
+        output.append(
+            {
+                "dataset": dataset.lower(),
+                "methods": len(rows) - 1,
+                "train_size": baseline["train_size"],
+                "clean_accuracy": baseline["clean_accuracy"],
+                "critical_confusion_metric": baseline["attack_metric"],
+                "critical_confusion": baseline["attack_success"],
+                "top_poisoning_method": top_poison["method"] if top_poison else "",
+                "top_poisoning_success": top_poison["attack_success"] if top_poison else "",
+                "top_evasion_method": top_evasion["method"] if top_evasion else "",
+                "top_evasion_success": top_evasion["attack_success"] if top_evasion else "",
+            }
+        )
+    return output
 
 
 def periodic_entries_for_export() -> list[dict[str, object]]:
@@ -484,16 +517,28 @@ def main() -> None:
     FIGURES_DIR.mkdir(exist_ok=True)
     fungi_rows = read_rows(RESULTS_DIR / "fungi_attack_comparison.csv")
     mnist_rows = read_rows(RESULTS_DIR / "mnist_attack_comparison.csv")
+    fish_rows = read_optional_rows(RESULTS_DIR / "fish_attack_comparison.csv")
+    summary_datasets = [("Fungi", fungi_rows), ("MNIST", mnist_rows)]
+    if fish_rows:
+        summary_datasets.insert(1, ("Fish", fish_rows))
 
     dataset_stats = collect_fungi_dataset_statistics()
     write_csv(RESULTS_DIR / "fungi_dataset_statistics.csv", dataset_stats)
     write_json(RESULTS_DIR / "fungi_dataset_statistics.json", dataset_stats)
     write_markdown(RESULTS_DIR / "fungi_dataset_statistics.md", "Fungi Dataset Statistics", dataset_stats)
 
-    attack_stats = attack_summary_statistics(fungi_rows, "fungi") + attack_summary_statistics(mnist_rows, "mnist")
+    attack_stats: list[dict[str, object]] = []
+    for dataset, rows in summary_datasets:
+        attack_stats.extend(attack_summary_statistics(rows, dataset.lower()))
     write_csv(RESULTS_DIR / "attack_summary_statistics.csv", attack_stats)
     write_json(RESULTS_DIR / "attack_summary_statistics.json", attack_stats)
     write_markdown(RESULTS_DIR / "attack_summary_statistics.md", "Attack Summary Statistics", attack_stats)
+
+    food_comparison = dataset_comparison_rows([("Fungi", fungi_rows)] + ([("Fish", fish_rows)] if fish_rows else []))
+    if food_comparison:
+        write_csv(RESULTS_DIR / "food_dataset_comparison.csv", food_comparison)
+        write_json(RESULTS_DIR / "food_dataset_comparison.json", food_comparison)
+        write_markdown(RESULTS_DIR / "food_dataset_comparison.md", "Food Dataset Comparison", food_comparison)
 
     periodic_rows = periodic_entries_for_export()
     write_csv(RESULTS_DIR / "periodic_table_entries.csv", periodic_rows)
@@ -507,11 +552,13 @@ def main() -> None:
     save_fungi_sample_grid()
     save_dataset_split_chart(dataset_stats)
     save_attack_dashboard(fungi_rows)
-    save_success_by_stage_chart(fungi_rows, mnist_rows)
+    save_success_by_stage_chart(summary_datasets)
     save_periodic_table()
 
     print(f"Wrote {RESULTS_DIR / 'fungi_dataset_statistics.md'}")
     print(f"Wrote {RESULTS_DIR / 'attack_summary_statistics.md'}")
+    if fish_rows:
+        print(f"Wrote {RESULTS_DIR / 'food_dataset_comparison.md'}")
     print(f"Wrote {RESULTS_DIR / 'periodic_table_entries.md'}")
     print(f"Wrote {RESULTS_DIR / 'implementation_coverage.md'}")
     print(f"Wrote {FIGURES_DIR / 'fungi_dataset_samples.png'}")

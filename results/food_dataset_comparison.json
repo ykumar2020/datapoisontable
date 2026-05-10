@@ -1,0 +1,26 @@
+[
+  {
+    "dataset": "fungi",
+    "methods": 20,
+    "train_size": "360",
+    "clean_accuracy": "0.6667",
+    "critical_confusion_metric": "poisonous_to_edible_confusion",
+    "critical_confusion": "0.2708",
+    "top_poisoning_method": "Subpopulation label poison",
+    "top_poisoning_success": "0.6842",
+    "top_evasion_method": "PGD",
+    "top_evasion_success": "1.0"
+  },
+  {
+    "dataset": "fish",
+    "methods": 20,
+    "train_size": "30",
+    "clean_accuracy": "0.8",
+    "critical_confusion_metric": "non-fresh2_to_fresh2_confusion",
+    "critical_confusion": "0.0",
+    "top_poisoning_method": "Sleeper Agent-style backdoor",
+    "top_poisoning_success": "0.8",
+    "top_evasion_method": "FGSM",
+    "top_evasion_success": "1.0"
+  }
+]

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fungi image attack comparison with lazy loading and transfer learning.
+"""Food image attack comparison with lazy loading and transfer learning.
 
 The target direction defaults to poisonous -> edible, because that is the
 safety-critical mistake for a mushroom classifier. Training uses a lazy
@@ -53,6 +53,24 @@ class FungiImageDataset(Dataset):
             self.samples.extend((path, label) for path in files)
         if not self.samples:
             raise RuntimeError(f"No image samples found in {root / split}")
+        self.labels = [label for _, label in self.samples]
+
+    def __len__(self) -> int:
+        return len(self.samples)
+
+    def __getitem__(self, index: int) -> tuple[torch.Tensor, int]:
+        path, label = self.samples[index]
+        return image_to_tensor(path, self.image_size), label
+
+
+class ImagePathDataset(Dataset):
+    def __init__(self, samples: Sequence[tuple[Path, int]], class_names: list[str], image_size: int, split: str) -> None:
+        self.samples = list(samples)
+        self.class_names = class_names
+        self.image_size = image_size
+        self.split = split
+        if not self.samples:
+            raise RuntimeError(f"No image samples found for split={split}")
         self.labels = [label for _, label in self.samples]
 
     def __len__(self) -> int:
@@ -164,8 +182,10 @@ class TransferFungiModel(nn.Module):
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run fungi dataset attack comparison.")
+    parser = argparse.ArgumentParser(description="Run food image attack comparison.")
     parser.add_argument("--dataset-root", type=Path, default=ROOT / "fungi")
+    parser.add_argument("--dataset-name", default="fungi")
+    parser.add_argument("--val-fraction", type=float, default=0.25)
     parser.add_argument("--image-size", type=int, default=160)
     parser.add_argument("--model", choices=["mobilenet_v3_small", "resnet18"], default="mobilenet_v3_small")
     parser.add_argument("--pretrained", action=argparse.BooleanOptionalAction, default=True)
@@ -198,10 +218,44 @@ def image_to_tensor(path: Path, image_size: int) -> torch.Tensor:
 
 
 def discover_classes(root: Path) -> list[str]:
-    class_names = sorted(p.name for p in (root / "train").iterdir() if p.is_dir() and not p.name.startswith("."))
+    class_root = root / "train" if (root / "train").is_dir() else root
+    class_names = sorted(p.name for p in class_root.iterdir() if p.is_dir() and not p.name.startswith("."))
     if len(class_names) < 2:
-        raise RuntimeError(f"Expected at least two classes under {root / 'train'}")
+        raise RuntimeError(f"Expected at least two classes under {class_root}")
     return class_names
+
+
+def has_explicit_split(root: Path) -> bool:
+    return (root / "train").is_dir() and (root / "val").is_dir()
+
+
+def flat_train_val_datasets(
+    root: Path,
+    class_names: list[str],
+    image_size: int,
+    val_fraction: float,
+    seed: int,
+) -> tuple[ImagePathDataset, ImagePathDataset]:
+    rng = np.random.default_rng(seed)
+    train_samples: list[tuple[Path, int]] = []
+    val_samples: list[tuple[Path, int]] = []
+    for label, class_name in enumerate(class_names):
+        class_dir = root / class_name
+        files = sorted(p for p in class_dir.iterdir() if p.is_file() and p.suffix.lower() in IMAGE_EXTENSIONS)
+        if len(files) < 2:
+            raise RuntimeError(f"Need at least two images in {class_dir} for a train/validation split")
+        order = rng.permutation(len(files))
+        shuffled = [files[int(i)] for i in order]
+        val_count = int(round(len(shuffled) * val_fraction))
+        val_count = min(max(1, val_count), len(shuffled) - 1)
+        val_samples.extend((path, label) for path in shuffled[:val_count])
+        train_samples.extend((path, label) for path in shuffled[val_count:])
+    train_samples.sort(key=lambda item: str(item[0]))
+    val_samples.sort(key=lambda item: str(item[0]))
+    return (
+        ImagePathDataset(train_samples, class_names, image_size, "train"),
+        ImagePathDataset(val_samples, class_names, image_size, "val"),
+    )
 
 
 def labels_of(dataset: Dataset) -> list[int]:
@@ -1032,18 +1086,29 @@ def metric_row(
     }
 
 
-def write_results(rows: list[dict[str, str | int | float]]) -> None:
+def dataset_slug(dataset_name: str) -> str:
+    slug = "".join(ch.lower() if ch.isalnum() else "_" for ch in dataset_name).strip("_")
+    return slug or "dataset"
+
+
+def dataset_title(dataset_name: str) -> str:
+    return dataset_name.replace("_", " ").replace("-", " ").title()
+
+
+def write_results(rows: list[dict[str, str | int | float]], dataset_name: str) -> None:
     RESULTS_DIR.mkdir(exist_ok=True)
     fieldnames = list(rows[0].keys())
-    csv_path = RESULTS_DIR / "fungi_attack_comparison.csv"
+    slug = dataset_slug(dataset_name)
+    title = dataset_title(dataset_name)
+    csv_path = RESULTS_DIR / f"{slug}_attack_comparison.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
-    with (RESULTS_DIR / "fungi_attack_comparison.json").open("w", encoding="utf-8") as f:
+    with (RESULTS_DIR / f"{slug}_attack_comparison.json").open("w", encoding="utf-8") as f:
         json.dump(rows, f, indent=2)
-    with (RESULTS_DIR / "fungi_attack_comparison.md").open("w", encoding="utf-8") as f:
-        f.write("# Fungi Attack Comparison\n\n")
+    with (RESULTS_DIR / f"{slug}_attack_comparison.md").open("w", encoding="utf-8") as f:
+        f.write(f"# {title} Attack Comparison\n\n")
         f.write("| Method | Stage | Mechanism | Risk | Poison rate | Clean acc. | Metric | Success | L0 | Linf | Notes |\n")
         f.write("|---|---|---|---|---:|---:|---|---:|---:|---:|---|\n")
         for row in rows:
@@ -1054,8 +1119,10 @@ def write_results(rows: list[dict[str, str | int | float]]) -> None:
             )
 
 
-def save_bar_chart(rows: list[dict[str, str | int | float]]) -> None:
+def save_bar_chart(rows: list[dict[str, str | int | float]], dataset_name: str) -> None:
     FIGURES_DIR.mkdir(exist_ok=True)
+    slug = dataset_slug(dataset_name)
+    title = dataset_title(dataset_name)
     plot_rows = [r for r in rows if r["method"] != "Clean baseline"]
     labels = [str(r["method"]).replace(" ", "\n") for r in plot_rows]
     clean = [float(r["clean_accuracy"]) for r in plot_rows]
@@ -1067,16 +1134,16 @@ def save_bar_chart(rows: list[dict[str, str | int | float]]) -> None:
     ax.bar(x + width / 2, attack, width, label="Conditional attack success / damage")
     ax.set_ylim(0, 1.05)
     ax.set_ylabel("Rate")
-    ax.set_title("Fungi attack comparison")
+    ax.set_title(f"{title} attack comparison")
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=8)
     ax.legend(loc="upper left")
     fig.tight_layout()
-    fig.savefig(FIGURES_DIR / "fungi_attack_comparison_bars.png", dpi=220)
+    fig.savefig(FIGURES_DIR / f"{slug}_attack_comparison_bars.png", dpi=220)
     plt.close(fig)
 
 
-def save_examples(clean: torch.Tensor, attacked: list[tuple[str, torch.Tensor]], path: Path) -> None:
+def save_examples(clean: torch.Tensor, attacked: list[tuple[str, torch.Tensor]], path: Path, dataset_name: str) -> None:
     cols = min(6, len(clean))
     rows = 1 + len(attacked)
     fig, axes = plt.subplots(rows, cols, figsize=(cols * 1.5, rows * 1.6))
@@ -1090,7 +1157,7 @@ def save_examples(clean: torch.Tensor, attacked: list[tuple[str, torch.Tensor]],
             axes[r, c].set_title(name, fontsize=7)
     for ax in axes.ravel():
         ax.axis("off")
-    fig.suptitle("Fungi attack examples", fontsize=14)
+    fig.suptitle(f"{dataset_title(dataset_name)} attack examples", fontsize=14)
     fig.tight_layout()
     fig.savefig(path, dpi=220)
     plt.close(fig)
@@ -1103,8 +1170,19 @@ def main() -> None:
     FIGURES_DIR.mkdir(exist_ok=True)
 
     class_names = discover_classes(args.dataset_root)
-    train_ds = FungiImageDataset(args.dataset_root, "train", class_names, args.image_size)
-    val_ds = FungiImageDataset(args.dataset_root, "val", class_names, args.image_size)
+    if has_explicit_split(args.dataset_root):
+        train_ds = FungiImageDataset(args.dataset_root, "train", class_names, args.image_size)
+        val_ds = FungiImageDataset(args.dataset_root, "val", class_names, args.image_size)
+        split_note = "explicit train/val folders"
+    else:
+        train_ds, val_ds = flat_train_val_datasets(
+            args.dataset_root,
+            class_names,
+            args.image_size,
+            args.val_fraction,
+            args.seed,
+        )
+        split_note = f"deterministic stratified split from flat class folders; val_fraction={args.val_fraction}"
     val_x, val_y = materialize_dataset(val_ds)
     class_to_idx = {name: i for i, name in enumerate(class_names)}
     if args.target_class not in class_to_idx or args.source_class not in class_to_idx:
@@ -1136,7 +1214,7 @@ def main() -> None:
             baseline_acc,
             f"{args.source_class}_to_{args.target_class}_confusion",
             source_to_target_rate(baseline, val_x, val_y, source, target),
-            f"Model={args.model}, pretrained={args.pretrained}, freeze_features={args.freeze_features}; classes={class_names}.",
+            f"Dataset={args.dataset_name}; split={split_note}; model={args.model}, pretrained={args.pretrained}, freeze_features={args.freeze_features}; classes={class_names}.",
         )
     ]
 
@@ -1189,13 +1267,13 @@ def main() -> None:
     ds = TensorAppendDataset(train_ds, base_labels, poison_x, poison_y)
     model = train_model(ds, seed=args.seed + 7, **train_kwargs)
     acc = accuracy_on_dataset(model, val_ds)
-    rows.append(metric_row("Clean-label Poison Frogs", "poisoning", "O", "R1", f"{count} appended", len(ds), acc, f"{args.source_class}_to_{args.target_class}_confusion", source_to_target_rate(model, val_x, val_y, source, target), "Optimized edible clean-label poisons toward poisonous latent features with L-infinity projection."))
+    rows.append(metric_row("Clean-label Poison Frogs", "poisoning", "O", "R1", f"{count} appended", len(ds), acc, f"{args.source_class}_to_{args.target_class}_confusion", source_to_target_rate(model, val_x, val_y, source, target), f"Optimized {args.target_class} clean-label poisons toward {args.source_class} latent features with L-infinity projection."))
 
     poison_x, poison_y, count = gradient_matching_poison(baseline, train_ds, source, target, 40, eps=0.08, iters=70, seed=args.seed + 8)
     ds = TensorAppendDataset(train_ds, base_labels, poison_x, poison_y)
     model = train_model(ds, seed=args.seed + 8, **train_kwargs)
     acc = accuracy_on_dataset(model, val_ds)
-    rows.append(metric_row("Witches' Brew gradient match", "poisoning", "G", "R2", f"{count} appended", len(ds), acc, f"{args.source_class}_to_{args.target_class}_confusion", source_to_target_rate(model, val_x, val_y, source, target), "Clean-label poisons optimized so classifier-parameter gradients align with a poisonous-to-edible target objective."))
+    rows.append(metric_row("Witches' Brew gradient match", "poisoning", "G", "R2", f"{count} appended", len(ds), acc, f"{args.source_class}_to_{args.target_class}_confusion", source_to_target_rate(model, val_x, val_y, source, target), f"Clean-label {args.target_class} poisons optimized so classifier-parameter gradients align with a {args.source_class}-to-{args.target_class} target objective."))
 
     baseline_pred = predict(baseline, val_x)
     source_correct = torch.nonzero((val_y == source) & (baseline_pred == val_y), as_tuple=False).flatten()
@@ -1262,8 +1340,8 @@ def main() -> None:
     l0, linf, l2 = perturbation_stats(small_x, adv)
     rows.append(metric_row("Boundary / HopSkipJump search", "evasion", "O", "R3", "0", len(train_ds), baseline_acc, f"conditional_targeted_ASR_to_{args.target_class}", conditional_targeted_success(baseline, small_x, adv, small_y, target), "Poster Boundary method represented by decision-only binary search to target-class guide images.", l0, linf, l2))
 
-    write_results(rows)
-    save_bar_chart(rows)
+    write_results(rows, args.dataset_name)
+    save_bar_chart(rows, args.dataset_name)
     sample_count = min(6, len(attack_x))
     save_examples(
         attack_x[:sample_count],
@@ -1272,13 +1350,15 @@ def main() -> None:
             ("PGD", pgd(baseline, attack_x[:sample_count], attack_y[:sample_count], eps=0.10, step=0.025, iters=7)),
             ("Patch", apply_patch(attack_x[:sample_count], patch, attack_x.shape[2] - args.adversarial_patch_size, attack_x.shape[3] - args.adversarial_patch_size)),
         ],
-        FIGURES_DIR / "fungi_attack_examples.png",
+        FIGURES_DIR / f"{dataset_slug(args.dataset_name)}_attack_examples.png",
+        args.dataset_name,
     )
 
     for row in rows:
         print(f"{row['method']}: clean={row['clean_accuracy']} {row['attack_metric']}={row['attack_success']}")
-    print(f"\nWrote {RESULTS_DIR / 'fungi_attack_comparison.md'}")
-    print(f"Wrote {FIGURES_DIR / 'fungi_attack_comparison_bars.png'}")
+    slug = dataset_slug(args.dataset_name)
+    print(f"\nWrote {RESULTS_DIR / f'{slug}_attack_comparison.md'}")
+    print(f"Wrote {FIGURES_DIR / f'{slug}_attack_comparison_bars.png'}")
 
 
 if __name__ == "__main__":

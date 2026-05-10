@@ -81,6 +81,87 @@
     "attack_success_max": 0.2708
   },
   {
+    "dataset": "fish",
+    "stage": "evasion",
+    "mechanism": "G",
+    "methods": 2,
+    "clean_accuracy_mean": 0.8,
+    "attack_success_mean": 1.0,
+    "attack_success_max": 1.0
+  },
+  {
+    "dataset": "fish",
+    "stage": "evasion",
+    "mechanism": "M",
+    "methods": 4,
+    "clean_accuracy_mean": 0.8,
+    "attack_success_mean": 0.35,
+    "attack_success_max": 1.0
+  },
+  {
+    "dataset": "fish",
+    "stage": "evasion",
+    "mechanism": "O",
+    "methods": 4,
+    "clean_accuracy_mean": 0.8,
+    "attack_success_mean": 0.65,
+    "attack_success_max": 1.0
+  },
+  {
+    "dataset": "fish",
+    "stage": "evasion",
+    "mechanism": "U",
+    "methods": 2,
+    "clean_accuracy_mean": 0.8,
+    "attack_success_mean": 0.5,
+    "attack_success_max": 1.0
+  },
+  {
+    "dataset": "fish",
+    "stage": "poisoning",
+    "mechanism": "B",
+    "methods": 3,
+    "clean_accuracy_mean": 1.0,
+    "attack_success_mean": 0.2667,
+    "attack_success_max": 0.8
+  },
+  {
+    "dataset": "fish",
+    "stage": "poisoning",
+    "mechanism": "G",
+    "methods": 1,
+    "clean_accuracy_mean": 1.0,
+    "attack_success_mean": 0.0,
+    "attack_success_max": 0.0
+  },
+  {
+    "dataset": "fish",
+    "stage": "poisoning",
+    "mechanism": "M",
+    "methods": 3,
+    "clean_accuracy_mean": 0.8333,
+    "attack_success_mean": 0.0,
+    "attack_success_max": 0.0
+  },
+  {
+    "dataset": "fish",
+    "stage": "poisoning",
+    "mechanism": "O",
+    "methods": 1,
+    "clean_accuracy_mean": 1.0,
+    "attack_success_mean": 0.0,
+    "attack_success_max": 0.0
+  },
+  {
+    "dataset": "fish",
+    "stage": "reference",
+    "mechanism": "none",
+    "methods": 1,
+    "clean_accuracy_mean": 0.8,
+    "attack_success_mean": 0.0,
+    "attack_success_max": 0.0
+  },
+  {
     "dataset": "mnist",
     "stage": "evasion",
     "mechanism": "G",

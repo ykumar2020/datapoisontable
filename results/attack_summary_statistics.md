@@ -11,6 +11,15 @@
 | fungi | poisoning | M | 3 | 0.6185 | 0.3619 | 0.6842 |
 | fungi | poisoning | O | 1 | 0.6333 | 0.3542 | 0.3542 |
 | fungi | reference | none | 1 | 0.6667 | 0.2708 | 0.2708 |
+| fish | evasion | G | 2 | 0.8 | 1.0 | 1.0 |
+| fish | evasion | M | 4 | 0.8 | 0.35 | 1.0 |
+| fish | evasion | O | 4 | 0.8 | 0.65 | 1.0 |
+| fish | evasion | U | 2 | 0.8 | 0.5 | 1.0 |
+| fish | poisoning | B | 3 | 1.0 | 0.2667 | 0.8 |
+| fish | poisoning | G | 1 | 1.0 | 0.0 | 0.0 |
+| fish | poisoning | M | 3 | 0.8333 | 0.0 | 0.0 |
+| fish | poisoning | O | 1 | 1.0 | 0.0 | 0.0 |
+| fish | reference | none | 1 | 0.8 | 0.0 | 0.0 |
 | mnist | evasion | G | 2 | 0.9173 | 1.0 | 1.0 |
 | mnist | evasion | M | 2 | 0.9173 | 0.8216 | 1.0 |
 | mnist | evasion | O | 3 | 0.9173 | 0.662 | 0.981 |
