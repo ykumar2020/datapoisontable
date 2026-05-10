@@ -13,6 +13,18 @@
 \graphicspath{{../figures/}{figures/}}
 \newcommand{\atk}[2]{\textbf{#1}~#2}
 \newcommand{\emptycell}{--}
+\definecolor{ptM}{HTML}{FF6B6B}
+\definecolor{ptO}{HTML}{FFD166}
+\definecolor{ptG}{HTML}{F4E04D}
+\definecolor{ptU}{HTML}{4DABF7}
+\definecolor{ptB}{HTML}{B197FC}
+\definecolor{ptD}{HTML}{74C0FC}
+\definecolor{ptS}{HTML}{63E6BE}
+\definecolor{ptR}{HTML}{8CE99A}
+\definecolor{ptN}{HTML}{69DB7C}
+\definecolor{ptP}{HTML}{F783AC}
+\newcommand{\ptile}[4]{\fcolorbox{black!35}{#1}{\begin{minipage}[c][0.44in][c]{0.92in}\centering{\large\bfseries #2}\\[-1pt]{\scriptsize #3}\\[-2pt]{\tiny #4}\end{minipage}}}
+\newcommand{\btile}{\fcolorbox{black!10}{white}{\begin{minipage}[c][0.44in][c]{0.92in}\end{minipage}}}
 
 \title{Data Poisoning Risk Matrix: A Periodic-Table-Inspired Framework for AI Security}
 
@@ -90,98 +102,77 @@ where \(I\) is impact, \(S\) is stealth, \(G\) is scalability, and \(C\) is atta
 
 \begin{table*}[t]
 \centering
-\caption{Periodic table of data poisoning, block A: learning-mechanism families. Rows are assigned operational risk levels; cells list element-style symbol and technique name.}
+\caption{Readable Mendeleev-style table, block A: learning-mechanism poisoning families. Each colored tile is an attack ``element'' with symbol, short name, and risk/mechanism code.}
 \label{tab:periodicpoison}
-\footnotesize
-\setlength{\tabcolsep}{2.5pt}
-\renewcommand{\arraystretch}{1.24}
-\begin{tabular}{@{}p{0.075\textwidth}p{0.18\textwidth}p{0.20\textwidth}p{0.12\textwidth}p{0.24\textwidth}p{0.13\textwidth}@{}}
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{@{}c c c c c c@{}}
 \toprule
-Risk & M Minimal/Structural & O Optimization & G Gradient & B Backdoor/Trigger & D Distributed/Federated \\
+Risk & I. Minimal & II. Optimization & III. Gradient & IV. Backdoor & V. Distributed \\
 \midrule
-R1 Extreme &
-\emptycell &
-\atk{Fc}{Feature collision} &
-\emptycell &
-\atk{Wa}{WaNet}; \atk{Sa}{Sleeper agent}; \atk{Cl}{Clean-label BD} &
-\atk{Fl}{Fed replace}; \atk{Db}{DBA} \\
+R1 & \btile & \ptile{ptO}{Fc}{Feature collision}{R1/O} & \btile & \ptile{ptB}{Wa}{WaNet}{R1/B} & \ptile{ptD}{Fl}{Fed replace}{R1/D} \\
+R1 & \btile & \btile & \btile & \ptile{ptB}{Sa}{Sleeper agent}{R1/B} & \ptile{ptD}{Db}{DBA}{R1/D} \\
+R1 & \btile & \btile & \btile & \ptile{ptB}{Cl}{Clean-label BD}{R1/B} & \btile \\
 \midrule
-R2 High &
-\atk{Sp}{Subpopulation}; \atk{Cf}{Collab filter} &
-\atk{Bp}{Bullseye poly}; \atk{If}{Influence}; \atk{Hp}{Hessian}; \atk{Cp}{Curriculum} &
-\atk{Wb}{Witches Brew} &
-\atk{Bn}{BadNets}; \atk{Hb}{Hidden backdoor}; \atk{Ip}{Input-aware BD}; \atk{Nl}{NLP trigger} &
-\atk{Al}{ALIE} \\
+R2 & \ptile{ptM}{Sp}{Subpopulation}{R2/M} & \ptile{ptO}{Bp}{Bullseye poly}{R2/O} & \ptile{ptG}{Wb}{Witches Brew}{R2/G} & \ptile{ptB}{Bn}{BadNets}{R2/B} & \ptile{ptD}{Al}{ALIE}{R2/D} \\
+R2 & \ptile{ptM}{Cf}{Collab filter}{R2/M} & \ptile{ptO}{If}{Influence}{R2/O} & \btile & \ptile{ptB}{Hb}{Hidden BD}{R2/B} & \btile \\
+R2 & \btile & \ptile{ptO}{Hp}{Hessian}{R2/O} & \btile & \ptile{ptB}{Ip}{Input-aware}{R2/B} & \btile \\
+R2 & \btile & \ptile{ptO}{Cp}{Curriculum}{R2/O} & \btile & \ptile{ptB}{Nl}{NLP trigger}{R2/B} & \btile \\
 \midrule
-R3 Moderate &
-\atk{Tf}{Target label flip}; \atk{Ko}{KNN poison}; \atk{Ts}{Time-series} &
-\emptycell &
-\emptycell &
-\emptycell &
-\emptycell \\
+R3 & \ptile{ptM}{Tf}{Target flip}{R3/M} & \btile & \btile & \btile & \btile \\
+R3 & \ptile{ptM}{Ko}{KNN poison}{R3/M} & \btile & \btile & \btile & \btile \\
+R3 & \ptile{ptM}{Ts}{Time-series}{R3/M} & \btile & \btile & \btile & \btile \\
 \midrule
-R4 Low/Baseline &
-\atk{Lf}{Random label flip}; \atk{Oo}{Outlier inject} &
-\atk{Svm}{SVM poison}; \atk{RgN}{Regression poison} &
-\emptycell &
-\emptycell &
-\emptycell \\
+R4 & \ptile{ptM}{Lf}{Random flip}{R4/M} & \ptile{ptO}{Svm}{SVM poison}{R4/O} & \btile & \btile & \btile \\
+R4 & \ptile{ptM}{Oo}{Outlier}{R4/M} & \ptile{ptO}{RgN}{Regression}{R4/O} & \btile & \btile & \btile \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
 \begin{table*}[t]
 \centering
-\caption{Periodic table of data poisoning, block B: system, retrieval, generative, and alignment-data families.}
+\caption{Readable Mendeleev-style table, block B: system, retrieval, generative, and alignment-data poisoning families.}
 \label{tab:periodicpoisonsystem}
-\footnotesize
 \setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.24}
-\begin{tabular}{@{}p{0.10\textwidth}p{0.22\textwidth}p{0.23\textwidth}p{0.18\textwidth}p{0.22\textwidth}@{}}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}c c c c c@{}}
 \toprule
-Risk & S Supply Chain & R Retrieval/RAG & N Generative & P Preference/RLHF \\
+Risk & VI. Supply & VII. Retrieval/RAG & VIII. Generative & IX. Preference/RLHF \\
 \midrule
-R1 Extreme &
-\atk{Ss}{Split-view web}; \atk{Fr}{Frontrun web} &
-\atk{Sd}{Single-doc RAG}; \atk{Rg}{RAG poison} &
-\atk{Ns}{Nightshade} &
-\emptycell \\
+R1 & \ptile{ptS}{Ss}{Split-view}{R1/S} & \ptile{ptR}{Sd}{Single-doc RAG}{R1/R} & \ptile{ptN}{Ns}{Nightshade}{R1/N} & \btile \\
+R1 & \ptile{ptS}{Fr}{Frontrun web}{R1/S} & \ptile{ptR}{Rg}{RAG poison}{R1/R} & \btile & \btile \\
 \midrule
-R2 High &
-\emptycell &
-\atk{Gg}{Gradient RAG} &
-\atk{Td}{TrojDiff} &
-\atk{Bv}{Best-of-Venom pref.}; \atk{Rl}{RLHF backdoor} \\
+R2 & \btile & \ptile{ptR}{Gg}{Gradient RAG}{R2/R} & \ptile{ptN}{Td}{TrojDiff}{R2/N} & \ptile{ptP}{Bv}{Best-of-Venom}{R2/P} \\
+R2 & \btile & \btile & \btile & \ptile{ptP}{Rl}{RLHF backdoor}{R2/P} \\
 \midrule
-R3 Moderate &
-\emptycell &
-\emptycell &
-\atk{Gd}{Glaze cloak} &
-\atk{Dp}{DPO poison}; \atk{Rp}{Reward poison} \\
+R3 & \btile & \btile & \ptile{ptN}{Gd}{Glaze cloak}{R3/N} & \ptile{ptP}{Dp}{DPO poison}{R3/P} \\
+R3 & \btile & \btile & \btile & \ptile{ptP}{Rp}{Reward poison}{R3/P} \\
 \midrule
-R4 Low/Baseline &
-\emptycell &
-\emptycell &
-\emptycell &
-\emptycell \\
+R4 & \btile & \btile & \btile & \btile \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
 \begin{table*}[t]
 \centering
-\caption{Related adversarial/evasion analogs included for comparison, not counted as data poisoning proper.}
+\caption{Readable Mendeleev-style companion table: related adversarial/evasion analogs included for comparison, not counted as data poisoning proper.}
 \label{tab:periodicevasion}
-\small
 \setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.18}
-\begin{tabular}{@{}p{0.11\textwidth}p{0.20\textwidth}p{0.22\textwidth}p{0.16\textwidth}p{0.23\textwidth}@{}}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}c c c c c@{}}
 \toprule
-Risk & M Minimal/Structural & O Optimization & G Gradient & U Universal/Transfer \\
+Risk & I. Minimal & II. Optimization & III. Gradient & IV. Universal/Transfer \\
 \midrule
-R2 High & \emptycell & \atk{Cw}{Carlini-Wagner}; \atk{Ead}{Elastic Net} & \atk{Pg}{PGD} & \atk{Ap}{Adv. patch}; \atk{Uap}{Universal pert.}; \atk{Eot}{EOT}; \atk{St}{Surrogate transfer} \\
-R3 Moderate & \atk{Js}{JSMA}; \atk{Df}{DeepFool} & \atk{Zo}{ZOO}; \atk{Bd}{Boundary} & \atk{Fg}{FGSM} & \emptycell \\
-R4 Low/Baseline & \atk{Sf}{SparseFool}; \atk{Op}{One-Pixel} & \emptycell & \emptycell & \emptycell \\
+R2 & \btile & \ptile{ptO}{Cw}{Carlini-Wagner}{R2/O} & \ptile{ptG}{Pg}{PGD}{R2/G} & \ptile{ptU}{Ap}{Adv. patch}{R2/U} \\
+R2 & \btile & \ptile{ptO}{Ead}{Elastic Net}{R2/O} & \btile & \ptile{ptU}{Uap}{Universal pert.}{R2/U} \\
+R2 & \btile & \btile & \btile & \ptile{ptU}{Eot}{EOT}{R2/U} \\
+R2 & \btile & \btile & \btile & \ptile{ptU}{St}{Surrogate}{R2/U} \\
+\midrule
+R3 & \ptile{ptM}{Js}{JSMA}{R3/M} & \ptile{ptO}{Zo}{ZOO}{R3/O} & \ptile{ptG}{Fg}{FGSM}{R3/G} & \btile \\
+R3 & \ptile{ptM}{Df}{DeepFool}{R3/M} & \ptile{ptO}{Bd}{Boundary}{R3/O} & \btile & \btile \\
+\midrule
+R4 & \ptile{ptM}{Sf}{SparseFool}{R4/M} & \btile & \btile & \btile \\
+R4 & \ptile{ptM}{Op}{One-Pixel}{R4/M} & \btile & \btile & \btile \\
 \bottomrule
 \end{tabular}
 \end{table*}
