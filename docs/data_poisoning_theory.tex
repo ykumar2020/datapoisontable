@@ -354,7 +354,7 @@ Although the proposed risk matrix covers LLM, RAG, federated, generative, supply
 
 \subsection{Datasets}
 
-The main visual-security experiment uses a local fungi dataset with two classes: edible and poisonous. Here ``poisonous'' is the biological mushroom label, not a data-poisoned image. A second food-safety dataset was added from the SC25 \emph{AdversaGuard} food-domain benchmark context~\cite{adversaguard}: local folders \texttt{fresh2} and \texttt{non-fresh2} contain 40 horse-mackerel images total, and the safety-critical direction is non-fresh fish classified as fresh. A third and larger seafood freshness dataset now replaces the earlier digit benchmark: the local \texttt{Datasets/} folder contains Anchovy and Horse Mackerel species folders, each with Fresh and NonFresh leaves. The runner infers labels from the repeated leaf folders, excludes the generated \texttt{working/} directory, and creates a deterministic stratified 75/25 split. Table~\ref{tab:dataset} reports fungi statistics, Table~\ref{tab:fishdata} reports the tiny fish split, and Table~\ref{tab:seafooddata} reports the new seafood split. Figure~\ref{fig:samples} shows representative fungi images from the train and validation splits.
+The main visual-security experiment uses a local fungi dataset with two classes: edible and poisonous. Here ``poisonous'' is the biological mushroom label, not a data-poisoned image. A second food-safety dataset was added from the SC25 \emph{AdversaGuard} food-domain benchmark context~\cite{adversaguard}: local folders \texttt{fresh2} and \texttt{non-fresh2} contain 40 horse-mackerel images total, and the safety-critical direction is non-fresh fish classified as fresh. A third and larger seafood freshness dataset now replaces the earlier digit benchmark: the local \texttt{Datasets/} folder contains Anchovy and Horse Mackerel species folders, each with Fresh and NonFresh leaves. The folder contains 522 JPG files on disk, but a SHA-256 audit finds 400 unique image hashes; the extra 122 files are duplicate copies under \texttt{Anchovy/working/} created by an internal split. The runner therefore excludes \texttt{working/} to avoid duplicate train/validation leakage and uses all 400 unique images. It infers labels from the repeated leaf folders and creates a deterministic stratified 75/25 split. Table~\ref{tab:dataset} reports fungi statistics, Table~\ref{tab:fishdata} reports the tiny fish split, and Table~\ref{tab:seafooddata} reports the new seafood split. Figure~\ref{fig:samples} shows representative fungi images from the train and validation splits.
 
 \begin{table}[t]
 \centering
@@ -392,7 +392,7 @@ Total & 40 & 30 & 10 \\
 
 \begin{table}[t]
 \centering
-\caption{New seafood freshness dataset from \texttt{Datasets/}. Labels are inferred from repeated Fresh/NonFresh leaf folders across Anchovy and Horse Mackerel.}
+\caption{New seafood freshness dataset from \texttt{Datasets/}. Counts use all 400 unique image hashes after excluding 122 duplicate \texttt{Anchovy/working/} split copies from the 522 JPG files on disk. Labels are inferred from repeated Fresh/NonFresh leaf folders across Anchovy and Horse Mackerel.}
 \label{tab:seafooddata}
 \small
 \begin{tabular}{lrrr}
@@ -776,6 +776,7 @@ Artifact & Type & Role in paper \\
 \texttt{attack\_success\_by\_stage.png}, \texttt{fungi\_reporting\_dashboard.png} & Figures & Normalized effect summary and fungi dashboard. \\
 \texttt{*\_attack\_comparison\_split.png} & Figures & Stage-separated attack comparisons for fungi, fish, and seafood. \\
 \texttt{*\_attack\_examples.png} & Figures & Visual examples for fungi, fish, and seafood attacks. \\
+\texttt{seafood\_dataset\_audit.md} & Audit & SHA-256 duplicate audit showing that the seafood run uses all 400 unique images and excludes only 122 duplicate \texttt{working/} copies. \\
 \texttt{seafood\_attack\_comparison.*} & Tables & Source rows for the replacement seafood controlled benchmark. \\
 \texttt{results/*comparison.*}, \texttt{results/*audit.*} & Tables & Source tables for reported values, implementation coverage, citation checks, and layout consistency. \\
 \bottomrule
