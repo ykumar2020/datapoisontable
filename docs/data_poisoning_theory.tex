@@ -78,7 +78,7 @@ The contributions are: (i) a mechanism-and-risk taxonomy for poisoning and relat
 
 Classical poisoning was formalized for support vector machines and other learners by Biggio et al.~\cite{biggio2012} and Mei and Zhu~\cite{mei2015}. Backdoor poisoning became prominent with BadNets~\cite{badnets} and targeted backdoors~\cite{targetedbackdoor}. Clean-label attacks such as Poison Frogs~\cite{poisonfrogs} improve stealth by keeping labels correct, while Witches' Brew~\cite{witchesbrew} uses gradient matching to craft efficient poisons. Modern supply-chain and retrieval surfaces include web-scale dataset poisoning~\cite{webscale}, RAG corpus poisoning~\cite{poisonedrag}, and generative-model poisoning such as Nightshade~\cite{nightshade}. The SC25 poster paper \emph{AdversaGuard} motivates the food-image and distributed-training angle used here by benchmarking poisoning and evasion-style attacks across parallel AI configurations and food-domain datasets~\cite{adversaguard}.
 
-The evasion literature supplies useful comparison methods. DeepFool linearizes the nearest decision boundary~\cite{deepfool}; Carlini-Wagner attacks optimize margin-based adversarial objectives~\cite{cw}; One-Pixel uses differential evolution in a highly sparse search space~\cite{onepixel}; UAP learns an image-agnostic perturbation~\cite{uap}; JSMA computes saliency from the model Jacobian~\cite{jsma}; EAD uses an elastic-net objective~\cite{ead}; ZOO estimates gradients through black-box finite differences~\cite{zoo}; HopSkipJump is decision-based~\cite{hopskipjump}; Adversarial Patch learns a reusable localized perturbation~\cite{adversarialpatch}; and SparseFool searches for sparse decision-boundary crossings~\cite{sparsefool}.
+The evasion literature supplies useful comparison methods. FGSM uses a one-step loss-gradient sign perturbation~\cite{goodfellow2014}; PGD iterates projected gradient steps and is a standard robustness baseline~\cite{madry2017}; DeepFool linearizes the nearest decision boundary~\cite{deepfool}; Carlini-Wagner attacks optimize margin-based adversarial objectives~\cite{cw}; One-Pixel uses differential evolution in a highly sparse search space~\cite{onepixel}; UAP learns an image-agnostic perturbation~\cite{uap}; JSMA computes saliency from the model Jacobian~\cite{jsma}; EAD uses an elastic-net objective~\cite{ead}; ZOO estimates gradients through black-box finite differences~\cite{zoo}; Boundary and HopSkipJump are decision-based~\cite{boundaryattack,hopskipjump}; Adversarial Patch learns a reusable localized perturbation~\cite{adversarialpatch}; and SparseFool searches for sparse decision-boundary crossings~\cite{sparsefool}.
 
 \begin{table*}[t]
 \centering
@@ -106,6 +106,150 @@ The defender trains or fine-tunes an image classifier and evaluates it with clea
 The poisoning attacker can corrupt a bounded fraction of data before or during learning. Depending on the attack family, the corruption may change labels, inject new samples, alter images inside an \(L_\infty\) or structural constraint, insert triggers, bias a subgroup, submit federated updates, poison retrieval documents, or influence preference/alignment examples. Optimization-based and gradient-based attacks assume white-box or surrogate-model access during poison construction. Backdoor and supply attacks assume data-injection access but not arbitrary control of the final training code. Evasion analogs assume test-time query or white-box access to the trained model; they are reported as stress tests and are not counted as poisoning unless adversarial inputs are later incorporated into training or adaptation data.
 
 The attacker goals are safety-critical targeted failure, triggered control, or availability degradation. In the food-image pilots, the safety-critical targeted direction is poisonous fungi or non-fresh fish being predicted as edible/fresh. Attack success is constrained by a small poison budget, clean-label requirements when applicable, image-range clipping, and the requirement that clean validation accuracy remain interpretable. The experiments do not attack production systems, private datasets, deployed APIs, or physical-world sensors.
+
+\section{FoodDDP Provenance from the Unpublished Draft}
+
+This manuscript preserves the useful technical material from the earlier unpublished \emph{FoodDDP} draft while reorganizing it around a stricter poisoning taxonomy. FoodDDP was originally framed as a high-performance-computing benchmark for distributed data poisoning on food-safety imagery. Its broader goal was to compare one non-distributed baseline with seven distributed execution paths, evaluate several food datasets and model families, and connect attack success to resource use. Table~\ref{tab:foodddpmap} records where that earlier material is retained in the present paper.
+
+\begin{table*}[t]
+\centering
+\caption{Preserved information from the unpublished FoodDDP manuscript.}
+\label{tab:foodddpmap}
+\small
+\begin{tabular}{p{0.18\textwidth}p{0.35\textwidth}p{0.39\textwidth}}
+\toprule
+Prior FoodDDP component & Useful information preserved & How it is used here \\
+\midrule
+HPC motivation & Distributed training changes the attack surface because poisoned batches, gradients, and model shards can propagate differently across workers & Added as distributed/federated mechanism family D and as future journal-scale scope beyond the local image pilots \\
+Attack set & FGSM, PGD, DeepFool, One-Pixel, UAP, Carlini-Wagner, Trojan/backdoor, and Boundary attacks & Kept as the original poster/evasion/backdoor suite and extended with newer poisoning methods \\
+Datasets & Tiny fish-eye freshness data, larger fish segmentation/classification data, fungi, and additional food-safety imagery & Tiny fish and fungi are executed here; larger fish and other food datasets are retained as expansion targets \\
+Model families & VGG16, ResNet50, ViT, Swin, DenseNet, EfficientNet, and small custom baselines & Current code uses MobileNetV3-Small for the food pilots; prior architectures are preserved as benchmark candidates \\
+Distributed frameworks & PyTorch DDP, Ray, Horovod, Dask, DeepSpeed, Hugging Face Accelerate, MPI4PY, plus non-distributed baseline; exploratory feature-extractor pipelines also used Spark MLlib, H2O AutoML, TensorFlow/Horovod, and XGBoost/Dask & Kept in the distributed benchmark scope table rather than claimed as completed in the current local pilot \\
+FoodDDP Efficiency Index & Combined clean accuracy, attack success, perturbation, parameter count, feature-map size, iterations, memory, latency, training time, energy, and attack time & Preserved as an exploratory HPC metric in Eq.~(\ref{eq:fei}), while stage-aware attack metrics remain the main results \\
+AdversaGuard app & Interactive GUI/tooling idea for applying attacks and logging model response & Cited through the SC25 AdversaGuard poster and retained as reproducibility/tooling motivation \\
+Qualitative LLM sanity check & General-purpose multimodal LLMs disagreed about fish-eye freshness images, sometimes interpreting them as human irises & Preserved as a dataset-ambiguity note motivating supervised labels and careful food-domain evaluation \\
+Future experiments & Poison frequency, poison ratio, rank-specific attacks, late-phase poisoning, defenses, logging, dataset-size scaling, and multi-GPU variants & Preserved as a journal-scale experiment roadmap in Table~\ref{tab:futurefoodddp} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Prior Dataset Scope}
+
+The current executable paper uses MNIST, local fungi images, and the tiny fish freshness folder. The unpublished draft also documented two fish sources and a broader food-safety motivation. The tiny fish-eye dataset contains 40 images split evenly into fresh and non-fresh classes; according to its Kaggle data card, images were captured with a Samsung A6+ phone at \(4608\times3456\) resolution from roughly 10 cm and cropped to \(500\times500\) eye-centered patches~\cite{agustyawan2020fish}. The larger fish dataset of Ulucan et al.~\cite{ulucan2020fish} contains nine seafood classes with segmentation masks and augmented images; the prior draft focused on horse mackerel as the closest bridge to fresh/non-fresh food-safety classification. The fungi dataset is retained as the main current food-image task; the earlier draft described it as a crowdsourced edible/poisonous mushroom classification problem connected to food-safety risk.
+
+\begin{table}[t]
+\centering
+\caption{Food-domain dataset scope retained from the unpublished FoodDDP draft.}
+\label{tab:legacydatasets}
+\small
+\begin{tabular}{p{0.25\columnwidth}p{0.29\columnwidth}p{0.34\columnwidth}}
+\toprule
+Dataset & Prior detail & Present status \\
+\midrule
+Tiny fish-eye freshness & 40 eye-centered images, 20 fresh and 20 non-fresh; \(500\times500\) crops from high-resolution phone photographs~\cite{agustyawan2020fish} & Executed as the fish pilot with 30 train and 10 validation images \\
+Large fish classification & Nine seafood classes, 1000 augmented images per class plus masks; prior focus on horse mackerel~\cite{ulucan2020fish} & Preserved as a natural expansion dataset, not used in current results \\
+Fungi edible/poisonous & Crowdsourced food-safety classification task noted in the prior draft & Executed as the main food-image pilot \\
+MNIST & Transparent visual baseline for attack auditability & Executed as the controlled benchmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{HPC and Distributed Benchmark Scope}
+
+The unpublished FoodDDP draft used the Amarel HPC environment and Google Colab Pro+ as development targets. The Amarel notes describe a CPU-oriented setup with 56 logical threads across two sockets, 2.40 GHz clock speed, substantial shared cache, roughly 125 GB in the user space, and about 1 TB in scratch storage. Colab devices considered in the prior draft included CPU, A100, L4, T4, v2-8 TPU, and v5e-1 TPU. The practical conclusion was that CPU and PyTorch DDP were the most accessible starting point, while DeepSpeed and large tensor-parallel variants require stronger multi-GPU resources.
+
+FoodDDP distinguished data, model, tensor, and hybrid parallelism. In data parallelism, each worker trains a full model copy on a shard of the data and synchronizes gradients:
+\begin{equation}
+\theta \leftarrow \theta-\eta\,\frac{1}{K}\sum_{i=1}^{K}\nabla_i ,
+\end{equation}
+where \(K\) is the number of workers and \(\nabla_i\) is the local gradient. Model parallelism assigns different modules to different devices. Tensor parallelism shards individual matrix or tensor operations. Hybrid parallelism combines these ideas and was hypothesized in the prior draft to improve throughput, reduce per-node memory, and sometimes contain the spread of poisoned updates.
+
+The prior methodology also treated poison generation itself as a parallel workload. If \(\{(x_i,y_i)\}_{i=1}^{N}\) is split into worker subsets, a poison generator \(\mathcal{P}\) maps each local sample to \((\hat{x}_j,y_j)\), where \(\hat{x}_j\) is the attacked image and \(y_j\) is either preserved for clean-label/evasion-style stress tests or changed for label-manipulation poisoning. Continual poisoning was described as
+\[
+\text{for } n=1,\ldots,N:\quad \text{PoisonBatch}(B_n),\quad \text{Train}(B_n),\quad \text{SyncUpdates}(),
+\]
+where each mini-batch \(B_n\) can be partially or fully poisoned. FoodDDP also tracked attacker and defender confidence curves:
+\[
+C_{\mathrm{att}}(x)=1-p_{\mathrm{model}}(y_{\mathrm{true}}\mid x),\qquad
+C_{\mathrm{def}}(x)=p_{\mathrm{model}}(y_{\mathrm{true}}\mid x).
+\]
+These curves are useful for real-time dashboards because they show whether an attack is merely creating visible examples or actually shifting model confidence over training time.
+
+\begin{table*}[t]
+\centering
+\caption{Distributed execution paths retained from FoodDDP as journal-scale benchmark scope.}
+\label{tab:distributedscope}
+\small
+\begin{tabular}{p{0.17\textwidth}p{0.28\textwidth}p{0.44\textwidth}}
+\toprule
+Framework/path & Role in prior draft & Relevance to this paper \\
+\midrule
+Non-distributed baseline & Single-process reference for clean and attacked training & Required control for all future distributed comparisons \\
+PyTorch DDP & Data-parallel training with synchronized gradients & Most direct extension of the current PyTorch image experiments \\
+Ray~\cite{moritz2018ray} & General distributed actors/tasks and parameter-server style workflows & Useful for simulating malicious or heterogeneous workers \\
+Horovod~\cite{sergeev2018horovod} & Ring-allreduce distributed training, especially TensorFlow/PyTorch pipelines & Useful for comparing allreduce behavior under poisoned gradients \\
+Dask/XGBoost & Distributed tabular/feature-extractor pipelines & Useful after extracting CNN features from food images \\
+Spark MLlib and H2O AutoML & Prior exploratory feature-based baselines & Preserved as non-deep distributed baselines \\
+DeepSpeed and HF Accelerate & Large-model and simplified multi-device training & Future scope for larger models and stronger hardware \\
+MPI4PY & Direct MPI-style HPC control & Useful for explicit rank-level poisoning schedules \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Model Families and Architecture Hypotheses}
+
+The prior draft compared architecture families rather than only one transfer model. It listed VGG16, ResNet50, ViT, Swin Transformer, DenseNet, and EfficientNet, with final classification heads replaced for the target class count. Those models are retained here as benchmark candidates. The unpublished heatmap observations are treated as hypotheses rather than final claims: VGG16, ViT, and Swin appeared comparatively robust in those early runs; ResNet50 showed moderate vulnerability to Boundary and Carlini-Wagner; DenseNet was affected by sparse One-Pixel-style perturbations; and EfficientNet appeared vulnerable to Trojan/backdoor-style settings on the small fish experiments. The old AdversaGuard notes also recorded a qualitative confidence-drop pattern: CNN models such as MobileNetV2 and ResNet50 showed large confidence reductions as \(\epsilon\) increased, with one run noting roughly a 40\% confidence drop around \(\epsilon=0.03\); transformer models such as ViT and DeiT appeared more resistant at small perturbations but degraded as attack strength increased. The current MobileNetV3-Small choice is a practical lightweight transfer-learning baseline, not a replacement for a future architecture sweep.
+
+\subsection{FoodDDP Efficiency Index}
+
+The unpublished draft proposed a FoodDDP Efficiency Index (FEI) to combine model quality, attack resistance, and HPC cost. Because the current paper emphasizes stage-aware attack metrics, FEI is not used as the main result. It is preserved as a journal-scale systems metric:
+\begin{equation}
+\begin{aligned}
+\mathrm{FEI}={}&
+w_1\mathrm{CA}+w_2(1-\mathrm{ASR})
+-w_3\frac{\mathrm{PR}}{\epsilon}
+-w_4\frac{N_{\mathrm{params}}}{10^6}
+-w_5\frac{F_{\mathrm{size}}}{49}\\
+&-w_6\frac{N_{\mathrm{iters}}}{100}
+-w_7\frac{M_{\mathrm{footprint}}}{1024}
+-w_8\frac{T_{\mathrm{CPU}}+T_{\mathrm{GPU}}}{100}\\
+&-w_9\frac{T_{\mathrm{train}}}{T_{\mathrm{baseline}}}
+-w_{10}\frac{E_{\mathrm{energy}}}{E_{\mathrm{baseline}}}
+-w_{11}\frac{T_{\mathrm{attack}}}{T_{\mathrm{baseline}}}.
+\end{aligned}
+\label{eq:fei}
+\end{equation}
+Here CA is clean accuracy, ASR is attack success rate, PR is perturbation-related robustness or penalty, \(N_{\mathrm{params}}\) is trainable parameter count, \(F_{\mathrm{size}}\) is the final feature-map size, \(N_{\mathrm{iters}}\) is attack iteration count, \(M_{\mathrm{footprint}}\) is memory footprint, \(T_{\mathrm{CPU}}\) and \(T_{\mathrm{GPU}}\) are latency terms, \(T_{\mathrm{train}}\) is training time, \(E_{\mathrm{energy}}\) is energy cost, and \(T_{\mathrm{attack}}\) is attack-generation time. The weights \(w_i\) should be calibrated for the target deployment; FEI is therefore best treated as a configurable systems score, not a universal scalar truth.
+
+\subsection{Qualitative Food-Image Ambiguity Check}
+
+The prior draft included a useful qualitative sanity check: multimodal LLMs were shown a collage of tiny fish-eye samples without task context. ChatGPT-4o recognized fish-eye photographs and described lighting/reflection differences. Gemini Advanced interpreted the image as a fish freshness sensor and reasoned about freshness cues, but the prior draft recorded at least one incorrect freshness judgment. Microsoft Copilot preview interpreted the same collage as human irises and suggested unrelated biometric or medical use cases. This observation is not a quantitative benchmark, but it reinforces the paper's food-domain warning: visually plausible labels are not enough, and small specialty datasets need careful provenance, supervised labels, and human-auditable examples.
+
+\begin{table}[t]
+\centering
+\caption{Future FoodDDP experiments preserved from the unpublished draft.}
+\label{tab:futurefoodddp}
+\small
+\begin{tabular}{p{0.31\columnwidth}p{0.57\columnwidth}}
+\toprule
+Experiment axis & Planned comparison \\
+\midrule
+Poison frequency & Inject poison every 10, 50, or 100 batches \\
+Poison ratio & Compare 25\%, 50\%, and full-batch poisoning \\
+Rank specialization & Assign different attacks to different ranks \\
+Targeting & Compare targeted and untargeted poisoning \\
+Conditional timing & Inject only after loss or accuracy plateaus \\
+Round-robin ranks & Stagger poison schedules across workers \\
+Curriculum poisoning & Increase poison rate over epochs or switch late in training \\
+Class-specific bias & Over-poison one class and measure subgroup harm \\
+Attack mixing & Alternate attacks each epoch or combine attacks on one sample \\
+Dataset scaling & Repeat at 10\%, 50\%, and 100\% dataset size \\
+Hardware scaling & Compare CPU, single GPU, multi-GPU, and HPC ranks \\
+Defenses & Test clipping, noise augmentation, adversarial training, ensembles, and anomaly detection \\
+Logging & Store poisoned images, confidence shifts, resource use, and prediction drift over time \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Framework}
 
@@ -267,6 +411,7 @@ For poisoning and backdoors, the model is retrained on modified training data an
 \mathrm{CSR}=
 \frac{\sum_i \mathbf{1}[f(x_i)=y_i]\mathbf{1}[f(x_i')\neq y_i]}
 {\sum_i \mathbf{1}[f(x_i)=y_i]}.
+\label{eq:csr}
 \end{equation}
 This prevents inflated attack success caused by baseline errors.
 
@@ -283,7 +428,7 @@ Label flip or availability poison & Baseline accuracy minus attacked clean accur
 Targeted data poison & Target/source error rate or safety-critical confusion on clean validation data & Stronger targeted poisoning \\
 Backdoor poison & Triggered test samples predicted as target label & Stronger trigger control \\
 Clean-label poison & Target misclassification or critical confusion after retraining & Stronger clean-label effect \\
-Evasion analog & Conditional success rate in Eq.~(3) & Stronger inference-time failure \\
+Evasion analog & Conditional success rate in Eq.~(\ref{eq:csr}) & Stronger inference-time failure \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -311,6 +456,27 @@ Fish & 2027 & 2027--2031 & Pilot only \\
 \subsection{Implementation Corrections}
 
 The fungi code addresses common pitfalls. It uses a custom \texttt{Dataset} and \texttt{DataLoader} for out-of-core batching. Clean-label Poison Frogs is implemented as latent feature optimization, minimizing feature distance while projecting the poison image back into an \(L_\infty\) ball around the base image. The poster methods are implemented as FGSM, PGD, DeepFool L2, Carlini-Wagner L2, Boundary/HopSkipJump search, One-Pixel differential evolution, and UAP. EAD uses a formal ISTA proximal solver: a gradient step on the smooth targeted objective followed by soft-thresholding for the \(L_1\) term and projection into the box and \(L_\infty\) constraints. JSMA saliency is vectorized across a batch. ZOO batches finite-difference coordinate probes. The adversarial patch is trained with random-location expectation over transformation.
+
+\begin{table*}[t]
+\centering
+\caption{Core poster/evasion/backdoor attack definitions preserved from the unpublished draft. These are stress-test definitions unless the generated examples are inserted into training data.}
+\label{tab:legacyattackdefs}
+\small
+\begin{tabular}{p{0.13\textwidth}p{0.32\textwidth}p{0.45\textwidth}}
+\toprule
+Method & Core operation & Parameters retained from prior draft \\
+\midrule
+FGSM & \(x'=\mathrm{clip}(x+\epsilon\,\mathrm{sign}(\nabla_x\mathcal{L}(f_\theta(x),y)),0,1)\) & \(\epsilon\) controls maximum per-pixel change; simple and fast but weaker than iterative attacks \\
+PGD & \(x_{t+1}=\Pi_{\|x_t-x\|_\infty\le\epsilon}(x_t+\alpha\,\mathrm{sign}(\nabla_{x_t}\mathcal{L}))\) & \(\epsilon\), step size \(\alpha\), and iteration count trade strength against runtime and visibility \\
+DeepFool & Iteratively linearizes the nearest decision boundary and solves for a small \(L_2\) crossing perturbation & Useful for minimal untargeted stress tests; can fail when the local boundary approximation or parameters are poor \\
+One-Pixel & Searches over pixel coordinates and RGB values with differential evolution & Number of pixels, population size, mutation, and crossover control sparsity and cost \\
+UAP & Learns one bounded perturbation that transfers across many inputs & Perturbation norm, training subset, and update iterations control universality \\
+Carlini-Wagner & Optimizes a margin loss plus perturbation penalty, commonly in \(L_2\) form & Confidence margin, optimization constant, steps, and learning rate control strength and stealth \\
+Boundary/HopSkipJump & Starts from an adversarial point and moves toward the clean image while staying across the decision boundary & Query budget and step schedule dominate practicality in black-box settings \\
+Trojan/backdoor & Trains on triggered samples so clean inputs behave normally but triggered inputs map to an attacker target & Trigger size, target class, poison rate, and clean-accuracy preservation define the attack quality \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \begin{table*}[t]
 \centering
@@ -643,6 +809,12 @@ W. Zou, R. Geng, B. Wang, and J. Jia, ``PoisonedRAG: Knowledge corruption attack
 \bibitem{nightshade}
 S. Shan et al., ``Nightshade: Prompt-specific poisoning attacks on text-to-image generative models,'' arXiv:2310.13828, 2023, doi: 10.48550/arXiv.2310.13828. [Online]. Available: \url{https://arxiv.org/abs/2310.13828}
 
+\bibitem{goodfellow2014}
+I. J. Goodfellow, J. Shlens, and C. Szegedy, ``Explaining and harnessing adversarial examples,'' arXiv:1412.6572, 2014. [Online]. Available: \url{https://arxiv.org/abs/1412.6572}
+
+\bibitem{madry2017}
+A. Madry, A. Makelov, L. Schmidt, D. Tsipras, and A. Vladu, ``Towards deep learning models resistant to adversarial attacks,'' arXiv:1706.06083, 2017. [Online]. Available: \url{https://arxiv.org/abs/1706.06083}
+
 \bibitem{deepfool}
 S.-M. Moosavi-Dezfooli, A. Fawzi, and P. Frossard, ``DeepFool: a simple and accurate method to fool deep neural networks,'' in \emph{Proc. IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 2016. [Online]. Available: \url{https://arxiv.org/abs/1511.04599}
 
@@ -664,6 +836,9 @@ P.-Y. Chen, Y. Sharma, H. Zhang, J. Yi, and C.-J. Hsieh, ``EAD: Elastic-net atta
 \bibitem{zoo}
 P.-Y. Chen, H. Zhang, Y. Sharma, J. Yi, and C.-J. Hsieh, ``ZOO: Zeroth order optimization based black-box attacks to deep neural networks without training substitute models,'' in \emph{Proc. ACM Workshop on Artificial Intelligence and Security}, 2017, doi: 10.1145/3128572.3140448. [Online]. Available: \url{https://arxiv.org/abs/1708.03999}
 
+\bibitem{boundaryattack}
+W. Brendel, J. Rauber, and M. Bethge, ``Decision-based adversarial attacks: Reliable attacks against black-box machine learning models,'' in \emph{Proc. International Conference on Learning Representations (ICLR)}, 2018. [Online]. Available: \url{https://arxiv.org/abs/1712.04248}
+
 \bibitem{hopskipjump}
 J. Chen, M. I. Jordan, and M. J. Wainwright, ``HopSkipJumpAttack: A query-efficient decision-based attack,'' in \emph{Proc. IEEE Symposium on Security and Privacy}, 2020. [Online]. Available: \url{https://arxiv.org/abs/1904.02144}
 
@@ -678,6 +853,18 @@ A. Turner, D. Tsipras, and A. Madry, ``Label-consistent backdoor attacks,'' arXi
 
 \bibitem{wanet}
 A. Nguyen and A. Tran, ``WaNet: Imperceptible warping-based backdoor attack,'' in \emph{Proc. International Conference on Learning Representations (ICLR)}, 2021. [Online]. Available: \url{https://openreview.net/forum?id=eEn8KTtJOx}
+
+\bibitem{agustyawan2020fish}
+A. Agustyawan, ``Fresh and not fresh fish dataset,'' Kaggle dataset, 2020. [Online]. Available: \url{https://www.kaggle.com/datasets/arifagustyawan/fresh-and-not-fresh-fish-dataset/data}
+
+\bibitem{ulucan2020fish}
+O. Ulucan, D. Karakaya, and M. Turkan, ``A large-scale dataset for fish segmentation and classification,'' in \emph{Proc. Innovations in Intelligent Systems and Applications Conference (ASYU)}, 2020, pp. 1--5, doi: 10.1109/ASYU50717.2020.9259867. [Online]. Available: \url{https://www.kaggle.com/datasets/crowww/a-large-scale-fish-dataset}
+
+\bibitem{moritz2018ray}
+P. Moritz et al., ``Ray: A distributed framework for emerging AI applications,'' in \emph{Proc. 13th USENIX Symposium on Operating Systems Design and Implementation (OSDI)}, 2018, pp. 561--577. [Online]. Available: \url{https://www.usenix.org/conference/osdi18/presentation/moritz}
+
+\bibitem{sergeev2018horovod}
+A. Sergeev and M. Del Balso, ``Horovod: fast and easy distributed deep learning in TensorFlow,'' arXiv:1802.05799, 2018. [Online]. Available: \url{https://arxiv.org/abs/1802.05799}
 
 \end{thebibliography}
 
