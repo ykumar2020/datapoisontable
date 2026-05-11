@@ -161,25 +161,25 @@
   },
   {
     "requirement_group": "Implementation-upgrade",
-    "method": "MNIST CNN baseline",
+    "method": "Food transfer-learning baseline",
     "stage": "reference",
-    "implemented_in": "scripts/mnist_attack_comparison.py::MNISTCnn",
+    "implemented_in": "scripts/fungi_attack_comparison.py::TransferFungiModel",
     "result_row": "Clean baseline",
     "status": "implemented"
   },
   {
     "requirement_group": "Implementation-upgrade",
-    "method": "Activation clustering defense",
-    "stage": "defense",
-    "implemented_in": "scripts/mnist_attack_comparison.py::activation_cluster_filter",
-    "result_row": "--defense activation_clustering",
+    "method": "Frozen-feature linear probing cache",
+    "stage": "training",
+    "implemented_in": "scripts/fungi_attack_comparison.py::train_model(cache_frozen_features=True)",
+    "result_row": "Seafood cached frozen features",
     "status": "implemented"
   },
   {
     "requirement_group": "Implementation-upgrade",
     "method": "PGD epsilon sweep",
     "stage": "evaluation",
-    "implemented_in": "scripts/fungi_attack_comparison.py::run_pgd_epsilon_sweep; scripts/mnist_attack_comparison.py::run_epsilon_sweep",
+    "implemented_in": "scripts/fungi_attack_comparison.py::run_pgd_epsilon_sweep",
     "result_row": "*_attack_sweep.*",
     "status": "implemented"
   }

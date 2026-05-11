@@ -64,25 +64,17 @@ Replace "most mathematically powerful" with a clearer takeaway:
 
 > The highest operational risk comes from poisoning that is stealthy, durable, and aligned with modern ML pipelines: web-scale dataset poisoning, supply-chain/pretrained-model backdoors, RAG knowledge-base poisoning, federated model replacement, and trigger-based backdoors. Simple label flipping remains useful for demonstrations, but it is easier to detect and usually causes visible accuracy loss.
 
-## MNIST Technical Experiments To Report
+## Food-Image Technical Experiments To Report
 
-The runnable script in `scripts/mnist_poisoning_experiment.py` uses the real MNIST handwritten-digit dataset and reports:
+The runnable experiment in `scripts/fungi_attack_comparison.py` is now the main empirical benchmark. It evaluates fungi, fish, and the larger seafood freshness dataset using the same transfer-learning/linear-probing threat model and produces comparable CSV, Markdown, JSON, and figure artifacts for the report.
 
-- clean baseline accuracy on the official MNIST test split
-- random label-flip availability poisoning
-- targeted source-to-target label poisoning, defaulting to digit `7` toward digit `1`
-- visible patch-trigger backdoor poisoning with clean accuracy and attack success rate
-- figures showing clean digits, poisoned trigger examples, metric bars, and confusion matrices
-
-This gives a visually clear conference presentation: the audience can see the handwritten digits, see the trigger, and compare clean accuracy against targeted failure behavior.
-
-The expanded script `scripts/mnist_attack_comparison.py` implements a larger comparison suite for the handwritten-digit demo. The fungi script is now the main conference experiment: `scripts/fungi_attack_comparison.py` implements all original poster evasion methods (FGSM, PGD, DeepFool, Carlini-Wagner, Boundary, One-Pixel, and UAP) plus ten additional shared methods: Poison Frogs, Sleeper-Agent-style backdoor, Adversarial Patch, Witches' Brew-style gradient matching, JSMA, ZOO, SparseFool, EAD, subpopulation poisoning, and BadNets. The implementation audit is generated in `results/implementation_coverage.md`.
+The script implements all original poster evasion methods (FGSM, PGD, DeepFool, Carlini-Wagner, Boundary, One-Pixel, and UAP) plus the additional shared methods: Poison Frogs, Sleeper-Agent-style backdoor, Adversarial Patch, Witches' Brew-style gradient matching, JSMA, ZOO, SparseFool, EAD, subpopulation poisoning, and BadNets. The implementation audit is generated in `results/implementation_coverage.md`.
 
 Important implementation audit: the code reproduces the core experimental mechanisms in a local fungi setting. It should not claim industrial-scale transferability, physical-world patch certification, or long-horizon LLM sleeper-agent persistence.
 
 ## Suggested Future Work
 
 - Keep the "data poisoning vs evasion" separation explicit in the visual.
-- Validate the risk scores with consistent MNIST experiments and literature-backed case studies.
+- Validate the risk scores with larger food-image datasets and literature-backed case studies.
 - Add defenses beside each block: provenance, deduplication, anomaly detection, trusted data snapshots, robust aggregation, backdoor scanning, and retrieval-source auditing.
 - Extend the risk matrix to LLM/RAG/federated settings, which are now more relevant than only image classifiers.

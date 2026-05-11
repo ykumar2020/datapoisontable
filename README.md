@@ -16,47 +16,12 @@ The original poster framed several test-time adversarial examples as data poison
 - `docs/visual_taxonomy_audit.md` - rationale for replacing the literal chemical-table shape with an auditable risk-by-mechanism matrix.
 - `docs/fish_dataset_notes.md` - extracted notes from the SC25 AdversaGuard poster for the `__fish2/` fish freshness dataset.
 - `docs/data_poisoning_theory.tex` - IEEE two-column conference-style LaTeX paper with abstract, introduction, related work, methodology, results, discussion, and conclusion.
-- `scripts/mnist_poisoning_experiment.py` - actual training-time poisoning implementations on real MNIST: random label flipping, targeted source-to-target label flipping, and a BadNets-style visible trigger backdoor.
-- `scripts/mnist_attack_comparison.py` - 14-method MNIST comparison suite covering poisoning, backdoors, and related evasion attacks.
+- `docs/data_poisoning_access.tex` - IEEE Access version of the paper.
 - `scripts/fungi_attack_comparison.py` - fungi dataset comparison using lazy PyTorch datasets, a pretrained MobileNetV3-Small transfer model, conditional evasion metrics, every original poster method (FGSM, PGD, DeepFool, Carlini-Wagner, Boundary, One-Pixel, UAP), and the additional shared methods including Poison Frogs, Sleeper-Agent-style backdoor, Witches' Brew-style gradient matching, Adversarial Patch, JSMA, ZOO, SparseFool, EAD, subpopulation poisoning, and BadNets.
 - `scripts/generate_reporting_artifacts.py` - derived report tables and figures: fungi dataset statistics, sample image grid, dataset split chart, grouped attack statistics, implementation coverage audit, table layout audit, reporting dashboard, paper risk matrix, poster risk matrix, and cross-dataset stage comparison.
 - `pptx_media/periodic_table_slide.jpg` - extracted image from the supplied PPTX for reference.
 
-## Run The MNIST Experiment
-
-```powershell
-python scripts\mnist_poisoning_experiment.py --download
-```
-
-Run the expanded comparison table:
-
-```powershell
-python scripts\mnist_attack_comparison.py --download
-```
-
-The script uses real MNIST data through `torchvision`, trains real scikit-learn classifiers, and writes:
-
-- `results/mnist_poisoning_results.csv`
-- `results/mnist_poisoning_results.json`
-- `results/mnist_poisoning_results.md`
-- `figures/mnist_clean_samples.png`
-- `figures/mnist_backdoor_examples.png`
-- `figures/mnist_metric_bars.png`
-- `figures/mnist_confusion_*.png`
-- `figures/mnist_confusion_visible_patch_backdoor_triggered.png`
-
-The expanded comparison additionally writes:
-
-- `results/mnist_attack_comparison.csv`
-- `results/mnist_attack_comparison.json`
-- `results/mnist_attack_comparison.md`
-- `figures/mnist_attack_comparison_bars.png`
-- `figures/mnist_attack_comparison_split.png`
-- `figures/mnist_attack_examples.png`
-
-The experiment is local to this project: it uses a public research dataset, trains real classifiers, applies real poisoning transformations to the training split, and reports the exact poison rates and metrics used.
-
-## Run The Fungi Experiment
+## Run The Food-Image Experiments
 
 Place the fungi image dataset under `fungi/` with this folder layout:
 
@@ -76,10 +41,16 @@ Then run:
 python scripts\fungi_attack_comparison.py
 ```
 
-For the fish freshness dataset referenced by the SC25 AdversaGuard poster, use the flat `__fish2/` class-folder layout. The safety-critical direction is non-fresh fish being accepted as fresh:
+For the fish freshness dataset referenced by the SC25 AdversaGuard poster, use the flat `fish/` class-folder layout. The safety-critical direction is non-fresh fish being accepted as fresh:
 
 ```powershell
-python scripts\fungi_attack_comparison.py --dataset-root __fish2 --dataset-name fish --source-class non-fresh2 --target-class fresh2 --eval-samples 12 --zoo-samples 4 --epochs 12
+python scripts\fungi_attack_comparison.py --dataset-root fish --dataset-name fish --source-class non-fresh2 --target-class fresh2 --eval-samples 12 --zoo-samples 4 --epochs 12
+```
+
+For the larger seafood freshness benchmark, use the local `Datasets/` hierarchy. The runner excludes duplicate `working/` split copies and uses all 400 unique image hashes:
+
+```powershell
+python scripts\fungi_attack_comparison.py --dataset-root Datasets --dataset-name seafood --source-class NonFresh --target-class Fresh --image-size 96 --epochs 2 --batch-size 32 --eval-samples 8 --zoo-samples 2 --trigger-size 12 --adversarial-patch-size 20 --attack-scale 0.12 --seed 2027 --cache-frozen-features
 ```
 
 Generate the additional reporting artifacts:
@@ -96,6 +67,10 @@ The script writes:
 - `results/fish_attack_comparison.csv`
 - `results/fish_attack_comparison.json`
 - `results/fish_attack_comparison.md`
+- `results/seafood_attack_comparison.csv`
+- `results/seafood_attack_comparison.json`
+- `results/seafood_attack_comparison.md`
+- `results/seafood_dataset_audit.md`
 - `results/food_dataset_comparison.csv`
 - `results/food_dataset_comparison.json`
 - `results/food_dataset_comparison.md`
@@ -122,6 +97,9 @@ The script writes:
 - `figures/fish_attack_comparison_bars.png`
 - `figures/fish_attack_comparison_split.png`
 - `figures/fish_attack_examples.png`
+- `figures/seafood_attack_comparison_bars.png`
+- `figures/seafood_attack_comparison_split.png`
+- `figures/seafood_attack_examples.png`
 - `figures/fungi_dataset_samples.png`
 - `figures/fungi_dataset_split.png`
 - `figures/fungi_reporting_dashboard.png`
@@ -130,4 +108,4 @@ The script writes:
 - `figures/periodic_table_data_poisoning.svg`
 - `figures/paper_taxonomy_panels.png`
 
-The fungi dataset and pretrained-weight cache are intentionally ignored by git.
+The fungi, fish, seafood dataset folders and pretrained-weight cache are intentionally ignored by git.

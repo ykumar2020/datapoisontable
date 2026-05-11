@@ -1,6 +1,0 @@
-scenario,poison_rate,clean_accuracy,attack_metric_name,attack_metric_value,train_size,notes
-dataset,0,,train/test images,,6000,"MNIST train=6000, test=1000, image_shape=1x28x28, model=2-layer CNN"
-clean_baseline,0,0.951,7_to_1_confusion,0.02,6000,Unpoisoned PyTorch CNN reference; defense=none; undefended training
-random_label_flip,10.00%,0.946,clean_accuracy_drop,0.005,6000,600 real MNIST labels changed; undefended training
-targeted_label_flip,35.00% of digit 7,0.885,7_to_1_confusion,0.52,6000,210 digit-7 labels changed to 1; undefended training
-visible_patch_backdoor,5.00% appended triggered samples,0.938,trigger_ASR_to_1,0.99,6300,300 non-target MNIST images copied with 5x5 trigger; undefended training

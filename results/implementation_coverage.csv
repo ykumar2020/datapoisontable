@@ -19,6 +19,6 @@ Additional-10,BadNets Patch Backdoor,poisoning,scripts/fungi_attack_comparison.p
 Extra implemented,Random Label Flipping,poisoning,scripts/fungi_attack_comparison.py::random_label_flip,Random label flip,implemented
 Extra implemented,Targeted Label Flipping,poisoning,scripts/fungi_attack_comparison.py::targeted_label_flip,Targeted label flip,implemented
 Extra implemented,Clean-Label Patch Backdoor,poisoning,scripts/fungi_attack_comparison.py::clean_label_backdoor_dataset,Clean-label patch backdoor,implemented
-Implementation-upgrade,MNIST CNN baseline,reference,scripts/mnist_attack_comparison.py::MNISTCnn,Clean baseline,implemented
-Implementation-upgrade,Activation clustering defense,defense,scripts/mnist_attack_comparison.py::activation_cluster_filter,--defense activation_clustering,implemented
-Implementation-upgrade,PGD epsilon sweep,evaluation,scripts/fungi_attack_comparison.py::run_pgd_epsilon_sweep; scripts/mnist_attack_comparison.py::run_epsilon_sweep,*_attack_sweep.*,implemented
+Implementation-upgrade,Food transfer-learning baseline,reference,scripts/fungi_attack_comparison.py::TransferFungiModel,Clean baseline,implemented
+Implementation-upgrade,Frozen-feature linear probing cache,training,scripts/fungi_attack_comparison.py::train_model(cache_frozen_features=True),Seafood cached frozen features,implemented
+Implementation-upgrade,PGD epsilon sweep,evaluation,scripts/fungi_attack_comparison.py::run_pgd_epsilon_sweep,*_attack_sweep.*,implemented

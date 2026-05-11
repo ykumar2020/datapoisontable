@@ -4,7 +4,6 @@ Google Scholar does not provide an official public API in this environment. Each
 
 | Key | Title | Primary verification URL | Google Scholar query | Status |
 |---|---|---|---|---|
-| mnist | Gradient-based learning applied to document recognition | https://doi.org/10.1109/5.726791 | https://scholar.google.com/scholar?q=Gradient-based+learning+applied+to+document+recognition | Verified |
 | mobilenetv3 | Searching for MobileNetV3 | https://openaccess.thecvf.com/content_ICCV_2019/html/Howard_Searching_for_MobileNetV3_ICCV_2019_paper.html | https://scholar.google.com/scholar?q=Searching+for+MobileNetV3 | Verified |
 | adversaguard | AdversaGuard: A Distributed Data-Poisoning Benchmark for Parallel AI | https://sc25.supercomputing.org/proceedings/posters/poster_files/post110s2-file3.pdf | https://scholar.google.com/scholar?q=AdversaGuard+A+Distributed+Data-Poisoning+Benchmark+for+Parallel+AI | Verified |
 | biggio2012 | Poisoning attacks against support vector machines | https://icml.cc/2012/papers/880.pdf | https://scholar.google.com/scholar?q=Poisoning+attacks+against+support+vector+machines | Verified |
